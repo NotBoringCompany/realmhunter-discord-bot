@@ -11,5 +11,12 @@ module.exports = {
     'ecmaVersion': 'latest',
   },
   'rules': {
+    'linebreak-style': [0, 'error', 'windows'],
+    'indent': 'off',
+    'object-curly-spacing': ['error', 'always'],
+    'max-len': ['error', { 'code': 150 }],
+    'spaced-comment': 'off',
+    'arrow-parens': 'off',
+    'no-multi-str': 'off',
   },
 };
