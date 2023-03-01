@@ -4,6 +4,10 @@ const path = require('path');
 
 const { Client, GatewayIntentBits, Collection, InteractionType, MessageFlags } = require('discord.js');
 const Moralis = require('moralis-v1/node');
+const { claimDailyTags, showClaimDailyTagsEmbed } = require('./commands/genesisTrials/claimTags');
+const { showContributionEmbed } = require('./commands/genesisTrials/submitContribution');
+const { submitContributionModal } = require('./modals/submitContribution');
+const { submitContributionToDB } = require('./utils/genesisTrials/submitContribution');
 
 const client = new Client({
     intents: [
@@ -36,6 +40,46 @@ for (const file of commandFiles) {
 
 // MESSAGE CREATE EVENT LISTENER
 client.on('messageCreate', async (message) => {
+    if (message.content.toLowerCase() === '!showdailytagclaim') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showClaimDailyTagsEmbed(message);
+    }
+
+    if (message.content.toLowerCase() === '!showcontributionembed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showContributionEmbed(message);
+    }
+});
+
+// INTERACTION CREATE EVENT LISTENER
+client.on('interactionCreate', async (interaction) => {
+    // button interactions
+    if (interaction.isButton()) {
+        // when claim daily tags button is clicked. will run the `claimDailyTags` function to check if the user can claim their daily tags.
+        if (interaction.customId === 'claimDailyTagsButton') {
+            const { message } = await claimDailyTags(interaction);
+            await interaction.reply({ content: message, ephemeral: true });
+        }
+
+        // when submit contribution button is clicked. will show the modal for submitting a contribution.
+        if (interaction.customId === 'submitContributionButton') {
+            await interaction.showModal(submitContributionModal);
+        }
+    }
+
+    // modal submit interactions
+    if (interaction.type === InteractionType.ModalSubmit) {
+        if (interaction.customId === 'submitContributionModal') {
+            // get the user id and the contribution work url from the modal
+            const userId = interaction.user.id;
+            const url = interaction.fields.getTextInputValue('contributionWorkUrl');
+
+            // we try to upload the contribution to the database. if it fails, we send an error message to the user.
+            const { status, message } = await submitContributionToDB(userId, url);
+
+            await interaction.reply({ content: message, ephemeral: true });
+        }
+    }
 });
 
 // BOT ON READY
