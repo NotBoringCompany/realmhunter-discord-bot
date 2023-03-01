@@ -4,13 +4,14 @@ const path = require('path');
 
 const { Client, GatewayIntentBits, Collection, InteractionType } = require('discord.js');
 const Moralis = require('moralis-v1/node');
-const { claimDailyTags, showClaimDailyTagsEmbed } = require('./commands/genesisTrials/claimTags');
 const { showSubmitContributionEmbed } = require('./commands/genesisTrials/submitContribution');
 const { submitContributionModal } = require('./modals/submitContribution');
 const { submitContributionToDB } = require('./utils/genesisTrials/submitContribution');
 const mongoose = require('mongoose');
 const { distributeTags, nextTagDistributionScheduler, distributeTagScheduler, claimRandomTags, updateTagsClaimed } = require('./utils/genesisTrials/randomTagAppearance');
 const cron = require('node-cron');
+const { showClaimDailyTagsEmbed, claimDailyTags } = require('./commands/genesisTrials/dailyTags');
+const { restartDailyTagsAllowance } = require('./utils/genesisTrials/dailyTags');
 
 const client = new Client({
     intents: [
@@ -54,7 +55,7 @@ client.on('messageCreate', async (message) => {
     }
 
     if (message.content.toLowerCase() === '!hunt claimtags') {
-        const { message: claimMessage } = await updateTagsClaimed(message.author.id);
+        const { message: claimMessage } = await updateTagsClaimed(message);
         await message.channel.send(claimMessage);
     }
 });
@@ -96,8 +97,10 @@ client.on('ready', async c => {
 
     mongoose.connect(process.env.MONGODB_URI);
 
+    // CRON JOBS (SCHEDULERS)
     nextTagDistributionScheduler.start();
     await distributeTagScheduler(client);
+    await restartDailyTagsAllowance();
 
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,

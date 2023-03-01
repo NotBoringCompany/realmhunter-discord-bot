@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const { generateObjectId } = require('../cryptoUtils');
 const permissions = require('../dbPermissions');
 const { DiscordUserSchema } = require('../schemas');
+const cron = require('node-cron');
 
 mongoose.connect(process.env.MONGODB_URI);
 
@@ -111,8 +112,33 @@ const checkJoinDateAndRole = (interaction) => {
     };
 };
 
+/**
+ * Resets the daily tags claiming allowance for all users. Called at 12:00 GMT.
+ */
+const restartDailyTagsAllowance = async () => {
+    try {
+        // this cron job runs every day at 12:00 GMT.
+        cron.schedule('13 22 * * *', async () => {
+            const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+            const userQuery = await User.find();
+
+            // sets the `dailyTagsClaimed` for every user to `false`, even when they haven't claimed their daily tags.
+            userQuery.forEach(async (user) => {
+                user.dailyTagsClaimed = false;
+                user._updated_at = Date.now();
+                await user.save();
+            });
+        }, {
+            timezone: 'Europe/London',
+        });
+    } catch (err) {
+        throw err;
+    }
+};
+
 module.exports = {
     claimDailyTagsLogic,
     dailyClaimableTags,
     checkJoinDateAndRole,
+    restartDailyTagsAllowance,
 };
