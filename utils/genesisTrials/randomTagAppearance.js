@@ -273,10 +273,8 @@ const distributeTagScheduler = async (client) => {
                     await nextTagDistribution();
                 } else {
                     if (currentTimestamp === nextDistributionTimestamp) {
-                        console.log('distribution time!');
                         // calls `distributeTags` to distribute the tags.
                         await distributeTags(client);
-                        console.log('Distributed tags.');
                     }
                 }
             }

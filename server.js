@@ -12,6 +12,8 @@ const { distributeTags, nextTagDistributionScheduler, distributeTagScheduler, cl
 const cron = require('node-cron');
 const { showClaimDailyTagsEmbed, claimDailyTags } = require('./commands/genesisTrials/dailyTags');
 const { restartDailyTagsAllowance } = require('./utils/genesisTrials/dailyTags');
+const { checkTagsCollected } = require('./utils/genesisTrials/checkTags');
+const { showCheckTagsCollected, showCheckTagsCollectedEmbed } = require('./commands/genesisTrials/checkTags');
 
 const client = new Client({
     intents: [
@@ -54,6 +56,11 @@ client.on('messageCreate', async (message) => {
         await showSubmitContributionEmbed(message);
     }
 
+    if (message.content.toLowerCase() === '!showchecktagscollected') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showCheckTagsCollectedEmbed(message);
+    }
+
     if (message.content.toLowerCase() === '!hunt claimtags') {
         const { message: claimMessage } = await updateTagsClaimed(message);
         await message.channel.send(claimMessage);
@@ -73,6 +80,12 @@ client.on('interactionCreate', async (interaction) => {
         // when submit contribution button is clicked. will show the modal for submitting a contribution.
         if (interaction.customId === 'submitContributionButton') {
             await interaction.showModal(submitContributionModal);
+        }
+
+        // when check tags collected button is clicked. will show the user how many tags they have collected.
+        if (interaction.customId === 'checkTagsCollectedButton') {
+            const { message } = await checkTagsCollected(interaction.user.id);
+            await interaction.reply({ content: message, ephemeral: true });
         }
     }
 

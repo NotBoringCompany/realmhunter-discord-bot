@@ -118,7 +118,7 @@ const checkJoinDateAndRole = (interaction) => {
 const restartDailyTagsAllowance = async () => {
     try {
         // this cron job runs every day at 12:00 GMT.
-        cron.schedule('13 22 * * *', async () => {
+        cron.schedule('00 12 * * *', async () => {
             const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
             const userQuery = await User.find();
 

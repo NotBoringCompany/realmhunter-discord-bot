@@ -9,3 +9,13 @@ const { nextTagDistributionTimestamp } = require('../utils/genesisTrials/randomT
 //     })
 // }
 // test();
+
+// const check = () => {
+//     console.log(new Date(process.env.JOIN_DATE_REQUIREMENT * 1000).toString());
+
+
+//     // console.log(process.env.JOIN_DATE_REQUIREMENT)
+//     // console.log(checkDate);
+// }
+
+// check();

@@ -8,7 +8,7 @@ const claimDailyTagsEmbed = new EmbedBuilder()
         {
             name: '__How many tags can I claim?__',
             value: `If you are whitelisted for our Genesis Mint, you can claim **${process.env.MORE_CLAIMABLE_TAGS}** tags daily. \n\
-            If you are not whitelisted, you can still claim **${process.env.MORE_CLAIMABLE_TAGS}** if you joined before ${new Date(process.env.JOIN_DATE_REQUIREMENT)}. \n\
+            If you are not whitelisted, you can still claim **${process.env.MORE_CLAIMABLE_TAGS}** if you joined before **${new Date(parseInt(process.env.JOIN_DATE_REQUIREMENT)* 1000).toUTCString()}**. \n\
             Otherwise, you can only claim **${process.env.DEFAULT_CLAIMABLE_TAGS}** tags daily.`,
         },
         {
