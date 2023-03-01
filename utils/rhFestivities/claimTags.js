@@ -1,6 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const { generateObjectId } = require('../cryptoUtils');
+const permissions = require('../dbPermissions');
 const { DiscordUserSchema } = require('../_schemas/DiscordUser');
 
 mongoose.connect(process.env.MONGODB_URI);
@@ -23,18 +24,15 @@ const claimDailyTags = async (interaction) => {
 
             // if user doesn't exist, we will create a new entry.
             if (!user) {
+                const { _wperm, _rperm, _acl } = permissions(true, false);
                 const NewUser = new User(
                     {
                         _id: generateObjectId(),
                         _created_at: Date.now(),
                         _updated_at: Date.now(),
-                        _wperm: [],
-                        _rperm: ['*'],
-                        _acl: {
-                            '*': {
-                                'r': true,
-                            },
-                        },
+                        _wperm: _wperm,
+                        _rperm: _rperm,
+                        _acl: _acl,
                         userId: interaction.user.id,
                         hunterTags: claimableTags,
                         realmPoints: 0,
@@ -111,7 +109,7 @@ const dailyClaimableTags = (interaction) => {
 
 /**
  * `checkJoinDateAndRole` returns the user's join date and whether or not they have the WL role.
- * @param {import('discord.js').Interaction} interaction 
+ * @param {import('discord.js').Interaction} interaction
  */
 const checkJoinDateAndRole = (interaction) => {
     // get the unix timestamp of when the user joined the server.
