@@ -4,7 +4,7 @@ const { submitContributionEmbed } = require('../../embeds/genesisTrials/submitCo
 /**
  * Show the embed for submitting Realm Hunter community contribution works.
  */
-const showContributionEmbed = async (message) => {
+const showSubmitContributionEmbed = async (message) => {
     try {
         await message.channel.send({
             embeds: [submitContributionEmbed],
@@ -28,5 +28,5 @@ const showContributionEmbed = async (message) => {
 };
 
 module.exports = {
-    showContributionEmbed,
+    showSubmitContributionEmbed,
 };

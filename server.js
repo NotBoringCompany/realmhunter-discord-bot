@@ -2,12 +2,15 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 
-const { Client, GatewayIntentBits, Collection, InteractionType, MessageFlags } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, InteractionType } = require('discord.js');
 const Moralis = require('moralis-v1/node');
 const { claimDailyTags, showClaimDailyTagsEmbed } = require('./commands/genesisTrials/claimTags');
-const { showContributionEmbed } = require('./commands/genesisTrials/submitContribution');
+const { showSubmitContributionEmbed } = require('./commands/genesisTrials/submitContribution');
 const { submitContributionModal } = require('./modals/submitContribution');
 const { submitContributionToDB } = require('./utils/genesisTrials/submitContribution');
+const mongoose = require('mongoose');
+const { distributeTags, nextTagDistributionScheduler, distributeTagScheduler, claimRandomTags, updateTagsClaimed } = require('./utils/genesisTrials/randomTagAppearance');
+const cron = require('node-cron');
 
 const client = new Client({
     intents: [
@@ -47,7 +50,12 @@ client.on('messageCreate', async (message) => {
 
     if (message.content.toLowerCase() === '!showcontributionembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showContributionEmbed(message);
+        await showSubmitContributionEmbed(message);
+    }
+
+    if (message.content.toLowerCase() === '!hunt claimtags') {
+        const { message: claimMessage } = await updateTagsClaimed(message.author.id);
+        await message.channel.send(claimMessage);
     }
 });
 
@@ -75,7 +83,7 @@ client.on('interactionCreate', async (interaction) => {
             const url = interaction.fields.getTextInputValue('contributionWorkUrl');
 
             // we try to upload the contribution to the database. if it fails, we send an error message to the user.
-            const { status, message } = await submitContributionToDB(userId, url);
+            const { message } = await submitContributionToDB(userId, url);
 
             await interaction.reply({ content: message, ephemeral: true });
         }
@@ -85,6 +93,12 @@ client.on('interactionCreate', async (interaction) => {
 // BOT ON READY
 client.on('ready', async c => {
     console.log(`Logged in as ${c.user.tag}`);
+
+    mongoose.connect(process.env.MONGODB_URI);
+
+    nextTagDistributionScheduler.start();
+    await distributeTagScheduler(client);
+
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,
         appId: process.env.MORALIS_APPID,

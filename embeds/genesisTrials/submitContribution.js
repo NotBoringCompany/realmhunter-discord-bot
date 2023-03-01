@@ -15,7 +15,7 @@ const submitContributionEmbed = new EmbedBuilder()
             If they are, you will be rewarded with **10 Hunter Tags** once your work is approved. They will be automatically added to your account.',
         },
         {
-            name: '__Can I submit multiple works daily?',
+            name: '__Can I submit multiple works daily?__',
             value: 'You can submit multiple **DIFFERENT WORKS** daily. Refrain from submitting the same work multiple times. They won\'t count. \n\
             There is also only a limit of **10 HUNTER TAGS** we can reward you daily for EACH work. For instance, if you submit 5 works, we will reward you with **10 Hunter Tags** each day for 5 days.',
         },

@@ -35,6 +35,7 @@ const claimDailyTagsLogic = async (interaction) => {
                     hunterTags: claimableTags,
                     realmPoints: 0,
                     dailyTagsClaimed: true,
+                    dailyContributionTagsClaimed: false,
                 },
             );
 
