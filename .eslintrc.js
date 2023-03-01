@@ -18,5 +18,7 @@ module.exports = {
     'spaced-comment': 'off',
     'arrow-parens': 'off',
     'no-multi-str': 'off',
+    'new-cap': 'off',
+    'valid-jsdoc': 'off',
   },
 };

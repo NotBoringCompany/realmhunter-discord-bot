@@ -10,7 +10,9 @@ const mongooseCollectionFind = async () => {
 
     const start = performance.now();
 
-    const checkCollection = await db.collection('_User').findOne();
+    const checkCollection = await db.collection('Benchmarking').findOne();
+
+    console.log(checkCollection['_acl']['*']);
 
     const end = performance.now();
     console.log(`Benchmark time MongoDB collection find: ${end-start} ms`);
@@ -92,10 +94,10 @@ const parseAddRecord = async () => {
 };
 
 const benchmark = async () => {
-    // await mongooseCollectionFind();
+    await mongooseCollectionFind();
     // await parseCollectionQuery();
 
-    await mongooseAddDocument();
+    // await mongooseAddDocument();
     // await parseAddRecord();
 
     // PREV BENCHMARK:
