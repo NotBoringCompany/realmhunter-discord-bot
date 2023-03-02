@@ -1,5 +1,8 @@
+require('dotenv').config();
 const cron = require('node-cron');
 const { nextTagDistributionTimestamp } = require('../utils/genesisTrials/randomTagAppearance');
+const mongoose = require('mongoose');
+const { AllianceSchema } = require('../utils/schemas');
 
 // const test = () => {
 //     cron.schedule('07 22 * * *', async () => {
@@ -19,3 +22,25 @@ const { nextTagDistributionTimestamp } = require('../utils/genesisTrials/randomT
 // }
 
 // check();
+
+mongoose.connect(process.env.MONGODB_URI);
+
+const test = async () => {
+    try {
+        const names = ['asd123', 'asd', 'Hello World'];
+        // test delete document from collection
+        const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
+
+        const query = await Alliance.findOne({ allianceName: 'asd' });
+        query.allianceName = undefined;
+
+        await query.save();
+
+        console.log('updated');
+
+        // await Alliance.deleteMany({ allianceName: { $in: names } });
+        // console.log('deleted');
+    } catch (err) {
+        throw err;
+    }
+};

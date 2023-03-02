@@ -247,7 +247,89 @@ const inviteToAlliance = async (inviterId, inviteeId) => {
     }
 };
 
+/**
+ * Called when a user wants to disband their alliance. Only the chief can disband the alliance.
+ */
+const disbandAlliance = async (userId) => {
+    try {
+        // we first query the user's data.
+        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: userId });
+
+        // if user doesn't exist, there's no alliance to disband.
+        if (!userQuery) {
+            return {
+                status: 'error',
+                message: 'You do not have an alliance to disband.',
+            };
+        // if user exists, we check if the user is in an alliance.
+        } else {
+            const userAlliancePointer = userQuery._p_alliance;
+
+            // if the pointer doesn't exist, then they're not in an alliance. throw an error.
+            if (!userAlliancePointer) {
+                return {
+                    status: 'error',
+                    message: 'You do not have an alliance to disband.',
+                };
+            // otherwise (if the pointer exists), we will first check if the user is the chief.
+            } else {
+                const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
+                // split to get the alliance's object ID.
+                const allianceObjId = userAlliancePointer.split('$')[1];
+                const allianceQuery = await Alliance.findOne({ _id: allianceObjId });
+
+                // at this point, if the alliance doesn't exist, then something went wrong.
+                // we request them to submit a ticket.
+                if (!allianceQuery) {
+                    return {
+                        status: 'error',
+                        message: 'Something went wrong. Please submit a ticket.',
+                    };
+                // if the alliance exists, we check if the user is the chief.
+                } else {
+                    const role = allianceQuery.memberData.find((member) => member.userId === userId).role;
+
+                    // if their role is not chief, then they're not allowed to disband the alliance.
+                    if (role !== 'chief') {
+                        return {
+                            status: 'error',
+                            message: 'Only the alliance\'s chief can disband the alliance.',
+                        };
+                    // otherwise, we will go ahead and disband the alliance.
+                    } else {
+                        // to do this, we need to:
+                        // 1. remove the alliance pointer from all members.
+                        // 2. delete the alliance data.
+
+                        /// remove the alliance pointer from all its members.
+                        // to do so, we first get all the member's user IDs.
+                        const memberUserIds = allianceQuery.memberData.map((member) => member.userId);
+
+                        // get the model ready
+                        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+
+                        // then we loop through each member's user ID and remove the alliance pointer.
+                        for (let i = 0; i < memberUserIds.length; i++) {
+                            const userQuery = await User.findOne({ userId: memberUserIds[i] });
+
+                            // set the alliance pointer to undefined.
+                            userQuery._p_alliance = undefined;
+                        };
+
+                        // once each member's alliance pointer is removed, we can delete the alliance data.
+                        await allianceQuery.deleteOne();
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        throw err;
+    }
+};
+
 module.exports = {
     createAlliance,
     inviteToAlliance,
+    disbandAlliance,
 };
