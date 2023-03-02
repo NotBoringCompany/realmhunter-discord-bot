@@ -15,6 +15,7 @@ const DiscordUserSchema = new mongoose.Schema(
         hunterTags: Number,
         realmPoints: Number,
         dailyTagsClaimed: Boolean,
+        timesDistributionTagsClaimed: Number,
     },
     {
         versionKey: false,

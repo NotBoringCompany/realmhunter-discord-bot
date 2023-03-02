@@ -57,7 +57,11 @@ const claimDailyTagsLogic = async (interaction) => {
                 };
             // otherwise, we update their entry.
             } else {
-                userQuery.hunterTags += claimableTags;
+                if (userQuery.hunterTags) {
+                    userQuery.hunterTags += claimableTags;
+                } else {
+                    userQuery.hunterTags = claimableTags;
+                }
                 userQuery.dailyTagsClaimed = true;
                 userQuery._updated_at = Date.now();
 

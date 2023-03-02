@@ -132,6 +132,7 @@ const claimRandomTags = async (message) => {
                     realmPoints: 0,
                     dailyTagsClaimed: false,
                     dailyContributionTagsClaimed: false,
+                    timesDistributionTagsClaimed: 1,
                 },
             );
 
@@ -140,7 +141,17 @@ const claimRandomTags = async (message) => {
         // if user exists, we update their `hunterTags` field.
         } else {
             // the user will earn the 5 tags they claimed.
-            userQuery.hunterTags += 5;
+            if (userQuery.hunterTags) {
+                userQuery.hunterTags += 5;
+            } else {
+                userQuery.hunterTags = 5;
+            }
+            // increase amount of times distribution tags claimed by 1.
+            if (userQuery.timesDistributionTagsClaimed) {
+                userQuery.timesDistributionTagsClaimed += 1;
+            } else {
+                userQuery.timesDistributionTagsClaimed = 1;
+            }
             userQuery._updated_at = Date.now();
 
             await userQuery.save();

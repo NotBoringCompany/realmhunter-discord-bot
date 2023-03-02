@@ -14,6 +14,8 @@ const { showClaimDailyTagsEmbed, claimDailyTags } = require('./commands/genesisT
 const { restartDailyTagsAllowance } = require('./utils/genesisTrials/dailyTags');
 const { checkTagsCollected } = require('./utils/genesisTrials/checkTags');
 const { showCheckTagsCollected, showCheckTagsCollectedEmbed } = require('./commands/genesisTrials/checkTags');
+const { showRoleNotifEmbed } = require('./commands/roleNotif');
+const { giveRole } = require('./utils/discord/roleNotif');
 
 const client = new Client({
     intents: [
@@ -61,6 +63,11 @@ client.on('messageCreate', async (message) => {
         await showCheckTagsCollectedEmbed(message);
     }
 
+    if (message.content.toLowerCase() === '!showrolenotifembed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showRoleNotifEmbed(message);
+    }
+
     if (message.content.toLowerCase() === '!hunt claimtags') {
         const { message: claimMessage } = await updateTagsClaimed(message);
         await message.channel.send(claimMessage);
@@ -85,6 +92,17 @@ client.on('interactionCreate', async (interaction) => {
         // when check tags collected button is clicked. will show the user how many tags they have collected.
         if (interaction.customId === 'checkTagsCollectedButton') {
             const { message } = await checkTagsCollected(interaction.user.id);
+            await interaction.reply({ content: message, ephemeral: true });
+        }
+
+        // when founder tweet notif gang button is clicked. will give them the founder tweet notif gang role.
+        if (interaction.customId === 'founderTweetNotifGangButton') {
+            const { message } = await giveRole(interaction, 'founderTweetNotifGang');
+            await interaction.reply({ content: message, ephemeral: true });
+        }
+
+        if (interaction.customId === 'dailyTagsResetNotifButton') {
+            const { message } = await giveRole(interaction, 'dailyTagsResetNotif');
             await interaction.reply({ content: message, ephemeral: true });
         }
     }
