@@ -109,6 +109,7 @@ client.on('interactionCreate', async (interaction) => {
 
     // modal submit interactions
     if (interaction.type === InteractionType.ModalSubmit) {
+        // if a user submits a contribution, we run the `submitContributionToDB` function to upload the contribution to the database.
         if (interaction.customId === 'submitContributionModal') {
             // get the user id and the contribution work url from the modal
             const userId = interaction.user.id;

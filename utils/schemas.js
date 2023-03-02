@@ -16,6 +16,8 @@ const DiscordUserSchema = new mongoose.Schema(
         realmPoints: Number,
         dailyTagsClaimed: Boolean,
         timesDistributionTagsClaimed: Number,
+        // pointer to alliance object via its object ID in RHDiscordAllianceData.
+        _p_alliance: String,
     },
     {
         versionKey: false,
@@ -63,8 +65,28 @@ const TagsSchema = new mongoose.Schema(
     },
 );
 
+const AllianceSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        allianceName: String,
+        memberData: Array,
+    },
+    {
+        versionKey: false,
+    },
+);
+
 module.exports = {
     DiscordUserSchema,
     ContributionSchema,
     TagsSchema,
+    AllianceSchema,
 };

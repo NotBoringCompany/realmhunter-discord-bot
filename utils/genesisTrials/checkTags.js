@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const { DiscordUserSchema } = require('../schemas');
 
+/**
+ * Checks how many tags a user has collected.
+ */
 const checkTagsCollected = async (userId) => {
     try {
         const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
