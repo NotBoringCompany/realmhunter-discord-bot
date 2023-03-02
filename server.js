@@ -16,7 +16,7 @@ const { checkTagsCollected } = require('./utils/genesisTrials/checkTags');
 const { showCheckTagsCollected, showCheckTagsCollectedEmbed } = require('./commands/genesisTrials/checkTags');
 const { showRoleNotifEmbed } = require('./commands/roleNotif');
 const { giveRole } = require('./utils/discord/roleNotif');
-const { createAlliance, inviteToAlliance, disbandAlliance, leaveAlliance, delegateChiefRole } = require('./commands/genesisTrials/alliance');
+const { createAlliance, inviteToAlliance, disbandAlliance, leaveAlliance, delegateChiefRole, showAlliance, kickFromAlliance } = require('./commands/genesisTrials/alliance');
 
 const client = new Client({
     intents: [
@@ -80,12 +80,15 @@ client.on('messageCreate', async (message) => {
     }
 
     if (message.content.toLowerCase().startsWith('!hunt invitetoalliance')) {
+        // const server = message.guild;
+        // const check = await server.members.fetch('876926027790688266').id;
+        // console.log(check);
         const { message: allianceMessage } = await inviteToAlliance(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt disbandalliance')) {
-        const { message: allianceMessage } = await disbandAlliance(message);
+        const { message: allianceMessage } = await disbandAlliance(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 
@@ -96,6 +99,20 @@ client.on('messageCreate', async (message) => {
 
     if (message.content.toLowerCase().startsWith('!hunt delegatechiefrole')) {
         const { message: allianceMessage } = await delegateChiefRole(message).catch((err) => console.log(err));
+        await message.channel.send(allianceMessage);
+    }
+
+    if (message.content.toLowerCase().startsWith('!hunt showalliance')) {
+        const { embed, status, message: allianceMessage } = await showAlliance(client, message).catch((err) => console.log(err));
+        if (embed !== 'none') {
+            await message.channel.send({ embeds: [embed] });
+        } else {
+            await message.channel.send(allianceMessage);
+        }
+    }
+
+    if (message.content.toLowerCase().startsWith('!hunt kickfromalliance')) {
+        const { message: allianceMessage } = await kickFromAlliance(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 });

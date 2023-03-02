@@ -1,4 +1,4 @@
-const { createAllianceLogic, inviteToAllianceLogic, disbandAllianceLogic, leaveAllianceLogic, delegateChiefRoleLogic } = require('../../utils/genesisTrials/alliance');
+const { createAllianceLogic, inviteToAllianceLogic, disbandAllianceLogic, leaveAllianceLogic, delegateChiefRoleLogic, showAllianceLogic, kickFromAllianceLogic } = require('../../utils/genesisTrials/alliance');
 
 /**
  * Creates an alliance for the user.
@@ -8,13 +8,19 @@ const createAlliance = async (message) => {
         // hunt and createAlliance are not used, but they are needed to split the message
         const [hunt, createAlliance, ...allianceName] = message.content.split(' ');
 
-        if (allianceName[0].length > 16) {
+        if (!allianceName[0]) {
+            return {
+                status: 'error',
+                message: 'Alliance name cannot be empty.',
+            };
+        } else if (allianceName[0].length > 16) {
             return {
                 status: 'error',
                 message: 'Alliance name cannot be longer than 16 characters.',
             };
+        } else {
+            return await createAllianceLogic(message.author.id, allianceName[0]);
         }
-        return await createAllianceLogic(message.author.id, allianceName[0]);
     } catch (err) {
         throw err;
     }
@@ -26,14 +32,20 @@ const createAlliance = async (message) => {
 const inviteToAlliance = async (message) => {
     try {
         const [hunt, inviteToAlliance, invitee] = message.content.split(' ');
+
+        console.log(invitee);
+        console.log(typeof invitee);
+
         // we need to check if invitee is a valid user ID
         const server = message.guild;
-        const inviteeId = await server.members.fetch(invitee[0]).catch((err) => {
+        const getInvitee = await server.members.fetch(invitee).catch((err) => {
             return {
                 status: 'error',
-                message: 'Invalid invitee ID.',
+                message: 'Invalid invitee.',
             };
         });
+
+        const inviteeId = getInvitee.id;
 
         return await inviteToAllianceLogic(message.author.id, inviteeId);
     } catch (err) {
@@ -69,16 +81,57 @@ const leaveAlliance = async (message) => {
 const delegateChiefRole = async (message) => {
     try {
         const [hunt, delegateChiefRole, delegatee] = message.content.split(' ');
+
         // we need to check if delegatee is a valid user ID
         const server = message.guild;
-        const delegateeId = await server.members.fetch(delegatee[0]).catch((err) => {
+        const getDelegatee = await server.members.fetch(delegatee).catch((err) => {
             return {
                 status: 'error',
-                message: 'Invalid delegatee ID.',
+                message: 'Invalid delegatee.',
             };
         });
 
+        const delegateeId = getDelegatee.id;
+
         return await delegateChiefRoleLogic(message.author.id, delegateeId);
+    } catch (err) {
+        throw err;
+    }
+};
+
+/**
+ * Gets the alliance data.
+ */
+const showAlliance = async (client, message) => {
+    try {
+        const [hunt, showAlliance, ...allianceName] = message.content.split(' ');
+        return await showAllianceLogic(client, allianceName[0]);
+    } catch (err) {
+        throw err;
+    }
+};
+
+const kickFromAlliance = async (message) => {
+    try {
+        const [hunt, kickFromAlliance, userToKick] = message.content.split(' ');
+
+        // we need to check if userToKick is a valid user ID
+        const server = message.guild;
+        const getUserToKick = await server.members.fetch(userToKick).catch((err) => {
+            return {
+                status: 'error',
+                message: 'Invalid user ID to kick.',
+            };
+        });
+
+        console.log(getUserToKick.id);
+
+        const userToKickId = getUserToKick.id;
+
+        // console.log(userToKickId);
+        // console.log(message.author.id);
+
+        return await kickFromAllianceLogic(message.author.id, userToKickId);
     } catch (err) {
         throw err;
     }
@@ -90,4 +143,6 @@ module.exports = {
     disbandAlliance,
     leaveAlliance,
     delegateChiefRole,
+    showAlliance,
+    kickFromAlliance,
 };
