@@ -124,8 +124,6 @@ const kickFromAlliance = async (message) => {
             };
         });
 
-        console.log(getUserToKick.id);
-
         const userToKickId = getUserToKick.id;
 
         // console.log(userToKickId);

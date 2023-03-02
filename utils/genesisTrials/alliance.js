@@ -639,15 +639,25 @@ const kickFromAllianceLogic = async (userId, targetId) => {
                             // remove the user from the alliance's memberData array.
                             await Alliance.updateOne({ _id: allianceObjId }, { $pull: { memberData: { userId: targetId } } });
 
-                            // remove the alliance's pointer from the user's _p_alliance field.
-                            userQuery._p_alliance = undefined;
+                            // remove the alliance's pointer from the target's _p_alliance field.
+                            const targetQuery = await User.findOne({ userId: targetId });
 
-                            await userQuery.save();
+                            // if somehow target query doesn't exist, then something went wrong.
+                            if (!targetQuery) {
+                                return {
+                                    status: 'error',
+                                    message: 'Unable to remove user from alliance successfully. Please submit a ticket.',
+                                };
+                            } else {
+                                // otherwise, we will go ahead and remove the alliance's pointer from the target's _p_alliance field.
+                                targetQuery._p_alliance = undefined;
+                                await targetQuery.save();
 
-                            return {
-                                status: 'success',
-                                message: 'User has been kicked from the alliance.',
-                            };
+                                return {
+                                    status: 'success',
+                                    message: 'User has been kicked from the alliance.',
+                                };
+                            }
                         }
                     }
                 }

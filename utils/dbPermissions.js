@@ -16,17 +16,17 @@ const permissions = (read, write) => {
             },
         };
     // read only
-    } else if (_wperm.length !== 0 && _rperm.length === 0) {
-        _acl = {
-            '*': {
-                'r': true,
-            },
-        };
-    // write only
     } else if (_wperm.length === 0 && _rperm.length !== 0) {
         _acl = {
             '*': {
                 'w': true,
+            },
+        };
+    // write only
+    } else if (_wperm.length !== 0 && _rperm.length === 0) {
+        _acl = {
+            '*': {
+                'r': true,
             },
         };
     // master key only
