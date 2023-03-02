@@ -16,6 +16,7 @@ const { checkTagsCollected } = require('./utils/genesisTrials/checkTags');
 const { showCheckTagsCollected, showCheckTagsCollectedEmbed } = require('./commands/genesisTrials/checkTags');
 const { showRoleNotifEmbed } = require('./commands/roleNotif');
 const { giveRole } = require('./utils/discord/roleNotif');
+const { createAlliance, inviteToAlliance, disbandAlliance, leaveAlliance, delegateChiefRole } = require('./commands/genesisTrials/alliance');
 
 const client = new Client({
     intents: [
@@ -71,6 +72,31 @@ client.on('messageCreate', async (message) => {
     if (message.content.toLowerCase() === '!hunt claimtags') {
         const { message: claimMessage } = await updateTagsClaimed(message);
         await message.channel.send(claimMessage);
+    }
+
+    if (message.content.toLowerCase().startsWith() === '!hunt createalliance') {
+        const { message: allianceMessage } = await createAlliance(message);
+        await message.channel.send(allianceMessage);
+    }
+
+    if (message.content.toLowerCase().startsWith() === '!hunt invitetoalliance') {
+        const { message: allianceMessage } = await inviteToAlliance(message);
+        await message.channel.send(allianceMessage);
+    }
+
+    if (message.content.toLowerCase().startsWith() === '!hunt disbandalliance') {
+        const { message: allianceMessage } = await disbandAlliance(message);
+        await message.channel.send(allianceMessage);
+    }
+
+    if (message.content.toLowerCase().startsWith() === '!hunt leavealliance') {
+        const { message: allianceMessage } = await leaveAlliance(message);
+        await message.channel.send(allianceMessage);
+    }
+
+    if (message.content.toLowerCase().startsWith() === '!hunt delegatechiefrole') {
+        const { message: allianceMessage } = await delegateChiefRole(message);
+        await message.channel.send(allianceMessage);
     }
 });
 

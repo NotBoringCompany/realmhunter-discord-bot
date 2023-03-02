@@ -25,22 +25,32 @@ const { AllianceSchema } = require('../utils/schemas');
 
 mongoose.connect(process.env.MONGODB_URI);
 
-const test = async () => {
-    try {
-        const names = ['asd123', 'asd', 'Hello World'];
-        // test delete document from collection
-        const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
+// const test = async () => {
+//     try {
+//         const names = ['asd123', 'asd', 'Hello World'];
+//         // test delete document from collection
+//         const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
 
-        const query = await Alliance.findOne({ allianceName: 'asd' });
-        query.allianceName = undefined;
+//         const query = await Alliance.findOne({ allianceName: 'asd' });
+//         query.allianceName = undefined;
 
-        await query.save();
+//         await query.save();
 
-        console.log('updated');
+//         console.log('updated');
 
-        // await Alliance.deleteMany({ allianceName: { $in: names } });
-        // console.log('deleted');
-    } catch (err) {
-        throw err;
-    }
-};
+//         // await Alliance.deleteMany({ allianceName: { $in: names } });
+//         // console.log('deleted');
+//     } catch (err) {
+//         throw err;
+//     }
+// };
+
+const check = () => {
+    const str = '!hunt createAlliance asd asdasdasd';
+    console.log(str.startsWith('!hunt createAlliance'));
+    const [first, second, ...all] = str.split(' ');
+    const name = all.join(' ');
+    console.log(name.length);
+}
+
+check();
