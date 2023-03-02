@@ -9,7 +9,7 @@ mongoose.connect(process.env.MONGODB_URI);
 /**
  * Creates an alliance when called and when the requirements are met.
  */
-const createAlliance = async (userId, allianceName) => {
+const createAllianceLogic = async (userId, allianceName) => {
     try {
         // we first check if such an alliance exists.
         const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
@@ -140,7 +140,7 @@ const createAlliance = async (userId, allianceName) => {
 /**
  * Called when an inviter invites an invitee to their alliance.
  */
-const inviteToAlliance = async (inviterId, inviteeId) => {
+const inviteToAllianceLogic = async (inviterId, inviteeId) => {
     try {
         // first, we check if the inviter is in an alliance.
         const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
@@ -250,7 +250,7 @@ const inviteToAlliance = async (inviterId, inviteeId) => {
 /**
  * Called when a user wants to disband their alliance. Only the chief can disband the alliance.
  */
-const disbandAlliance = async (userId) => {
+const disbandAllianceLogic = async (userId) => {
     try {
         // we first query the user's data.
         const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
@@ -328,8 +328,173 @@ const disbandAlliance = async (userId) => {
     }
 };
 
+/**
+ * Called when a user wants to leave their alliance.
+ */
+const leaveAllianceLogic = async (userId) => {
+    try {
+        // we first check if the user exists.
+        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: userId });
+
+        // if the user doesn't exist, then they're not in an alliance anyway.
+        if (!userQuery) {
+            return {
+                status: 'error',
+                message: 'You are not in an alliance.',
+            };
+        // if the user exists, we check if they are in an alliance.
+        } else {
+            const userAlliancePointer = userQuery._p_alliance;
+
+            // if the pointer doesn't exist, then they're not in an alliance. throw an error.
+            if (!userAlliancePointer) {
+                return {
+                    status: 'error',
+                    message: 'You are not in an alliance.',
+                };
+            // if the pointer exists, they are in an alliance, we first check if they are the chief.
+            } else {
+                const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
+                // split to get the alliance's object ID.
+                const allianceObjId = userAlliancePointer.split('$')[1];
+                const allianceQuery = await Alliance.findOne({ _id: allianceObjId });
+
+                // if somehow the alliance doesn't exist, then something went wrong.
+                // we request them to submit a ticket.
+                if (!allianceQuery) {
+                    return {
+                        status: 'error',
+                        message: 'Something went wrong. Please submit a ticket.',
+                    };
+                // if the alliance exists, we check if the user is the chief.
+                } else {
+                    const role = allianceQuery.memberData.find((member) => member.userId === userId).role;
+
+                    // if the user is the chief, we will not allow them to leave the alliance.
+                    // we will request them to either:
+                    // 1. delegate another member as the chief.
+                    // 2. disband the alliance as a whole.
+                    if (role === 'chief') {
+                        return {
+                            status: 'error',
+                            message: 'You are the chief of the alliance. Please either delegate another member as the chief or disband the alliance.',
+                        };
+                    // if the user is not the chief, we will go ahead and remove them from the alliance.
+                    } else {
+                        // we will:
+                        // 1. remove the alliance pointer from the user.
+                        // 2. remove the user from the alliance's member data.
+
+                        /// remove the alliance pointer from the user.
+                        // set the alliance pointer to undefined.
+                        userQuery._p_alliance = undefined;
+
+                        await userQuery.save();
+
+                        // afterwards, we will remove the user from the alliance's member data.
+                        // to do so, we first get the user's index in the member data.
+                        const memberIndex = allianceQuery.memberData.findIndex((member) => member.userId === userId);
+
+                        // then we remove the user from the member data.
+                        allianceQuery.memberData.splice(memberIndex, 1);
+
+                        await allianceQuery.save();
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        throw err;
+    }
+};
+
+/**
+ * Called when a user wants to delegate another member as the chief. The caller MUST be the current chief.
+ */
+const delegateChiefRoleLogic = async (userId, newChiefId) => {
+    try {
+        // first, we check if the user exists.
+        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: userId });
+
+        // if the user doesn't exist, then they're not in an alliance anyway.
+        if (!userQuery) {
+            return {
+                status: 'error',
+                message: 'You are not in an alliance.',
+            };
+        // if the user exists, we check if they are in an alliance.
+        } else {
+            const userAlliancePointer = userQuery._p_alliance;
+
+            // if the pointer doesn't exist, then they're not in an alliance. throw an error.
+            if (!userAlliancePointer) {
+                return {
+                    status: 'error',
+                    message: 'You are not in an alliance.',
+                };
+            // if the pointer exists, they are in an alliance, we first check if they are the chief.
+            } else {
+                const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
+                // split to get the alliance's object ID.
+                const allianceObjId = userAlliancePointer.split('$')[1];
+                const allianceQuery = await Alliance.findOne({ _id: allianceObjId });
+
+                // if somehow the alliance doesn't exist, then something went wrong.
+                // we request them to submit a ticket.
+                if (!allianceQuery) {
+                    return {
+                        status: 'error',
+                        message: 'Something went wrong. Please submit a ticket.',
+                    };
+                // if the alliance exists, we check if the user is the chief.
+                } else {
+                    const role = allianceQuery.memberData.find((member) => member.userId === userId).role;
+
+                    // if the user is not the chief, we will not allow them to delegate the chief role.
+                    if (role !== 'chief') {
+                        return {
+                            status: 'error',
+                            message: 'You are not the chief of the alliance. Only the chief can delegate the chief role.',
+                        };
+                    // if the user is the chief, we will go ahead and delegate the chief role.
+                    // we will check if the newChiefId is a member of the alliance.
+                    } else {
+                        const newChief = allianceQuery.memberData.find((member) => member.userId === newChiefId);
+
+                        // if newChief is undefined, then the new chief is not a member of the alliance.
+                        if (!newChief) {
+                            return {
+                                status: 'error',
+                                message: 'The delegatee is not a member of the alliance.',
+                            };
+                        // if newChief exists, then we can go ahead and do two things.
+                        // 1. set the new chief's role to chief.
+                        // 2. set the old chief's role to member.
+                        } else {
+                            // set the new chief's role to chief.
+                            newChief.role = 'chief';
+
+                            // set the old chief's role to member.
+                            const oldChief = allianceQuery.memberData.find((member) => member.userId === userId);
+                            oldChief.role = 'member';
+
+                            await allianceQuery.save();
+                        }
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        throw err;
+    }
+};
+
 module.exports = {
-    createAlliance,
-    inviteToAlliance,
-    disbandAlliance,
+    createAllianceLogic,
+    inviteToAllianceLogic,
+    disbandAllianceLogic,
+    leaveAllianceLogic,
+    delegateChiefRoleLogic,
 };
