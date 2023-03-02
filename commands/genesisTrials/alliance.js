@@ -33,9 +33,6 @@ const inviteToAlliance = async (message) => {
     try {
         const [hunt, inviteToAlliance, invitee] = message.content.split(' ');
 
-        console.log(invitee);
-        console.log(typeof invitee);
-
         // we need to check if invitee is a valid user ID
         const server = message.guild;
         const getInvitee = await server.members.fetch(invitee).catch((err) => {

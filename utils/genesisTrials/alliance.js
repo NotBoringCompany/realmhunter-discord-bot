@@ -167,90 +167,118 @@ const inviteToAllianceLogic = async (inviterId, inviteeId) => {
                 };
             // otherwise (if the pointer exists), we will go ahead and do the next checks.
             } else {
-                // we first check if the invitee exists.
-                const inviteeQuery = await User.findOne({ userId: inviteeId });
-                // if the invitee doesn't exist, then we can go ahead and
-                // 1. create the invitee's data
-                // 2. add the invitee to the inviter's alliance.
-                if (!inviteeQuery) {
-                    const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
-                    // split to get the alliance's object ID.
-                    const allianceObjId = inviterAlliancePointer.split('$')[1];
-                    const allianceQuery = await Alliance.findOne({ _id: allianceObjId });
+                // only the chief can invite people to the alliance.
+                // we first check if the inviter is the chief.
+                const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
+                // split to get the alliance's object ID.
+                const allianceObjId = inviterAlliancePointer.split('$')[1];
+                const allianceQuery = await Alliance.findOne({ _id: allianceObjId });
 
-                    // we now create the invitee's data.
-                    const NewUser = new User(
-                        {
-                            _id: generateObjectId(),
-                            _created_at: Date.now(),
-                            _updated_at: Date.now(),
-                            _wperm: _wperm,
-                            _rperm: _rperm,
-                            _acl: _acl,
-                            userId: inviteeId,
-                            hunterTags: 0,
-                            realmPoints: 0,
-                            dailyTagsClaimed: false,
-                            dailyContributionTagsClaimed: false,
-                            timesDistributionTagsClaimed: 0,
-                            // pointer to alliance via its object ID in RHDiscordAllianceData.
-                            _p_alliance: inviterAlliancePointer,
-                        },
-                    );
-
-                    await NewUser.save();
-
-                    // once the invitee data is created, we add the invitee's data to the alliance.
-                    allianceQuery.memberData.push(
-                        {
-                            userId: inviteeId,
-                            role: 'member',
-                        },
-                    );
-
-                    await allianceQuery.save();
-
+                // if the alliance doesn't exist, then something went wrong.
+                // we request them to submit a ticket.
+                if (!allianceQuery) {
                     return {
-                        status: 'success',
-                        message: 'Invitee successfully invited to alliance.',
+                        status: 'error',
+                        message: 'Something went wrong. Please submit a ticket.',
                     };
-                // if invitee exists, we will check if the invitee is already in an alliance.
+                // otherwise, we check if the inviter is the chief.
                 } else {
-                    const inviteeAlliancePointer = inviteeQuery._p_alliance;
-                    // if the pointer doesn't exist, that means that the invitee is not in an alliance yet.
-                    // we can go ahead and add the invitee to the inviter's alliance.
-                    if (!inviteeAlliancePointer) {
-                        // add the pointer to the invitee's data.
-                        inviteeQuery._p_alliance = inviterAlliancePointer;
+                    const role = allianceQuery.memberData.find((member) => member.userId === inviterId).role;
 
-                        await inviteeQuery.save();
-
-                        // then add the invitee to the alliance.
-                        const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
-                        // split to get the alliance's object ID.
-                        const allianceObjId = inviterAlliancePointer.split('$')[1];
-                        const allianceQuery = await Alliance.findOne({ _id: allianceObjId });
-
-                        // once the invitee data is created, we add the invitee's data to the alliance.
-                        allianceQuery.memberData.push(
-                            {
-                                userId: inviteeId,
-                                role: 'member',
-                            },
-                        );
-
-                        await allianceQuery.save();
-
-                        return {
-                            status: 'success',
-                            message: 'Invitee successfully invited to alliance.',
-                        };
-                    // if the pointer exists, that means that the invitee is already in an alliance. we throw an error.
-                    } else {
+                    // if the inviter is not the chief, we throw an error.
+                    if (role !== 'chief') {
                         return {
                             status: 'error',
-                            message: 'Invitee is already in an alliance.',
+                            message: 'Only the chief can invite people to the alliance.',
                         };
+                    // otherwise, we can go ahead do the next checks.
+                    } else {
+                        // we then check if the invitee exists.
+                        const inviteeQuery = await User.findOne({ userId: inviteeId });
+                        // if the invitee doesn't exist, then we can go ahead and
+                        // 1. create the invitee's data
+                        // 2. add the invitee to the inviter's alliance.
+                        if (!inviteeQuery) {
+                            const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
+                            // split to get the alliance's object ID.
+                            const allianceObjId = inviterAlliancePointer.split('$')[1];
+                            const allianceQuery = await Alliance.findOne({ _id: allianceObjId });
+
+                            // we now create the invitee's data.
+                            const NewUser = new User(
+                                {
+                                    _id: generateObjectId(),
+                                    _created_at: Date.now(),
+                                    _updated_at: Date.now(),
+                                    _wperm: _wperm,
+                                    _rperm: _rperm,
+                                    _acl: _acl,
+                                    userId: inviteeId,
+                                    hunterTags: 0,
+                                    realmPoints: 0,
+                                    dailyTagsClaimed: false,
+                                    dailyContributionTagsClaimed: false,
+                                    timesDistributionTagsClaimed: 0,
+                                    // pointer to alliance via its object ID in RHDiscordAllianceData.
+                                    _p_alliance: inviterAlliancePointer,
+                                },
+                            );
+
+                            await NewUser.save();
+
+                            // once the invitee data is created, we add the invitee's data to the alliance.
+                            allianceQuery.memberData.push(
+                                {
+                                    userId: inviteeId,
+                                    role: 'member',
+                                },
+                            );
+
+                            await allianceQuery.save();
+
+                            return {
+                                status: 'success',
+                                message: 'Invitee successfully invited to alliance.',
+                            };
+                        // if invitee exists, we will check if the invitee is already in an alliance.
+                        } else {
+                            const inviteeAlliancePointer = inviteeQuery._p_alliance;
+                            // if the pointer doesn't exist, that means that the invitee is not in an alliance yet.
+                            // we can go ahead and add the invitee to the inviter's alliance.
+                            if (!inviteeAlliancePointer) {
+                                // add the pointer to the invitee's data.
+                                inviteeQuery._p_alliance = inviterAlliancePointer;
+
+                                await inviteeQuery.save();
+
+                                // then add the invitee to the alliance.
+                                const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
+                                // split to get the alliance's object ID.
+                                const allianceObjId = inviterAlliancePointer.split('$')[1];
+                                const allianceQuery = await Alliance.findOne({ _id: allianceObjId });
+
+                                // once the invitee data is created, we add the invitee's data to the alliance.
+                                allianceQuery.memberData.push(
+                                    {
+                                        userId: inviteeId,
+                                        role: 'member',
+                                    },
+                                );
+
+                                await allianceQuery.save();
+
+                                return {
+                                    status: 'success',
+                                    message: 'Invitee successfully invited to alliance.',
+                                };
+                            // if the pointer exists, that means that the invitee is already in an alliance. we throw an error.
+                            } else {
+                                return {
+                                    status: 'error',
+                                    message: 'Invitee is already in an alliance.',
+                                };
+                            }
+                        }
                     }
                 }
             }
