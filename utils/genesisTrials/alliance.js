@@ -114,7 +114,7 @@ const createAllianceLogic = async (userId, allianceName) => {
 
                     return {
                         status: 'success',
-                        message: 'Alliance created successfully',
+                        message: `Alliance ${allianceName} created successfully.`,
                     };
                 // if the pointer exists, we know that the user is already in an alliance.
                 // we will not create the alliance and instead return an error.

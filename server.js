@@ -51,51 +51,51 @@ for (const file of commandFiles) {
 client.on('messageCreate', async (message) => {
     if (message.content.toLowerCase() === '!showdailytagclaim') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showClaimDailyTagsEmbed(message);
+        await showClaimDailyTagsEmbed(message).catch((err) => console.log(err));
     }
 
     if (message.content.toLowerCase() === '!showcontributionembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showSubmitContributionEmbed(message);
+        await showSubmitContributionEmbed(message).catch((err) => console.log(err));
     }
 
     if (message.content.toLowerCase() === '!showchecktagscollected') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showCheckTagsCollectedEmbed(message);
+        await showCheckTagsCollectedEmbed(message).catch((err) => console.log(err));
     }
 
     if (message.content.toLowerCase() === '!showrolenotifembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showRoleNotifEmbed(message);
+        await showRoleNotifEmbed(message).catch((err) => console.log(err));
     }
 
     if (message.content.toLowerCase() === '!hunt claimtags') {
-        const { message: claimMessage } = await updateTagsClaimed(message);
+        const { message: claimMessage } = await updateTagsClaimed(message).catch((err) => console.log(err));
         await message.channel.send(claimMessage);
     }
 
-    if (message.content.toLowerCase().startsWith() === '!hunt createalliance') {
-        const { message: allianceMessage } = await createAlliance(message);
+    if (message.content.toLowerCase().startsWith('!hunt createalliance')) {
+        const { message: allianceMessage } = await createAlliance(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 
-    if (message.content.toLowerCase().startsWith() === '!hunt invitetoalliance') {
-        const { message: allianceMessage } = await inviteToAlliance(message);
+    if (message.content.toLowerCase().startsWith('!hunt invitetoalliance')) {
+        const { message: allianceMessage } = await inviteToAlliance(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 
-    if (message.content.toLowerCase().startsWith() === '!hunt disbandalliance') {
+    if (message.content.toLowerCase().startsWith('!hunt disbandalliance')) {
         const { message: allianceMessage } = await disbandAlliance(message);
         await message.channel.send(allianceMessage);
     }
 
-    if (message.content.toLowerCase().startsWith() === '!hunt leavealliance') {
-        const { message: allianceMessage } = await leaveAlliance(message);
+    if (message.content.toLowerCase().startsWith('!hunt leavealliance')) {
+        const { message: allianceMessage } = await leaveAlliance(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 
-    if (message.content.toLowerCase().startsWith() === '!hunt delegatechiefrole') {
-        const { message: allianceMessage } = await delegateChiefRole(message);
+    if (message.content.toLowerCase().startsWith('!hunt delegatechiefrole')) {
+        const { message: allianceMessage } = await delegateChiefRole(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 });

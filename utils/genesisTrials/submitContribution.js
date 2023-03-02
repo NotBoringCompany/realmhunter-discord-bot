@@ -38,7 +38,7 @@ const submitContributionToDB = async (userId, url) => {
             await NewUser.save();
             return {
                 status: 'success',
-                message: 'Your contribution has been submitted. Thank you!',
+                message: 'Your contribution has been submitted. Thank you! Our team will now check your work and get back to you.',
             };
         // if user exists, we first check if they resubmitted an existing contribution.
         } else {
