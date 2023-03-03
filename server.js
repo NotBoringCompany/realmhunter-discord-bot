@@ -16,7 +16,8 @@ const { checkTagsCollected } = require('./utils/genesisTrials/checkTags');
 const { showCheckTagsCollected, showCheckTagsCollectedEmbed } = require('./commands/genesisTrials/checkTags');
 const { showRoleNotifEmbed } = require('./commands/roleNotif');
 const { giveRole } = require('./utils/discord/roleNotif');
-const { createAlliance, inviteToAlliance, disbandAlliance, leaveAlliance, delegateChiefRole, showAlliance, kickFromAlliance, pendingAllianceInvite, acceptAllianceInvite, declineAllianceInvite } = require('./commands/genesisTrials/alliance');
+const { createAlliance, inviteToAlliance, disbandAlliance, leaveAlliance, delegateChiefRole, showAlliance, kickFromAlliance, pendingAllianceInvite, acceptAllianceInvite, declineAllianceInvite, rescindAllianceInvite, showInviterPendingInvites, showInviteePendingInvites } = require('./commands/genesisTrials/alliance');
+const { showInviterPendingInvitesLogic } = require('./utils/genesisTrials/alliance');
 
 const client = new Client({
     intents: [
@@ -81,6 +82,26 @@ client.on('messageCreate', async (message) => {
 
     if (message.content.toLowerCase().startsWith('!hunt invitetoalliance')) {
         const { message: allianceMessage } = await pendingAllianceInvite(message).catch((err) => console.log(err));
+        await message.channel.send(allianceMessage);
+    }
+
+    if (message.content.toLowerCase().startsWith('!hunt showsentallianceinvites')) {
+        const { embed, message: allianceMessage } = await showInviterPendingInvites(client, message).catch((err) => console.log(err));
+        if (embed !== 'none') {
+            await message.channel.send({ embeds: [embed] });
+        } else {
+            await message.channel.send(allianceMessage);
+        }
+    }
+
+    if (message.content.toLowerCase().startsWith('!hunt getallianceinvites')) {
+        const { embed } = await showInviteePendingInvites(client, message).catch((err) => console.log(err));
+
+        await message.channel.send({ embeds: [embed] });
+    }
+
+    if (message.content.toLowerCase().startsWith('!hunt rescindallianceinvite')) {
+        const { message: allianceMessage } = await rescindAllianceInvite(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 

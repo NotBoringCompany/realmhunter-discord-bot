@@ -1,4 +1,4 @@
-const { createAllianceLogic, inviteToAllianceLogic, disbandAllianceLogic, leaveAllianceLogic, delegateChiefRoleLogic, showAllianceLogic, kickFromAllianceLogic, pendingAllianceInviteLogic, acceptAllianceInviteLogic, declineAllianceInviteLogic } = require('../../utils/genesisTrials/alliance');
+const { createAllianceLogic, inviteToAllianceLogic, disbandAllianceLogic, leaveAllianceLogic, delegateChiefRoleLogic, showAllianceLogic, kickFromAllianceLogic, pendingAllianceInviteLogic, acceptAllianceInviteLogic, declineAllianceInviteLogic, rescindPendingInviteLogic, showInviterPendingInvitesLogic, showInviteePendingInvitesLogic } = require('../../utils/genesisTrials/alliance');
 
 /**
  * Creates an alliance for the user.
@@ -46,6 +46,52 @@ const pendingAllianceInvite = async (message) => {
         const inviteeId = getInvitee.id;
 
         return await pendingAllianceInviteLogic(message.author.id, inviteeId);
+    } catch (err) {
+        throw err;
+    }
+};
+
+/**
+ * Shows all alliance invites the inviter sent.
+ */
+const showInviterPendingInvites = async (client, message) => {
+    try {
+        return await showInviterPendingInvitesLogic(client, message.author.id);
+    } catch (err) {
+        throw err;
+    }
+};
+
+/**
+ * Shows all alliance invites the invitee got.
+ */
+const showInviteePendingInvites = async (client, message) => {
+    try {
+        return await showInviteePendingInvitesLogic(client, message.author.id);
+    } catch (err) {
+        throw err;
+    }
+};
+
+/**
+ * Gets called when an inviter rescinds their invite to the invitee.
+ */
+const rescindAllianceInvite = async (message) => {
+    try {
+        const [hunt, inviteToAlliance, invitee] = message.content.split(' ');
+
+        // we need to check if invitee is a valid user ID
+        const server = message.guild;
+        const getInvitee = await server.members.fetch(invitee).catch((err) => {
+            return {
+                status: 'error',
+                message: 'Invalid invitee ID.',
+            };
+        });
+
+        const inviteeId = getInvitee.id;
+
+        return await rescindPendingInviteLogic(message.author.id, inviteeId);
     } catch (err) {
         throw err;
     }
@@ -162,6 +208,9 @@ const kickFromAlliance = async (message) => {
 module.exports = {
     createAlliance,
     pendingAllianceInvite,
+    showInviterPendingInvites,
+    showInviteePendingInvites,
+    rescindAllianceInvite,
     acceptAllianceInvite,
     declineAllianceInvite,
     disbandAlliance,

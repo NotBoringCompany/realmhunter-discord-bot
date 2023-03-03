@@ -1,6 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const { showAllianceEmbed } = require('../../embeds/genesisTrials/alliance');
+const { showAllianceEmbed, showInviterPendingInvitesEmbed, showInviteePendingInvitesEmbed } = require('../../embeds/genesisTrials/alliance');
 const { generateObjectId } = require('../cryptoUtils');
 const permissions = require('../dbPermissions');
 const { AllianceSchema, DiscordUserSchema, AlliancePendingInviteSchema } = require('../schemas');
@@ -167,6 +167,14 @@ const pendingAllianceInviteLogic = async (inviterId, inviteeId) => {
                 };
             // if the pointer exists, we know that the user is in an alliance. we check if they're the chief.
             } else {
+                // we check if the user sent an invite to themselves.
+                if (inviterId === inviteeId) {
+                    return {
+                        status: 'error',
+                        message: 'You cannot send an invite to yourself.',
+                    };
+                }
+
                 const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
                 // split to get the alliance's object ID.
                 const allianceObjId = inviterAlliancePointer.split('$')[1];
@@ -304,6 +312,215 @@ const pendingAllianceInviteLogic = async (inviterId, inviteeId) => {
                             }
                         }
                     }
+                }
+            }
+        }
+    } catch (err) {
+        throw err;
+    }
+};
+
+/**
+ * Shows the pending invites sent by the inviter.
+ */
+const showInviterPendingInvitesLogic = async (client, inviterId) => {
+    try {
+        // first, we check if the inviter exists.
+        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+        const inviterQuery = await User.findOne({ userId: inviterId });
+
+        // if the inviter doesn't exist, we throw an error.
+        if (!inviterQuery) {
+            return {
+                embed: 'none',
+                status: 'error',
+                message: 'You are not in an alliance.',
+            };
+        // if user exists, we first check if they have an alliance.
+        } else {
+            const inviterAlliancePointer = inviterQuery._p_alliance;
+
+            // if the inviter is not in an alliance, we throw an error.
+            if (!inviterAlliancePointer) {
+                return {
+                    embed: 'none',
+                    status: 'error',
+                    message: 'You are not in an alliance.',
+                };
+            // if the inviter is in an alliance, we show the pending invites.
+            } else {
+                // we get the list of pending invites and their timestamp.
+                const PendingAllianceInvite = mongoose.model('PendingAllianceInviteData', AlliancePendingInviteSchema, 'RHDiscordPendingAllianceInvites');
+                const pendingInvitesQuery = await PendingAllianceInvite.find({ inviterId: inviterId, _p_alliance: inviterAlliancePointer });
+
+                const pendingInvites = [];
+
+                const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
+                // split to get the alliance's object ID.
+                const allianceObjId = inviterAlliancePointer.split('$')[1];
+                const allianceQuery = await Alliance.findOne({ _id: allianceObjId });
+
+                const allianceName = allianceQuery.allianceName ? allianceQuery.allianceName : 'No alliance name';
+
+                // if no pending invites, we return an embed saying 'no pending invites'.
+                if (!pendingInvitesQuery) {
+                    return {
+                        embed: showInviterPendingInvitesEmbed(allianceName, {
+                            name: 'Invites',
+                            value: 'No pending invites.',
+                        }),
+                        status: 'success',
+                        message: 'No pending invites.',
+                    };
+                // if there are pending invites, we return an embed with the list of pending invites.
+                } else {
+                    for (let i = 0; i < pendingInvitesQuery.length; i++) {
+                        const invite = pendingInvitesQuery[i];
+
+                        const inviteeId = invite.inviteeId;
+
+                        // get the invitee's username.
+                        const inviteeData = await client.users.fetch(inviteeId);
+                        const userTag = inviteeData.username + '#' + inviteeData.discriminator;
+
+                        pendingInvites.push({
+                            name: `**${userTag}**`,
+                            value: `Invited: **${new Date(parseInt(invite.invitedTimestamp)* 1000).toUTCString()}**`,
+                        });
+                    }
+
+                    return {
+                        embed: showInviterPendingInvitesEmbed(allianceName, pendingInvites),
+                        status: 'success',
+                        message: 'Pending invites.',
+                    };
+                }
+            }
+        }
+    } catch (err) {
+        throw err;
+    }
+};
+
+/**
+ * Shows the pending invites sent to the invitee.
+ */
+const showInviteePendingInvitesLogic = async (client, inviteeId) => {
+    try {
+        // first, we check if the invitee exists.
+        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+        const inviteeQuery = await User.findOne({ userId: inviteeId });
+
+        // if the invitee doesn't exist, we return no pending invites.
+        if (!inviteeQuery) {
+            return {
+                embed: showInviteePendingInvitesEmbed([{
+                    name: 'Pending invites',
+                    value: 'You do not have any pending invites.',
+                }]),
+                status: 'success',
+                message: 'You do not have any pending invites.',
+            };
+        // otherwise, we get the list of pending invites.
+        } else {
+            // we get the list of pending invites and their timestamp.
+            const PendingAllianceInvite = mongoose.model('PendingAllianceInviteData', AlliancePendingInviteSchema, 'RHDiscordPendingAllianceInvites');
+            const pendingInvitesQuery = await PendingAllianceInvite.find({ inviteeId: inviteeId });
+
+            const pendingInvites = [];
+
+            // if no pending invites, we return an embed saying 'no pending invites'.
+            if (!pendingInvitesQuery) {
+                return {
+                    embed: showInviteePendingInvitesEmbed([{
+                        name: 'Pending invites',
+                        value: 'You do not have any pending invites.',
+                    }]),
+                    status: 'success',
+                    message: 'You do not have any pending invites.',
+                };
+            // if there are pending invites, we return an embed with the list of pending invites.
+            } else {
+                let alliancePointer;
+                const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
+
+                for (let i = 0; i < pendingInvitesQuery.length; i++) {
+                    alliancePointer = pendingInvitesQuery[i]._p_alliance;
+                    // split to get the alliance's object ID.
+                    const allianceObjId = alliancePointer.split('$')[1];
+                    const allianceQuery = await Alliance.findOne({ _id: allianceObjId });
+                    const allianceName = allianceQuery.allianceName ? allianceQuery.allianceName : 'N/A';
+
+                    const invite = pendingInvitesQuery[i];
+
+                    const inviterId = invite.inviterId;
+
+                    // get the inviter's username.
+                    const inviterData = await client.users.fetch(inviterId);
+                    const userTag = inviterData.username + '#' + inviterData.discriminator;
+
+                    pendingInvites.push({
+                        name: `Invite from **${userTag}** to join Alliance **${allianceName}**`,
+                        value: `Invited: **${new Date(parseInt(invite.invitedTimestamp)* 1000).toUTCString()}**`,
+                    });
+                }
+
+                return {
+                    embed: showInviteePendingInvitesEmbed(pendingInvites),
+                    status: 'success',
+                    message: 'Pending invites.',
+                };
+            }
+        }
+    } catch (err) {
+        throw err;
+    }
+};
+
+/**
+ * Rescinds a pending invite from the inviter to the invitee.
+ */
+const rescindPendingInviteLogic = async (inviterId, inviteeId) => {
+    try {
+        // first, we check if the inviter exists.
+        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+        const inviterQuery = await User.findOne({ userId: inviterId });
+
+        // if the inviter doesn't exist, we throw an error.
+        if (!inviterQuery) {
+            return {
+                status: 'error',
+                message: 'You are not in an alliance.',
+            };
+        // if user exists, we first check if they have an alliance.
+        } else {
+            const inviterAlliancePointer = inviterQuery._p_alliance;
+
+            // if the inviter is not in an alliance, we throw an error.
+            if (!inviterAlliancePointer) {
+                return {
+                    status: 'error',
+                    message: 'You are not in an alliance.',
+                };
+            // otherwise, we now check if the invite to the invitee exists.
+            } else {
+                const PendingAllianceInvite = mongoose.model('PendingAllianceInviteData', AlliancePendingInviteSchema, 'RHDiscordPendingAllianceInvites');
+                const inviteQuery = await PendingAllianceInvite.findOne({ inviterId: inviterId, inviteeId: inviteeId, _p_alliance: inviterAlliancePointer });
+
+                // if the invite doesn't exist, we throw an error.
+                if (!inviteQuery) {
+                    return {
+                        status: 'error',
+                        message: 'Invite invalid or doesn\'t exist.',
+                    };
+                // if the invite exists, we delete it.
+                } else {
+                    await inviteQuery.delete();
+
+                    return {
+                        status: 'success',
+                        message: 'Invite rescinded.',
+                    };
                 }
             }
         }
@@ -868,6 +1085,9 @@ const kickFromAllianceLogic = async (userId, targetId) => {
 module.exports = {
     createAllianceLogic,
     pendingAllianceInviteLogic,
+    showInviterPendingInvitesLogic,
+    showInviteePendingInvitesLogic,
+    rescindPendingInviteLogic,
     acceptAllianceInviteLogic,
     declineAllianceInviteLogic,
     disbandAllianceLogic,
