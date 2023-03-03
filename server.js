@@ -16,7 +16,7 @@ const { checkTagsCollected } = require('./utils/genesisTrials/checkTags');
 const { showCheckTagsCollected, showCheckTagsCollectedEmbed } = require('./commands/genesisTrials/checkTags');
 const { showRoleNotifEmbed } = require('./commands/roleNotif');
 const { giveRole } = require('./utils/discord/roleNotif');
-const { createAlliance, inviteToAlliance, disbandAlliance, leaveAlliance, delegateChiefRole, showAlliance, kickFromAlliance, pendingAllianceInvite, acceptAllianceInvite, declineAllianceInvite, rescindAllianceInvite, showInviterPendingInvites, showInviteePendingInvites } = require('./commands/genesisTrials/alliance');
+const { createAlliance, inviteToAlliance, disbandAlliance, leaveAlliance, delegateChiefRole, showAlliance, kickFromAlliance, pendingAllianceInvite, acceptAllianceInvite, declineAllianceInvite, rescindAllianceInvite, showInviterPendingInvites, showInviteePendingInvites, showOwnAlliance } = require('./commands/genesisTrials/alliance');
 const { showInviterPendingInvitesLogic, removeExpiredInvitesScheduler } = require('./utils/genesisTrials/alliance');
 
 const client = new Client({
@@ -132,6 +132,15 @@ client.on('messageCreate', async (message) => {
 
     if (message.content.toLowerCase().startsWith('!hunt showalliance')) {
         const { embed, status, message: allianceMessage } = await showAlliance(client, message).catch((err) => console.log(err));
+        if (embed !== 'none') {
+            await message.channel.send({ embeds: [embed] });
+        } else {
+            await message.channel.send(allianceMessage);
+        }
+    }
+
+    if (message.content.toLowerCase().startsWith('!hunt showownalliance')) {
+        const { embed, status, message: allianceMessage } = await showOwnAlliance(client, message).catch((err) => console.log(err));
         if (embed !== 'none') {
             await message.channel.send({ embeds: [embed] });
         } else {

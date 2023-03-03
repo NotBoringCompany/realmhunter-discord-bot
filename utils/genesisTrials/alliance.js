@@ -1,6 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const { showAllianceEmbed, showInviterPendingInvitesEmbed, showInviteePendingInvitesEmbed } = require('../../embeds/genesisTrials/alliance');
+const { showAllianceEmbed, showInviterPendingInvitesEmbed, showInviteePendingInvitesEmbed, showOwnAllianceEmbed } = require('../../embeds/genesisTrials/alliance');
 const { generateObjectId } = require('../cryptoUtils');
 const permissions = require('../dbPermissions');
 const { AllianceSchema, DiscordUserSchema, AlliancePendingInviteSchema } = require('../schemas');
@@ -986,6 +986,79 @@ const showAllianceLogic = async (client, allianceName) => {
 };
 
 /**
+ * Shows own alliance data when called.
+ */
+const showOwnAllianceLogic = async (client, userId) => {
+    try {
+        // we first check if the user has an alliance.
+        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: userId });
+
+        // if user isn't found, then they're not in an alliance anyway.
+        if (!userQuery) {
+            return {
+                embed: 'none',
+                status: 'error',
+                message: 'You are not in an alliance.',
+            };
+        // if user is found, we check if they are in an alliance.
+        } else {
+            const userAlliancePointer = userQuery._p_alliance;
+
+            // if the pointer doesn't exist, then they're not in an alliance. throw an error.
+            if (!userAlliancePointer) {
+                return {
+                    embed: 'none',
+                    status: 'error',
+                    message: 'You are not in an alliance.',
+                };
+            // otherwise, we check if the alliance exists.
+            } else {
+                const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
+                // split to get the alliance's object ID.
+                const allianceObjId = userAlliancePointer.split('$')[1];
+                const allianceQuery = await Alliance.findOne({ _id: allianceObjId });
+
+                // if the alliance doesn't exist, then something went wrong.
+                // we request them to submit a ticket.
+                if (!allianceQuery) {
+                    return {
+                        embed: 'none',
+                        status: 'error',
+                        message: 'Something went wrong. Please submit a ticket.',
+                    };
+                // otherwise, we return an embed of the alliance.
+                } else {
+                    const membersData = [];
+                    const members = allianceQuery.memberData;
+
+                    for (let i = 0; i < members.length; i++) {
+                        const member = members[i];
+
+                        // get the usertag of the member
+                        const user = await client.users.fetch(member.userId);
+                        const userTag = user.username + '#' + user.discriminator;
+
+                        membersData.push({
+                            name: `**${userTag}**`,
+                            value: `Role: ${member.role}`,
+                        });
+                    }
+
+                    return {
+                        embed: showOwnAllianceEmbed(allianceQuery.allianceName, membersData),
+                        status: 'success',
+                        message: 'Successfully retrieved alliance data.',
+                    };
+                }
+            }
+        }
+    } catch (err) {
+        throw err;
+    }
+};
+
+/**
  * Kicks a user from an alliance. Only the chief can kick a user.
  */
 const kickFromAllianceLogic = async (userId, targetId) => {
@@ -1127,6 +1200,7 @@ module.exports = {
     leaveAllianceLogic,
     delegateChiefRoleLogic,
     showAllianceLogic,
+    showOwnAllianceLogic,
     kickFromAllianceLogic,
     removeExpiredInvitesScheduler,
 };

@@ -11,6 +11,13 @@ const showAllianceEmbed = (allianceName, membersData) => {
         .setFields(membersData);
 };
 
+const showOwnAllianceEmbed = (allianceName, membersData) => {
+    return new EmbedBuilder()
+        .setColor(0x42ca9f)
+        .setTitle(`Alliance **${allianceName}**`)
+        .setFields(membersData);
+};
+
 const showInviterPendingInvitesEmbed = (allianceName, pendingInvites) => {
     return new EmbedBuilder()
         .setColor(0x42ca9f)
@@ -27,6 +34,7 @@ const showInviteePendingInvitesEmbed = (pendingInvites) => {
 
 module.exports = {
     showAllianceEmbed,
+    showOwnAllianceEmbed,
     showInviterPendingInvitesEmbed,
     showInviteePendingInvitesEmbed,
 };

@@ -1,4 +1,4 @@
-const { createAllianceLogic, inviteToAllianceLogic, disbandAllianceLogic, leaveAllianceLogic, delegateChiefRoleLogic, showAllianceLogic, kickFromAllianceLogic, pendingAllianceInviteLogic, acceptAllianceInviteLogic, declineAllianceInviteLogic, rescindPendingInviteLogic, showInviterPendingInvitesLogic, showInviteePendingInvitesLogic } = require('../../utils/genesisTrials/alliance');
+const { createAllianceLogic, inviteToAllianceLogic, disbandAllianceLogic, leaveAllianceLogic, delegateChiefRoleLogic, showAllianceLogic, kickFromAllianceLogic, pendingAllianceInviteLogic, acceptAllianceInviteLogic, declineAllianceInviteLogic, rescindPendingInviteLogic, showInviterPendingInvitesLogic, showInviteePendingInvitesLogic, showOwnAllianceLogic } = require('../../utils/genesisTrials/alliance');
 
 /**
  * Creates an alliance for the user.
@@ -181,6 +181,17 @@ const showAlliance = async (client, message) => {
     }
 };
 
+/**
+ * Gets the user's alliance data.
+ */
+const showOwnAlliance = async (client, message) => {
+    try {
+        return await showOwnAllianceLogic(client, message.author.id);
+    } catch (err) {
+        throw err;
+    }
+}
+
 const kickFromAlliance = async (message) => {
     try {
         const [hunt, kickFromAlliance, userToKick] = message.content.split(' ');
@@ -217,5 +228,6 @@ module.exports = {
     leaveAlliance,
     delegateChiefRole,
     showAlliance,
+    showOwnAlliance,
     kickFromAlliance,
 };
