@@ -4,8 +4,6 @@ const { tagsLeaderboardEmbed } = require('../../embeds/genesisTrials/tagsLeaderb
 const { DiscordUserSchema } = require('../schemas');
 const cron = require('node-cron');
 
-mongoose.connect(process.env.MONGODB_URI);
-
 // get the current tags leaderboard.
 const tagsLeaderboardLogic = async (client) => {
     try {
@@ -77,7 +75,7 @@ const tagsLeaderboardScheduler = async (msgId, client) => {
         cron.schedule('0 0 * * * *', async () => {
             console.log('editing leaderboard.');
 
-            const leaderboardChannel = await client.channels.fetch(process.env.TEST_LEADERBOARD_CHANNELID);
+            const leaderboardChannel = await client.channels.fetch(process.env.COOKIES_LEADERBOARD_CHANNELID);
             const leaderboardMsg = await leaderboardChannel.messages.fetch(msgId);
 
             const { embed } = await showTagsLeaderboard(client);

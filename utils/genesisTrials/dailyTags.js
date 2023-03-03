@@ -5,8 +5,6 @@ const permissions = require('../dbPermissions');
 const { DiscordUserSchema } = require('../schemas');
 const cron = require('node-cron');
 
-mongoose.connect(process.env.MONGODB_URI);
-
 /**
  * `claimDailyTagsLogic` allows all Hunters to claim their daily tags.
  * Depending on their role and/or join date, they can claim more tags.
@@ -87,12 +85,15 @@ const claimDailyTagsLogic = async (interaction) => {
  * @return {Number} amount of tags a user can claim daily.
  */
 const dailyClaimableTags = (interaction) => {
-    const { joinDate, hasWLRole } = checkJoinDateAndRole(interaction);
+    const { joinDate, hasWLRole, hasServerBoosterRole } = checkJoinDateAndRole(interaction);
 
     // if the user has the WL role, regardless, they can claim more tags.
     if (hasWLRole) {
         if (process.env.MORE_CLAIMABLE_TAGS) return parseInt(process.env.MORE_CLAIMABLE_TAGS);
-    // if they don't have the WL role, we check their join date.
+    // if the user has a server booster role, they can claim more tags.
+    } else if (hasServerBoosterRole) {
+        if (process.env.MORE_CLAIMABLE_TAGS) return parseInt(process.env.MORE_CLAIMABLE_TAGS);
+    // if they don't have the WL role OR the server booster role, we check their join date.
     } else {
         // if they joined before 1 Jan 2023 00:00 GMT, they can claim more tags.
         if (joinDate <= process.env.JOIN_DATE_REQUIREMENT) {
@@ -105,17 +106,19 @@ const dailyClaimableTags = (interaction) => {
 };
 
 /**
- * `checkJoinDateAndRole` returns the user's join date and whether or not they have the WL role.
+ * `checkJoinDateAndRole` returns the user's join date and whether or not they have the WL role/server booster role.
  * @param {import('discord.js').Interaction} interaction
  */
 const checkJoinDateAndRole = (interaction) => {
     // get the unix timestamp of when the user joined the server.
     const unixTimestamp = Math.floor(interaction.member.joinedTimestamp / 1000);
     const hasWLRole = interaction.member.roles.cache.some((role) => role.name === process.env.WHITELIST_ROLE);
+    const hasServerBoosterRole = interaction.member.roles.cache.some((role) => role.name === process.env.SERVER_BOOSTER_ROLE);
 
     return {
         joinDate: unixTimestamp,
         hasWLRole: hasWLRole,
+        hasServerBoosterRole: hasServerBoosterRole,
     };
 };
 

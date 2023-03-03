@@ -49,5 +49,3 @@ const validate = () => {
     const valid = cron.validate('59 * * * *');
     console.log(valid);
 }
-
-validate();

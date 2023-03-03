@@ -19,6 +19,7 @@ const { giveRole } = require('./utils/discord/roleNotif');
 const { createAlliance, inviteToAlliance, disbandAlliance, leaveAlliance, delegateChiefRole, showAlliance, kickFromAlliance, pendingAllianceInvite, acceptAllianceInvite, declineAllianceInvite, rescindAllianceInvite, showInviterPendingInvites, showInviteePendingInvites, showOwnAlliance } = require('./commands/genesisTrials/alliance');
 const { showInviterPendingInvitesLogic, removeExpiredInvitesScheduler } = require('./utils/genesisTrials/alliance');
 const { showTagsLeaderboard, tagsLeaderboardScheduler } = require('./utils/genesisTrials/tagsLeaderboard');
+const { showPartOneInfoEmbed } = require('./commands/genesisTrials/helpinfo');
 
 const client = new Client({
     intents: [
@@ -77,22 +78,31 @@ client.on('messageCreate', async (message) => {
         await showRoleNotifEmbed(message).catch((err) => console.log(err));
     }
 
+    if (message.content.toLowerCase() === '!showgenesistrialspartoneembed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showPartOneInfoEmbed(message).catch((err) => console.log(err));
+    }
+
     if (message.content.toLowerCase() === '!hunt collectcookies') {
+        if (message.channelId !== process.env.GENERAL_CHAT_CHANNELID) return;
         const { message: claimMessage } = await updateTagsClaimed(message).catch((err) => console.log(err));
         await message.channel.send(claimMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt createalliance')) {
+        if (message.channelId !== process.env.ALLIANCE_BUILDING_CHANNELID) return;
         const { message: allianceMessage } = await createAlliance(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt invitetoalliance')) {
+        if (message.channelId !== process.env.ALLIANCE_INVITES_CHANNELID) return;
         const { message: allianceMessage } = await pendingAllianceInvite(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt showsentallianceinvites')) {
+        if (message.channelId !== process.env.ALLIANCE_INVITES_CHANNELID) return;
         const { embed, message: allianceMessage } = await showInviterPendingInvites(client, message).catch((err) => console.log(err));
         if (embed !== 'none') {
             await message.channel.send({ embeds: [embed] });
@@ -102,42 +112,50 @@ client.on('messageCreate', async (message) => {
     }
 
     if (message.content.toLowerCase().startsWith('!hunt getallianceinvites')) {
+        if (message.channelId !== process.env.ALLIANCE_INVITES_CHANNELID) return;
         const { embed } = await showInviteePendingInvites(client, message).catch((err) => console.log(err));
 
         await message.channel.send({ embeds: [embed] });
     }
 
     if (message.content.toLowerCase().startsWith('!hunt rescindallianceinvite')) {
+        if (message.channelId !== process.env.ALLIANCE_INVITES_CHANNELID) return;
         const { message: allianceMessage } = await rescindAllianceInvite(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt acceptallianceinvite')) {
+        if (message.channelId !== process.env.ALLIANCE_INVITES_CHANNELID) return;
         const { message: allianceMessage } = await acceptAllianceInvite(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt declineallianceinvite')) {
+        if (message.channelId !== process.env.ALLIANCE_INVITES_CHANNELID) return;
         const { message: allianceMessage } = await declineAllianceInvite(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt disbandalliance')) {
+        if (message.channelId !== process.env.ALLIANCE_BUILDING_CHANNELID) return;
         const { message: allianceMessage } = await disbandAlliance(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt leavealliance')) {
+        if (message.channelId !== process.env.ALLIANCE_BUILDING_CHANNELID) return;
         const { message: allianceMessage } = await leaveAlliance(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt delegatechiefrole')) {
+        if (message.channelId !== process.env.ALLIANCE_BUILDING_CHANNELID) return;
         const { message: allianceMessage } = await delegateChiefRole(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt showalliance')) {
+        if (message.channelId !== process.env.ALLIANCE_INFO_CHANNELID) return;
         const { embed, status, message: allianceMessage } = await showAlliance(client, message).catch((err) => console.log(err));
         if (embed !== 'none') {
             await message.channel.send({ embeds: [embed] });
@@ -147,6 +165,7 @@ client.on('messageCreate', async (message) => {
     }
 
     if (message.content.toLowerCase().startsWith('!hunt showownalliance')) {
+        if (message.channelId !== process.env.ALLIANCE_INFO_CHANNELID) return;
         const { embed, status, message: allianceMessage } = await showOwnAlliance(client, message).catch((err) => console.log(err));
         if (embed !== 'none') {
             await message.channel.send({ embeds: [embed] });
@@ -156,6 +175,7 @@ client.on('messageCreate', async (message) => {
     }
 
     if (message.content.toLowerCase().startsWith('!hunt kickfromalliance')) {
+        if (message.channelId !== process.env.ALLIANCE_BUILDING_CHANNELID) return;
         const { message: allianceMessage } = await kickFromAlliance(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
@@ -221,7 +241,7 @@ client.on('ready', async c => {
     await distributeTagScheduler(client);
     await restartDailyTagsAllowance();
     await removeExpiredInvitesScheduler();
-    await tagsLeaderboardScheduler('1081192769860669450', client);
+    await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
 
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,

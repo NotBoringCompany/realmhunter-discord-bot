@@ -6,8 +6,6 @@ const permissions = require('../dbPermissions');
 const { generateObjectId } = require('../cryptoUtils');
 const { randomTagAppearanceEmbed } = require('../../embeds/genesisTrials/randomTagAppearance');
 
-mongoose.connect(process.env.MONGODB_URI);
-
 /**
  * `checkPrevTagsAppearance` checks the unix timestamp of the previous random tags appearance in general chat.
  */
@@ -184,7 +182,7 @@ const claimRandomTags = async (message) => {
 const distributeTags = async (client) => {
     try {
         // allows the tags to appear in general chat and updates the tags database.
-        await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send({ embeds: [randomTagAppearanceEmbed] });
+        await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send({ embeds: [randomTagAppearanceEmbed] });
         await updateTagsAppeared();
     } catch (err) {
         console.log({

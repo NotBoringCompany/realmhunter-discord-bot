@@ -6,8 +6,6 @@ const permissions = require('../dbPermissions');
 const { AllianceSchema, DiscordUserSchema, AlliancePendingInviteSchema } = require('../schemas');
 const cron = require('node-cron');
 
-mongoose.connect(process.env.MONGODB_URI);
-
 /**
  * Creates an alliance when called and when the requirements are met.
  */

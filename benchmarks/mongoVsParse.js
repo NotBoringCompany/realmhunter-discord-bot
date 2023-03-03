@@ -106,5 +106,3 @@ const benchmark = async () => {
     // Benchmark time MongoDB add document: 7.269100001081824 ms
     // Benchmark time Parse add record: 647.0845999997109 ms
 };
-
-benchmark();
