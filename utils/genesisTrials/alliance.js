@@ -4,6 +4,7 @@ const { showAllianceEmbed, showInviterPendingInvitesEmbed, showInviteePendingInv
 const { generateObjectId } = require('../cryptoUtils');
 const permissions = require('../dbPermissions');
 const { AllianceSchema, DiscordUserSchema, AlliancePendingInviteSchema } = require('../schemas');
+const cron = require('node-cron');
 
 mongoose.connect(process.env.MONGODB_URI);
 
@@ -1082,6 +1083,38 @@ const kickFromAllianceLogic = async (userId, targetId) => {
     }
 };
 
+/**
+ * Removes expired invites from the database. Gets called every 30 minutes.
+ */
+const removeExpiredInvitesScheduler = async () => {
+    try {
+        cron.schedule('*/30 * * * *', async () => {
+            // we query through the PendingInvites database and search for any expired invites.
+            const PendingAllianceInvite = mongoose.model('PendingAllianceInviteData', AlliancePendingInviteSchema, 'RHDiscordPendingAllianceInvites');
+            const pendingInvitesQuery = await PendingAllianceInvite.find();
+
+            // if there are no pending invites, we will not do anything.
+            if (!pendingInvitesQuery) {
+                return;
+            // otherwise, we query through each and check for any expired ones.
+            } else {
+                for (let i = 0; i < pendingInvitesQuery.length; i++) {
+                    const invite = pendingInvitesQuery[i];
+
+                    // get the current unix timestamp
+                    const now = Math.floor(new Date().getTime() / 1000);
+                    // if the invite has expired, we will remove it from the database.
+                    if (invite.inviteExpiryTimestamp < now) {
+                        await PendingAllianceInvite.deleteOne({ _id: invite._id });
+                    }
+                }
+            }
+        });
+    } catch (err) {
+        throw err;
+    }
+};
+
 module.exports = {
     createAllianceLogic,
     pendingAllianceInviteLogic,
@@ -1095,4 +1128,5 @@ module.exports = {
     delegateChiefRoleLogic,
     showAllianceLogic,
     kickFromAllianceLogic,
+    removeExpiredInvitesScheduler,
 };

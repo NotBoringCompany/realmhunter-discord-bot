@@ -17,7 +17,7 @@ const { showCheckTagsCollected, showCheckTagsCollectedEmbed } = require('./comma
 const { showRoleNotifEmbed } = require('./commands/roleNotif');
 const { giveRole } = require('./utils/discord/roleNotif');
 const { createAlliance, inviteToAlliance, disbandAlliance, leaveAlliance, delegateChiefRole, showAlliance, kickFromAlliance, pendingAllianceInvite, acceptAllianceInvite, declineAllianceInvite, rescindAllianceInvite, showInviterPendingInvites, showInviteePendingInvites } = require('./commands/genesisTrials/alliance');
-const { showInviterPendingInvitesLogic } = require('./utils/genesisTrials/alliance');
+const { showInviterPendingInvitesLogic, removeExpiredInvitesScheduler } = require('./utils/genesisTrials/alliance');
 
 const client = new Client({
     intents: [
@@ -204,6 +204,7 @@ client.on('ready', async c => {
     nextTagDistributionScheduler.start();
     await distributeTagScheduler(client);
     await restartDailyTagsAllowance();
+    await removeExpiredInvitesScheduler();
 
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,
