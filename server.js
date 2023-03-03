@@ -16,7 +16,7 @@ const { checkTagsCollected } = require('./utils/genesisTrials/checkTags');
 const { showCheckTagsCollected, showCheckTagsCollectedEmbed } = require('./commands/genesisTrials/checkTags');
 const { showRoleNotifEmbed } = require('./commands/roleNotif');
 const { giveRole } = require('./utils/discord/roleNotif');
-const { createAlliance, inviteToAlliance, disbandAlliance, leaveAlliance, delegateChiefRole, showAlliance, kickFromAlliance } = require('./commands/genesisTrials/alliance');
+const { createAlliance, inviteToAlliance, disbandAlliance, leaveAlliance, delegateChiefRole, showAlliance, kickFromAlliance, pendingAllianceInvite, acceptAllianceInvite, declineAllianceInvite } = require('./commands/genesisTrials/alliance');
 
 const client = new Client({
     intents: [
@@ -80,10 +80,17 @@ client.on('messageCreate', async (message) => {
     }
 
     if (message.content.toLowerCase().startsWith('!hunt invitetoalliance')) {
-        // const server = message.guild;
-        // const check = await server.members.fetch('876926027790688266').id;
-        // console.log(check);
-        const { message: allianceMessage } = await inviteToAlliance(message).catch((err) => console.log(err));
+        const { message: allianceMessage } = await pendingAllianceInvite(message).catch((err) => console.log(err));
+        await message.channel.send(allianceMessage);
+    }
+
+    if (message.content.toLowerCase().startsWith('!hunt acceptallianceinvite')) {
+        const { message: allianceMessage } = await acceptAllianceInvite(message).catch((err) => console.log(err));
+        await message.channel.send(allianceMessage);
+    }
+
+    if (message.content.toLowerCase().startsWith('!hunt declineallianceinvite')) {
+        const { message: allianceMessage } = await declineAllianceInvite(message).catch((err) => console.log(err));
         await message.channel.send(allianceMessage);
     }
 

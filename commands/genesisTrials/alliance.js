@@ -1,4 +1,4 @@
-const { createAllianceLogic, inviteToAllianceLogic, disbandAllianceLogic, leaveAllianceLogic, delegateChiefRoleLogic, showAllianceLogic, kickFromAllianceLogic } = require('../../utils/genesisTrials/alliance');
+const { createAllianceLogic, inviteToAllianceLogic, disbandAllianceLogic, leaveAllianceLogic, delegateChiefRoleLogic, showAllianceLogic, kickFromAllianceLogic, pendingAllianceInviteLogic, acceptAllianceInviteLogic, declineAllianceInviteLogic } = require('../../utils/genesisTrials/alliance');
 
 /**
  * Creates an alliance for the user.
@@ -27,9 +27,10 @@ const createAlliance = async (message) => {
 };
 
 /**
- * Invites a user to the alliance.
+ * Gets called when a user invites another user to the alliance.
+ * Will be pending until the invitee accepts the invite.
  */
-const inviteToAlliance = async (message) => {
+const pendingAllianceInvite = async (message) => {
     try {
         const [hunt, inviteToAlliance, invitee] = message.content.split(' ');
 
@@ -38,13 +39,39 @@ const inviteToAlliance = async (message) => {
         const getInvitee = await server.members.fetch(invitee).catch((err) => {
             return {
                 status: 'error',
-                message: 'Invalid invitee.',
+                message: 'Invalid invitee ID.',
             };
         });
 
         const inviteeId = getInvitee.id;
 
-        return await inviteToAllianceLogic(message.author.id, inviteeId);
+        return await pendingAllianceInviteLogic(message.author.id, inviteeId);
+    } catch (err) {
+        throw err;
+    }
+};
+
+/**
+ * Accepts an alliance invite.
+ */
+const acceptAllianceInvite = async (message) => {
+    try {
+        const [hunt, acceptAllianceInvite, ...allianceName] = message.content.split(' ');
+
+        return await acceptAllianceInviteLogic(message.author.id, allianceName[0]);
+    } catch (err) {
+        throw err;
+    }
+};
+
+/**
+ * Declines an alliance invite.
+ */
+const declineAllianceInvite = async (message) => {
+    try {
+        const [hunt, declineAllianceInvite, ...allianceName] = message.content.split(' ');
+
+        return await declineAllianceInviteLogic(message.author.id, allianceName[0]);
     } catch (err) {
         throw err;
     }
@@ -134,7 +161,9 @@ const kickFromAlliance = async (message) => {
 
 module.exports = {
     createAlliance,
-    inviteToAlliance,
+    pendingAllianceInvite,
+    acceptAllianceInvite,
+    declineAllianceInvite,
     disbandAlliance,
     leaveAlliance,
     delegateChiefRole,

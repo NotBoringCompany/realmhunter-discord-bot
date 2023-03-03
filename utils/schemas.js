@@ -84,9 +84,33 @@ const AllianceSchema = new mongoose.Schema(
     },
 );
 
+const AlliancePendingInviteSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        inviterId: String,
+        inviteeId: String,
+        invitedTimestamp: Number,
+        inviteExpiryTimestamp: Number,
+        // pointer to alliance object via its object ID in RHDiscordAllianceData.
+        _p_alliance: String,
+    },
+    {
+        versionKey: false,
+    },
+);
+
 module.exports = {
     DiscordUserSchema,
     ContributionSchema,
     TagsSchema,
     AllianceSchema,
+    AlliancePendingInviteSchema,
 };

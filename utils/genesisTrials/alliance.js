@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { showAllianceEmbed } = require('../../embeds/genesisTrials/alliance');
 const { generateObjectId } = require('../cryptoUtils');
 const permissions = require('../dbPermissions');
-const { AllianceSchema, DiscordUserSchema } = require('../schemas');
+const { AllianceSchema, DiscordUserSchema, AlliancePendingInviteSchema } = require('../schemas');
 
 mongoose.connect(process.env.MONGODB_URI);
 
@@ -139,36 +139,34 @@ const createAllianceLogic = async (userId, allianceName) => {
 };
 
 /**
- * Called when an inviter invites an invitee to their alliance.
+ * Called when an inviter invites an invitee to their alliance. The invite will be pending until the invitee accepts or declines.
  */
-const inviteToAllianceLogic = async (inviterId, inviteeId) => {
+const pendingAllianceInviteLogic = async (inviterId, inviteeId) => {
     try {
-        // first, we check if the inviter is in an alliance.
+        // first, we check if inviter exists.
         const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
         const inviterQuery = await User.findOne({ userId: inviterId });
 
         const { _wperm, _rperm, _acl } = permissions(true, false);
 
-        // if query is empty, that means that the user doesn't exist yet and must create an alliance first.
+        // if inviterQuery is empty, then user doesn't exist (meaning the alliance doesn't exist). we throw an error.
         if (!inviterQuery) {
             return {
                 status: 'error',
                 message: 'You must create an alliance first.',
             };
-        // if query is not empty, user exists and we check if the user is in an alliance.
+        // if the query exists, we check if the user is in an alliance.
         } else {
             const inviterAlliancePointer = inviterQuery._p_alliance;
 
-            // if the pointer doesn't exist, that means that the user is not in an alliance yet. we throw an error.
+            // if the pointer is undefined, that means that the user is not in an alliance.
             if (!inviterAlliancePointer) {
                 return {
                     status: 'error',
                     message: 'You must create an alliance first.',
                 };
-            // otherwise (if the pointer exists), we will go ahead and do the next checks.
+            // if the pointer exists, we know that the user is in an alliance. we check if they're the chief.
             } else {
-                // only the chief can invite people to the alliance.
-                // we first check if the inviter is the chief.
                 const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
                 // split to get the alliance's object ID.
                 const allianceObjId = inviterAlliancePointer.split('$')[1];
@@ -179,32 +177,34 @@ const inviteToAllianceLogic = async (inviterId, inviteeId) => {
                 if (!allianceQuery) {
                     return {
                         status: 'error',
-                        message: 'Something went wrong. Please submit a ticket.',
+                        message: 'An error occurred. Please submit a ticket.',
                     };
-                // otherwise, we check if the inviter is the chief.
+                // if the alliance exists, we check if the user is the chief.
                 } else {
                     const role = allianceQuery.memberData.find((member) => member.userId === inviterId).role;
 
-                    // if the inviter is not the chief, we throw an error.
+                    // if the user is not the chief, we throw an error.
                     if (role !== 'chief') {
                         return {
                             status: 'error',
-                            message: 'Only the chief can invite people to the alliance.',
+                            message: 'Only the chief can invite members to the alliance.',
                         };
-                    // otherwise, we can go ahead do the next checks.
+                    // if the user is the chief, we check if the invitee is already in an alliance.
                     } else {
-                        // we then check if the invitee exists.
-                        const inviteeQuery = await User.findOne({ userId: inviteeId });
-                        // if the invitee doesn't exist, then we can go ahead and
-                        // 1. create the invitee's data
-                        // 2. add the invitee to the inviter's alliance.
-                        if (!inviteeQuery) {
-                            const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
-                            // split to get the alliance's object ID.
-                            const allianceObjId = inviterAlliancePointer.split('$')[1];
-                            const allianceQuery = await Alliance.findOne({ _id: allianceObjId });
+                        // we first check if the alliance already has 5 members. if it does, we throw an error.
+                        if (allianceQuery.memberData.length >= 5) {
+                            return {
+                                status: 'error',
+                                message: 'Alliance already has 5 members. You cannot invite more members.',
+                            };
+                        }
 
-                            // we now create the invitee's data.
+                        const inviteeQuery = await User.findOne({ userId: inviteeId });
+                        // if the invitee doesn't exist, then we will:
+                        // 1. create the invitee's data.
+                        // 2. add the pending invite to the `RHDiscordPendingAllianceInvites` database.
+
+                        if (!inviteeQuery) {
                             const NewUser = new User(
                                 {
                                     _id: generateObjectId(),
@@ -219,67 +219,234 @@ const inviteToAllianceLogic = async (inviterId, inviteeId) => {
                                     dailyTagsClaimed: false,
                                     dailyContributionTagsClaimed: false,
                                     timesDistributionTagsClaimed: 0,
-                                    // pointer to alliance via its object ID in RHDiscordAllianceData.
-                                    _p_alliance: inviterAlliancePointer,
+                                    _p_alliance: undefined,
                                 },
                             );
 
                             await NewUser.save();
 
-                            // once the invitee data is created, we add the invitee's data to the alliance.
-                            allianceQuery.memberData.push(
+                            // once the invitee data is created, we add the pending invite to the `RHDiscordPendingAllianceInvites` database.
+                            const PendingAllianceInvite = mongoose.model('PendingAllianceInviteData', AlliancePendingInviteSchema, 'RHDiscordPendingAllianceInvites');
+
+                            // we create the pending invite.
+                            const NewPendingInvite = new PendingAllianceInvite(
                                 {
-                                    userId: inviteeId,
-                                    role: 'member',
+                                    _id: generateObjectId(),
+                                    _created_at: Date.now(),
+                                    _updated_at: Date.now(),
+                                    _wperm: _wperm,
+                                    _rperm: _rperm,
+                                    _acl: _acl,
+                                    inviterId: inviterId,
+                                    inviteeId: inviteeId,
+                                    invitedTimestamp: Math.floor(new Date().getTime() / 1000),
+                                    // 1 day from now.
+                                    inviteExpiryTimestamp: Math.floor(new Date().getTime() / 1000) + 86400,
+                                    _p_alliance: inviterAlliancePointer,
                                 },
                             );
 
-                            await allianceQuery.save();
+                            await NewPendingInvite.save();
 
+                            // we return a success message.
                             return {
                                 status: 'success',
-                                message: 'Invitee successfully invited to alliance.',
+                                message: `<@${inviterId}> has invited <@${inviteeId}> to Alliance ${allianceQuery.allianceName}. They have 24 hours to accept the invite.`,
                             };
-                        // if invitee exists, we will check if the invitee is already in an alliance.
+                        // if the invitee exists, we check if they're in an alliance.
                         } else {
                             const inviteeAlliancePointer = inviteeQuery._p_alliance;
-                            // if the pointer doesn't exist, that means that the invitee is not in an alliance yet.
-                            // we can go ahead and add the invitee to the inviter's alliance.
+
+                            // if the invitee is not in an alliance, we first check if they have a similar pending invite.
                             if (!inviteeAlliancePointer) {
-                                // add the pointer to the invitee's data.
-                                inviteeQuery._p_alliance = inviterAlliancePointer;
+                                const PendingAllianceInvite = mongoose.model('PendingAllianceInviteData', AlliancePendingInviteSchema, 'RHDiscordPendingAllianceInvites');
+                                const pendingInviteQuery = await PendingAllianceInvite.findOne({ inviterId: inviterId, inviteeId: inviteeId, _p_alliance: inviterAlliancePointer });
 
-                                await inviteeQuery.save();
+                                // if such an invite doesn't exist, we create one.
+                                if (!pendingInviteQuery) {
+                                    const NewPendingInvite = new PendingAllianceInvite(
+                                        {
+                                            _id: generateObjectId(),
+                                            _created_at: Date.now(),
+                                            _updated_at: Date.now(),
+                                            _wperm: _wperm,
+                                            _rperm: _rperm,
+                                            _acl: _acl,
+                                            inviterId: inviterId,
+                                            inviteeId: inviteeId,
+                                            invitedTimestamp: Math.floor(new Date().getTime() / 1000),
+                                            // 1 day from now.
+                                            inviteExpiryTimestamp: Math.floor(new Date().getTime() / 1000) + 86400,
+                                            _p_alliance: inviterAlliancePointer,
+                                        },
+                                    );
 
-                                // then add the invitee to the alliance.
-                                const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
-                                // split to get the alliance's object ID.
-                                const allianceObjId = inviterAlliancePointer.split('$')[1];
-                                const allianceQuery = await Alliance.findOne({ _id: allianceObjId });
+                                    await NewPendingInvite.save();
 
-                                // once the invitee data is created, we add the invitee's data to the alliance.
-                                allianceQuery.memberData.push(
-                                    {
-                                        userId: inviteeId,
-                                        role: 'member',
-                                    },
-                                );
-
-                                await allianceQuery.save();
-
-                                return {
-                                    status: 'success',
-                                    message: 'Invitee successfully invited to alliance.',
-                                };
-                            // if the pointer exists, that means that the invitee is already in an alliance. we throw an error.
+                                    // we return a success message.
+                                    return {
+                                        status: 'success',
+                                        message: `<@${inviterId}> has invited <@${inviteeId}> to Alliance ${allianceQuery.allianceName}. They have 24 hours to accept the invite.`,
+                                    };
+                                // if such an invite exists, we throw an error.
+                                } else {
+                                    return {
+                                        status: 'error',
+                                        message: 'You have already invited this user to your alliance. Awaiting their response.',
+                                    };
+                                }
+                            // if the invitee is in an alliance, we throw an error.
                             } else {
                                 return {
                                     status: 'error',
-                                    message: 'Invitee is already in an alliance.',
+                                    message: 'This user is already in an alliance.',
                                 };
                             }
                         }
                     }
+                }
+            }
+        }
+    } catch (err) {
+        throw err;
+    }
+};
+
+/**
+ * Gets called when an invitee accepts an invite to join the alliance.
+ */
+const acceptAllianceInviteLogic = async (inviteeId, allianceName) => {
+    try {
+        // we first check if the invitee exists.
+        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+        const inviteeQuery = await User.findOne({ userId: inviteeId });
+
+        // if the invitee doesn't exist, then something is wrong.
+        // we request them to submit a ticket.
+        if (!inviteeQuery) {
+            return {
+                status: 'error',
+                message: 'Something went wrong. Please submit a ticket.',
+            };
+        // if they exist, we check if the invite is still valid.
+        } else {
+            // we need to query for the alliance via the name.
+            const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
+            const allianceQuery = await Alliance.findOne({ allianceName: allianceName });
+
+            // if alliance is not found, maybe the `allianceName` is wrong. return an error.
+            if (!allianceQuery) {
+                return {
+                    status: 'error',
+                    message: 'Alliance not found.',
+                };
+            // if the alliance exists, get the objectId of the alliance.
+            } else {
+                // we first check if the alliance already has 5 members. if they do, we throw an error.
+                if (allianceQuery.memberData.length >= 5) {
+                    return {
+                        status: 'error',
+                        message: 'Alliance is already full.',
+                    };
+                }
+
+                const objId = allianceQuery._id;
+                // get the pointer.
+                const alliancePointer = `${process.env.ALLIANCE_DB_NAME}$${objId}`;
+
+                // we query for the pending invite.
+                const PendingAllianceInvite = mongoose.model('PendingAllianceInviteData', AlliancePendingInviteSchema, 'RHDiscordPendingAllianceInvites');
+                const inviteQuery = await PendingAllianceInvite.findOne({ inviteeId: inviteeId, _p_alliance: alliancePointer });
+
+                // if the invite query is empty, then the invite is either invalid or expired.
+                if (!inviteQuery) {
+                    return {
+                        status: 'error',
+                        message: 'Invite is either invalid or expired.',
+                    };
+                // if the invite still exists, we will add the invitee to the alliance.
+                } else {
+                    allianceQuery.memberData.push(
+                        {
+                            userId: inviteeId,
+                            role: 'member',
+                        },
+                    );
+
+                    await allianceQuery.save();
+
+                    // update the pointer in the invitee's document.
+                    inviteeQuery._p_alliance = alliancePointer;
+
+                    await inviteeQuery.save();
+
+                    // we delete the invite.
+                    await inviteQuery.delete();
+
+                    return {
+                        status: 'success',
+                        message: `<@${inviteeId}> has joined Alliance ${allianceQuery.allianceName}.`,
+                    };
+                }
+            }
+        }
+    } catch (err) {
+        throw err;
+    }
+};
+
+/**
+ * Gets called when an invitee declines an invite to join the alliance.
+ */
+const declineAllianceInviteLogic = async (inviteeId, allianceName) => {
+    try {
+        // we first check if the invitee exists.
+        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+        const inviteeQuery = await User.findOne({ userId: inviteeId });
+
+        // if the invitee doesn't exist, then something is wrong.
+        // we request them to submit a ticket.
+        if (!inviteeQuery) {
+            return {
+                status: 'error',
+                message: 'Something went wrong. Please submit a ticket.',
+            };
+        // if they exist, we check if the invite is still valid.
+        } else {
+            // we need to query for the alliance via the name.
+            const Alliance = mongoose.model('AllianceData', AllianceSchema, 'RHDiscordAllianceData');
+            const allianceQuery = await Alliance.findOne({ allianceName: allianceName });
+
+            // if alliance is not found, maybe the `allianceName` is wrong. return an error.
+            if (!allianceQuery) {
+                return {
+                    status: 'error',
+                    message: 'Alliance not found.',
+                };
+            // if the alliance exists, we check for a few things.
+            } else {
+                const objId = allianceQuery._id;
+                // get the pointer.
+                const alliancePointer = `${process.env.ALLIANCE_DB_NAME}$${objId}`;
+
+                // we query for the pending invite.
+                const PendingAllianceInvite = mongoose.model('PendingAllianceInviteData', AlliancePendingInviteSchema, 'RHDiscordPendingAllianceInvites');
+                const inviteQuery = await PendingAllianceInvite.findOne({ inviteeId: inviteeId, _p_alliance: alliancePointer });
+
+                // if the invite query is empty, then the invite is either invalid or expired.
+                if (!inviteQuery) {
+                    return {
+                        status: 'error',
+                        message: 'Invite is either invalid or expired.',
+                    };
+                // if the invite still exists, we will delete the invite.
+                } else {
+                    await inviteQuery.delete();
+
+                    return {
+                        status: 'success',
+                        message: `<@${inviteeId}> has declined the invite to join Alliance ${allianceQuery.allianceName}.`,
+                    };
                 }
             }
         }
@@ -320,11 +487,12 @@ const disbandAllianceLogic = async (userId) => {
                 const allianceObjId = userAlliancePointer.split('$')[1];
                 const allianceQuery = await Alliance.findOne({ _id: allianceObjId });
 
-                // at this point, if the alliance doesn't exist, then there's no alliance to disband.
+                // at this point, if the alliance doesn't exist, then something is wrong.
+                // we request them to submit a ticket.
                 if (!allianceQuery) {
                     return {
                         status: 'error',
-                        message: 'You do not have an alliance to disband.',
+                        message: 'Something went wrong. Please submit a ticket.',
                     };
                 // if the alliance exists, we check if the user is the chief.
                 } else {
@@ -665,7 +833,8 @@ const kickFromAllianceLogic = async (userId, targetId) => {
                             // 2. remove the alliance's pointer from the user's _p_alliance field.
 
                             // remove the user from the alliance's memberData array.
-                            await Alliance.updateOne({ _id: allianceObjId }, { $pull: { memberData: { userId: targetId } } });
+                            console.log(targetId);
+                            await Alliance.updateOne({ _id: allianceObjId }, { $pull: { memberData: { userId: targetId } } })
 
                             // remove the alliance's pointer from the target's _p_alliance field.
                             const targetQuery = await User.findOne({ userId: targetId });
@@ -698,7 +867,9 @@ const kickFromAllianceLogic = async (userId, targetId) => {
 
 module.exports = {
     createAllianceLogic,
-    inviteToAllianceLogic,
+    pendingAllianceInviteLogic,
+    acceptAllianceInviteLogic,
+    declineAllianceInviteLogic,
     disbandAllianceLogic,
     leaveAllianceLogic,
     delegateChiefRoleLogic,
