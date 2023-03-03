@@ -70,7 +70,7 @@ client.on('messageCreate', async (message) => {
         await showRoleNotifEmbed(message).catch((err) => console.log(err));
     }
 
-    if (message.content.toLowerCase() === '!hunt claimtags') {
+    if (message.content.toLowerCase() === '!hunt collectcookies') {
         const { message: claimMessage } = await updateTagsClaimed(message).catch((err) => console.log(err));
         await message.channel.send(claimMessage);
     }
