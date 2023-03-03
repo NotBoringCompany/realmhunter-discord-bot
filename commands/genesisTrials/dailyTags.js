@@ -16,7 +16,7 @@ const showClaimDailyTagsEmbed = async (message) => {
                         {
                             type: 2,
                             style: 1,
-                            label: 'Claim your daily tags',
+                            label: 'Collect your daily dose of Stella\'s Cookies',
                             custom_id: 'claimDailyTagsButton',
                         },
                     ],

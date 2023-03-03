@@ -12,12 +12,12 @@ const checkTagsCollected = async (userId) => {
         if (!userQuery) {
             return {
                 status: 'error',
-                message: 'You have not collected any tags yet.',
+                message: 'You have not collected any cookies yet.',
             };
         } else {
             return {
                 status: 'success',
-                message: `You have collected ${userQuery.hunterTags} tags so far. Keep it up!`,
+                message: `You have collected ${userQuery.hunterTags} cookies so far. Stella will be proud!`,
             };
         }
     } catch (err) {

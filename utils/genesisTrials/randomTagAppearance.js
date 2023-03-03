@@ -116,7 +116,7 @@ const claimRandomTags = async (message) => {
         if (!claimable) {
             return {
                 status: 'error',
-                message: 'Tags have already been claimed by someone else. Please wait for the next distribution.',
+                message: 'Cookies have already been collected by someone else. Please wait for Stella to drop the next batch.',
             };
         }
 
@@ -168,7 +168,7 @@ const claimRandomTags = async (message) => {
 
         return {
             status: 'success',
-            message: `Congratulations ${message.author.tag}! You have successfully claimed 5 tags.`,
+            message: `Congratulations ${message.author.tag}! You have successfully collected 5 cookies.`,
         };
     } catch (err) {
         console.log({

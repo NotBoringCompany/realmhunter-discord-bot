@@ -45,7 +45,7 @@ const claimDailyTagsLogic = async (interaction) => {
 
             return {
                 status: 'success',
-                message: `You have successfully claimed ${claimableTags} tags.`,
+                message: `You have successfully collected ${claimableTags} cookies!`,
             };
         // if user exists, we update their entry if they haven't claimed their daily tags.
         } else {
@@ -53,7 +53,7 @@ const claimDailyTagsLogic = async (interaction) => {
             if (userQuery.dailyTagsClaimed) {
                 return {
                     status: 'error',
-                    message: 'You have already claimed your daily tags.',
+                    message: 'You have already collected your daily dose of cookies.',
                 };
             // otherwise, we update their entry.
             } else {
@@ -69,7 +69,7 @@ const claimDailyTagsLogic = async (interaction) => {
 
                 return {
                     status: 'success',
-                    message: `You have successfully claimed ${claimableTags} tags.`,
+                    message: `You have successfully collected ${claimableTags} cookies!`,
                 };
             }
         }

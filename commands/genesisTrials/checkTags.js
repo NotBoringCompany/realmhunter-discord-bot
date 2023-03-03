@@ -11,7 +11,7 @@ const showCheckTagsCollectedEmbed = async (message) => {
                         {
                             type: 2,
                             style: 1,
-                            label: 'Check collected tags',
+                            label: 'Check collected cookies',
                             custom_id: 'checkTagsCollectedButton',
                         },
                     ],
