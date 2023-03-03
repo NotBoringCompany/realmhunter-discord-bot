@@ -21,7 +21,10 @@ const checkTagsCollected = async (userId) => {
             };
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'checkTagsCollected',
+            errorMessage: err.message,
+        });
     }
 };
 

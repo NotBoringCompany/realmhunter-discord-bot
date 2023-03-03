@@ -39,7 +39,10 @@ const giveRole = async (interaction, role) => {
             message: `You now have the ${roleToGive.name} role!`,
         };
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'giveRole',
+            errorMessage: err.message,
+        });
     }
 };
 

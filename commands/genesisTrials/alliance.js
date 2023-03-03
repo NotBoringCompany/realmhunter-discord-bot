@@ -22,7 +22,10 @@ const createAlliance = async (message) => {
             return await createAllianceLogic(message.author.id, allianceName[0]);
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'createAlliance',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -47,7 +50,10 @@ const pendingAllianceInvite = async (message) => {
 
         return await pendingAllianceInviteLogic(message.author.id, inviteeId);
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'pendingAllianceInvite',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -58,7 +64,10 @@ const showInviterPendingInvites = async (client, message) => {
     try {
         return await showInviterPendingInvitesLogic(client, message.author.id);
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'showInviterPendingInvites',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -69,7 +78,10 @@ const showInviteePendingInvites = async (client, message) => {
     try {
         return await showInviteePendingInvitesLogic(client, message.author.id);
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'showInviteePendingInvites',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -93,7 +105,10 @@ const rescindAllianceInvite = async (message) => {
 
         return await rescindPendingInviteLogic(message.author.id, inviteeId);
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'rescindAllianceInvite',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -106,7 +121,10 @@ const acceptAllianceInvite = async (message) => {
 
         return await acceptAllianceInviteLogic(message.author.id, allianceName[0]);
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'acceptAllianceInvite',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -119,7 +137,10 @@ const declineAllianceInvite = async (message) => {
 
         return await declineAllianceInviteLogic(message.author.id, allianceName[0]);
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'declineAllianceInvite',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -130,7 +151,10 @@ const disbandAlliance = async (message) => {
     try {
         return await disbandAllianceLogic(message.author.id);
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'disbandAllianceInvite',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -141,7 +165,10 @@ const leaveAlliance = async (message) => {
     try {
         return await leaveAllianceLogic(message.author.id);
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'leaveAlliance',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -165,7 +192,10 @@ const delegateChiefRole = async (message) => {
 
         return await delegateChiefRoleLogic(message.author.id, delegateeId);
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'delegateChiefRole',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -177,7 +207,10 @@ const showAlliance = async (client, message) => {
         const [hunt, showAlliance, ...allianceName] = message.content.split(' ');
         return await showAllianceLogic(client, allianceName[0]);
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'showAlliance',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -188,10 +221,16 @@ const showOwnAlliance = async (client, message) => {
     try {
         return await showOwnAllianceLogic(client, message.author.id);
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'showOwnAlliance',
+            errorMessage: err.message,
+        });
     }
-}
+};
 
+/**
+ * Kicks a user from the alliance.
+ */
 const kickFromAlliance = async (message) => {
     try {
         const [hunt, kickFromAlliance, userToKick] = message.content.split(' ');
@@ -212,7 +251,10 @@ const kickFromAlliance = async (message) => {
 
         return await kickFromAllianceLogic(message.author.id, userToKickId);
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'kickFromAlliance',
+            errorMessage: err.message,
+        });
     }
 };
 

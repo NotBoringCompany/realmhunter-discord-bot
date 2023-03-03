@@ -24,7 +24,10 @@ const showClaimDailyTagsEmbed = async (message) => {
             ],
         });
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'showClaimDailyTagsEmbed',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -36,7 +39,10 @@ const claimDailyTags = async (interaction) => {
     try {
         return await claimDailyTagsLogic(interaction);
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'claimDailyTags',
+            errorMessage: err.message,
+        });
     }
 };
 

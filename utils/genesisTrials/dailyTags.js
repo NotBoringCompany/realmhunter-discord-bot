@@ -74,7 +74,10 @@ const claimDailyTagsLogic = async (interaction) => {
             }
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'claimDailyTagsLogic',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -136,7 +139,10 @@ const restartDailyTagsAllowance = async () => {
             timezone: 'Europe/London',
         });
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'restartDailyTagsAllowance',
+            errorMessage: err.message,
+        });
     }
 };
 

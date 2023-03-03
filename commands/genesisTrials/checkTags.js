@@ -19,7 +19,10 @@ const showCheckTagsCollectedEmbed = async (message) => {
             ],
         });
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'showCheckTagsCollectedEmbed',
+            errorMessage: err.message,
+        });
     }
 };
 

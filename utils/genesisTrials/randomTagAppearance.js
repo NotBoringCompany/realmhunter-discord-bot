@@ -23,7 +23,10 @@ const checkPrevTagsAppearance = async () => {
 
         return tagsQuery.previousAppearance;
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'checkPrevTagsAppearance',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -65,7 +68,10 @@ const updateTagsAppeared = async () => {
             await tagsQuery.save();
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'updateTagsAppeared',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -92,7 +98,10 @@ const updateTagsClaimed = async (message) => {
             message: getMessage,
         };
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'updateTagsClaimed',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -162,7 +171,10 @@ const claimRandomTags = async (message) => {
             message: `Congratulations ${message.author.tag}! You have successfully claimed 5 tags.`,
         };
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'claimRandomTags',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -175,7 +187,10 @@ const distributeTags = async (client) => {
         await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send({ embeds: [randomTagAppearanceEmbed] });
         await updateTagsAppeared();
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'distributeTags',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -193,7 +208,10 @@ const checkTagDistributionClaimable = async () => {
             return false;
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'checkTagDistributionClaimable',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -211,7 +229,10 @@ const nextTagDistributionTimestamp = async () => {
             return 0;
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'nextTagDistributionTimestamp',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -241,7 +262,10 @@ const nextTagDistribution = async () => {
 
         await tagsQuery.save();
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'nextTagDistribution',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -291,7 +315,10 @@ const distributeTagScheduler = async (client) => {
             }
         });
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'distributeTagScheduler',
+            errorMessage: err.message,
+        });
     }
 };
 

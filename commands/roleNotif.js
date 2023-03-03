@@ -13,7 +13,10 @@ const showRoleNotifEmbed = async (message) => {
             ],
         });
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'showRoleNotifEmbed',
+            errorMessage: err.message,
+        });
     }
 };
 

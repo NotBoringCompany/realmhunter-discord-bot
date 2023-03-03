@@ -23,7 +23,10 @@ const showSubmitContributionEmbed = async (message) => {
             ],
         });
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'showSubmitContributionEmbed',
+            errorMessage: err.message,
+        });
     }
 };
 

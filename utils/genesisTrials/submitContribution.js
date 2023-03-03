@@ -88,7 +88,10 @@ const submitContributionToDB = async (userId, url) => {
             }
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'submitContributionToDB',
+            errorMessage: err.message,
+        });
     }
 };
 

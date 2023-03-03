@@ -135,7 +135,10 @@ const createAllianceLogic = async (userId, allianceName) => {
             };
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'createAllianceLogic',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -317,7 +320,10 @@ const pendingAllianceInviteLogic = async (inviterId, inviteeId) => {
             }
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'pendingAllianceInviteLogic',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -399,7 +405,10 @@ const showInviterPendingInvitesLogic = async (client, inviterId) => {
             }
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'showInviterPendingInvitesLogic',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -474,7 +483,10 @@ const showInviteePendingInvitesLogic = async (client, inviteeId) => {
             }
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'showInviteePendingInvitesLogic',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -526,7 +538,10 @@ const rescindPendingInviteLogic = async (inviterId, inviteeId) => {
             }
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'rescindPendingInvitesLogic',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -609,7 +624,10 @@ const acceptAllianceInviteLogic = async (inviteeId, allianceName) => {
             }
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'acceptAllianceInviteLogic',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -669,7 +687,10 @@ const declineAllianceInviteLogic = async (inviteeId, allianceName) => {
             }
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'declineAllianceInviteLogic',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -757,7 +778,10 @@ const disbandAllianceLogic = async (userId) => {
             }
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'disbandAllianceLogic',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -843,7 +867,10 @@ const leaveAllianceLogic = async (userId) => {
             }
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'leaveAllianceLogic',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -934,7 +961,10 @@ const delegateChiefRoleLogic = async (userId, newChiefId) => {
             }
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'delegateChiefRoleLogic',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -981,7 +1011,10 @@ const showAllianceLogic = async (client, allianceName) => {
             message: 'Successfully retrieved alliance data.',
         };
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'showAllianceLogic',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -1054,7 +1087,10 @@ const showOwnAllianceLogic = async (client, userId) => {
             }
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'showOwnAllianceLogic',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -1152,7 +1188,10 @@ const kickFromAllianceLogic = async (userId, targetId) => {
             }
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'kickFromAllianceLogic',
+            errorMessage: err.message,
+        });
     }
 };
 
@@ -1184,7 +1223,10 @@ const removeExpiredInvitesScheduler = async () => {
             }
         });
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'removeExpiredInvitesScheduler',
+            errorMessage: err.message,
+        });
     }
 };
 
