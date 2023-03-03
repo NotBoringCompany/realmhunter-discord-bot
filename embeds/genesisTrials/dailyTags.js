@@ -22,7 +22,7 @@ const claimDailyTagsEmbed = new EmbedBuilder()
             value: 'We cannot disclaim everything right now. The anticipation will build up and you won\'t want to skip this ;)',
         },
     )
-    .setImage('https://i.imgur.com/fgTj7Fy.png')
+    .setImage('https://i.imgur.com/H63OH2D.png')
     .setFooter({ text: 'Collect your cookies now by pressing the button below.' });
 
 module.exports = {
