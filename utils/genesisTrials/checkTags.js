@@ -17,7 +17,7 @@ const checkTagsCollected = async (userId) => {
         } else {
             return {
                 status: 'success',
-                message: `You have collected ${userQuery.hunterTags} cookies so far. Stella will be proud!`,
+                message: `You have collected ${userQuery.hunterTags} cookies so far. Keep it up and the Gatekeeper may be happy.`,
             };
         }
     } catch (err) {
