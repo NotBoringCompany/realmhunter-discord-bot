@@ -45,12 +45,9 @@ mongoose.connect(process.env.MONGODB_URI);
 //     }
 // };
 
-const check = () => {
-    const str = '!hunt createAlliance asd asdasdasd';
-    console.log(str.startsWith('!hunt createAlliance'));
-    const [first, second, ...all] = str.split(' ');
-    const name = all.join(' ');
-    console.log(name.length);
+const validate = () => {
+    const valid = cron.validate('59 * * * *');
+    console.log(valid);
 }
 
-check();
+validate();

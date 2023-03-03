@@ -18,6 +18,7 @@ const { showRoleNotifEmbed } = require('./commands/roleNotif');
 const { giveRole } = require('./utils/discord/roleNotif');
 const { createAlliance, inviteToAlliance, disbandAlliance, leaveAlliance, delegateChiefRole, showAlliance, kickFromAlliance, pendingAllianceInvite, acceptAllianceInvite, declineAllianceInvite, rescindAllianceInvite, showInviterPendingInvites, showInviteePendingInvites, showOwnAlliance } = require('./commands/genesisTrials/alliance');
 const { showInviterPendingInvitesLogic, removeExpiredInvitesScheduler } = require('./utils/genesisTrials/alliance');
+const { showTagsLeaderboard, tagsLeaderboardScheduler } = require('./utils/genesisTrials/tagsLeaderboard');
 
 const client = new Client({
     intents: [
@@ -63,6 +64,12 @@ client.on('messageCreate', async (message) => {
     if (message.content.toLowerCase() === '!showchecktagscollected') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         await showCheckTagsCollectedEmbed(message).catch((err) => console.log(err));
+    }
+
+    if (message.content.toLowerCase() === '!showtagsleaderboard') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        const { embed } = await showTagsLeaderboard(client).catch((err) => console.log(err));
+        await message.channel.send({ embeds: [embed] });
     }
 
     if (message.content.toLowerCase() === '!showrolenotifembed') {
@@ -214,6 +221,7 @@ client.on('ready', async c => {
     await distributeTagScheduler(client);
     await restartDailyTagsAllowance();
     await removeExpiredInvitesScheduler();
+    await tagsLeaderboardScheduler('1081192769860669450', client);
 
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,
