@@ -19,14 +19,14 @@ const permissions = (read, write) => {
     } else if (_wperm.length === 0 && _rperm.length !== 0) {
         _acl = {
             '*': {
-                'w': true,
+                'r': true,
             },
         };
     // write only
     } else if (_wperm.length !== 0 && _rperm.length === 0) {
         _acl = {
             '*': {
-                'r': true,
+                'w': true,
             },
         };
     // master key only
