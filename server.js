@@ -70,6 +70,11 @@ for (const file of commandFiles) {
 
 // MESSAGE CREATE EVENT LISTENER
 client.on('messageCreate', async (message) => {
+    if (message.content.toLowerCase() === '!testbot') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await message.channel.send('Bot is working!');
+    }
+
     if (message.content.toLowerCase() === '!hunt unrewardedcontributions') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         const { status, message: contributionsMessage } = await retrieveUnrewardedContributions(message).catch((err) => console.log(err));
@@ -287,7 +292,7 @@ client.on('ready', async c => {
 
     mongoose.connect(process.env.MONGODB_URI);
 
-    //CRON JOBS (SCHEDULERS)
+    // CRON JOBS (SCHEDULERS)
     nextTagDistributionScheduler.start();
     await distributeTagScheduler(client);
     await restartDailyTagsAllowance();
