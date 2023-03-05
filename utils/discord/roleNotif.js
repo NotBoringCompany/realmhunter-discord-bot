@@ -13,7 +13,7 @@ const notifRoles = () => {
         {
             type: 2,
             style: 1,
-            label: 'Daily Tags Reset Notif',
+            label: 'Daily Cookies Reset Notif',
             custom_id: 'dailyTagsResetNotifButton',
         },
     ];
@@ -41,7 +41,7 @@ const giveRole = async (interaction, role) => {
     } catch (err) {
         console.log({
             errorFrom: 'giveRole',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };

@@ -17,7 +17,7 @@ const submitContributionEmbed = new EmbedBuilder()
         {
             name: '__Can I submit multiple works daily?__',
             value: 'You can submit multiple **DIFFERENT WORKS** daily. Refrain from submitting the same work multiple times. They won\'t count. \n\
-            There is also only a limit of **10 COOKIES** we can reward you daily for EACH work. For instance, if you submit 5 works, we will reward you with **10 Hunter Tags** each day for 5 days.',
+            There is also only a limit of **10 COOKIES** we can reward you daily for EACH work. For instance, if you submit 5 works, we will reward you with **10 Cookies** each day for 5 days.',
         },
     );
 

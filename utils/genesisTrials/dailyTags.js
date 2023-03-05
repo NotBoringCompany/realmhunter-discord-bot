@@ -1,4 +1,3 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
 const { generateObjectId } = require('../cryptoUtils');
 const permissions = require('../dbPermissions');
@@ -74,7 +73,7 @@ const claimDailyTagsLogic = async (interaction) => {
     } catch (err) {
         console.log({
             errorFrom: 'claimDailyTagsLogic',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -144,7 +143,7 @@ const restartDailyTagsAllowance = async () => {
     } catch (err) {
         console.log({
             errorFrom: 'restartDailyTagsAllowance',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };

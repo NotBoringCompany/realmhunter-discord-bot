@@ -1,4 +1,3 @@
-require('dotenv').config();
 const cron = require('node-cron');
 const { nextTagDistributionTimestamp } = require('../utils/genesisTrials/randomTagAppearance');
 const mongoose = require('mongoose');

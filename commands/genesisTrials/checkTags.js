@@ -21,7 +21,7 @@ const showCheckTagsCollectedEmbed = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'showCheckTagsCollectedEmbed',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };

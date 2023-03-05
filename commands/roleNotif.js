@@ -15,7 +15,7 @@ const showRoleNotifEmbed = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'showRoleNotifEmbed',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };

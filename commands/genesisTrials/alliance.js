@@ -1,4 +1,18 @@
-const { createAllianceLogic, inviteToAllianceLogic, disbandAllianceLogic, leaveAllianceLogic, delegateChiefRoleLogic, showAllianceLogic, kickFromAllianceLogic, pendingAllianceInviteLogic, acceptAllianceInviteLogic, declineAllianceInviteLogic, rescindPendingInviteLogic, showInviterPendingInvitesLogic, showInviteePendingInvitesLogic, showOwnAllianceLogic } = require('../../utils/genesisTrials/alliance');
+const {
+    createAllianceLogic,
+    disbandAllianceLogic,
+    leaveAllianceLogic,
+    delegateChiefRoleLogic,
+    showAllianceLogic,
+    kickFromAllianceLogic,
+    pendingAllianceInviteLogic,
+    acceptAllianceInviteLogic,
+    declineAllianceInviteLogic,
+    rescindPendingInviteLogic,
+    showInviterPendingInvitesLogic,
+    showInviteePendingInvitesLogic,
+    showOwnAllianceLogic,
+} = require('../../utils/genesisTrials/alliance');
 
 /**
  * Creates an alliance for the user.
@@ -24,7 +38,7 @@ const createAlliance = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'createAlliance',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -52,7 +66,7 @@ const pendingAllianceInvite = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'pendingAllianceInvite',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -66,7 +80,7 @@ const showInviterPendingInvites = async (client, message) => {
     } catch (err) {
         console.log({
             errorFrom: 'showInviterPendingInvites',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -80,7 +94,7 @@ const showInviteePendingInvites = async (client, message) => {
     } catch (err) {
         console.log({
             errorFrom: 'showInviteePendingInvites',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -107,7 +121,7 @@ const rescindAllianceInvite = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'rescindAllianceInvite',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -123,7 +137,7 @@ const acceptAllianceInvite = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'acceptAllianceInvite',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -139,7 +153,7 @@ const declineAllianceInvite = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'declineAllianceInvite',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -153,7 +167,7 @@ const disbandAlliance = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'disbandAllianceInvite',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -167,7 +181,7 @@ const leaveAlliance = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'leaveAlliance',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -194,7 +208,7 @@ const delegateChiefRole = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'delegateChiefRole',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -209,7 +223,7 @@ const showAlliance = async (client, message) => {
     } catch (err) {
         console.log({
             errorFrom: 'showAlliance',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -223,7 +237,7 @@ const showOwnAlliance = async (client, message) => {
     } catch (err) {
         console.log({
             errorFrom: 'showOwnAlliance',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -253,7 +267,7 @@ const kickFromAlliance = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'kickFromAlliance',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };

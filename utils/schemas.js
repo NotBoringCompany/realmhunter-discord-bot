@@ -16,8 +16,11 @@ const DiscordUserSchema = new mongoose.Schema(
         realmPoints: Number,
         dailyTagsClaimed: Boolean,
         timesDistributionTagsClaimed: Number,
+        dailyContributionTagsClaimed: Boolean,
+        contributionTagsEarned: Number,
         // pointer to alliance object via its object ID in RHDiscordAllianceData.
         _p_alliance: String,
+        nation: String,
     },
     {
         versionKey: false,

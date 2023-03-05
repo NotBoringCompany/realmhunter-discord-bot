@@ -1,4 +1,3 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
 const Moralis = require('moralis-v1/node');
 const { parseJSON } = require('../utils/jsonParser');

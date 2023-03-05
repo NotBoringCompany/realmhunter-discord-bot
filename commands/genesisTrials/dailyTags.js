@@ -1,7 +1,6 @@
 const { claimDailyTagsEmbed } = require('../../embeds/genesisTrials/dailyTags');
 const { claimDailyTagsLogic } = require('../../utils/genesisTrials/dailyTags');
 
-
 /**
  * Show the embed for claiming daily tags.
  */
@@ -26,7 +25,7 @@ const showClaimDailyTagsEmbed = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'showClaimDailyTagsEmbed',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -41,7 +40,7 @@ const claimDailyTags = async (interaction) => {
     } catch (err) {
         console.log({
             errorFrom: 'claimDailyTags',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };

@@ -1,4 +1,3 @@
-require('dotenv').config();
 const cron = require('node-cron');
 const mongoose = require('mongoose');
 const { TagsSchema, DiscordUserSchema } = require('../schemas');
@@ -23,7 +22,7 @@ const checkPrevTagsAppearance = async () => {
     } catch (err) {
         console.log({
             errorFrom: 'checkPrevTagsAppearance',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -68,7 +67,7 @@ const updateTagsAppeared = async () => {
     } catch (err) {
         console.log({
             errorFrom: 'updateTagsAppeared',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -98,7 +97,7 @@ const updateTagsClaimed = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'updateTagsClaimed',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -171,7 +170,7 @@ const claimRandomTags = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'claimRandomTags',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -187,7 +186,7 @@ const distributeTags = async (client) => {
     } catch (err) {
         console.log({
             errorFrom: 'distributeTags',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -208,7 +207,7 @@ const checkTagDistributionClaimable = async () => {
     } catch (err) {
         console.log({
             errorFrom: 'checkTagDistributionClaimable',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -229,7 +228,7 @@ const nextTagDistributionTimestamp = async () => {
     } catch (err) {
         console.log({
             errorFrom: 'nextTagDistributionTimestamp',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -262,7 +261,7 @@ const nextTagDistribution = async () => {
     } catch (err) {
         console.log({
             errorFrom: 'nextTagDistribution',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -315,7 +314,7 @@ const distributeTagScheduler = async (client) => {
     } catch (err) {
         console.log({
             errorFrom: 'distributeTagScheduler',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
