@@ -16,7 +16,21 @@ const { checkTagsCollected } = require('./utils/genesisTrials/checkTags');
 const { showCheckTagsCollected, showCheckTagsCollectedEmbed } = require('./commands/genesisTrials/checkTags');
 const { showRoleNotifEmbed } = require('./commands/roleNotif');
 const { giveRole } = require('./utils/discord/roleNotif');
-const { createAlliance, inviteToAlliance, disbandAlliance, leaveAlliance, delegateChiefRole, showAlliance, kickFromAlliance, pendingAllianceInvite, acceptAllianceInvite, declineAllianceInvite, rescindAllianceInvite, showInviterPendingInvites, showInviteePendingInvites, showOwnAlliance } = require('./commands/genesisTrials/alliance');
+const { 
+    createAlliance,
+    disbandAlliance,
+    leaveAlliance,
+    delegateChiefRole,
+    showAlliance,
+    kickFromAlliance,
+    pendingAllianceInvite,
+    acceptAllianceInvite,
+    declineAllianceInvite,
+    rescindAllianceInvite,
+    showInviterPendingInvites,
+    showInviteePendingInvites,
+    showOwnAlliance 
+} = require('./commands/genesisTrials/alliance');
 const { showInviterPendingInvitesLogic, removeExpiredInvitesScheduler } = require('./utils/genesisTrials/alliance');
 const { showTagsLeaderboard, tagsLeaderboardScheduler } = require('./utils/genesisTrials/tagsLeaderboard');
 const { showPartOneInfoEmbed } = require('./commands/genesisTrials/helpinfo');

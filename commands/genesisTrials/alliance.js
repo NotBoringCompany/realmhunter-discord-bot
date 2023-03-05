@@ -1,4 +1,18 @@
-const { createAllianceLogic, inviteToAllianceLogic, disbandAllianceLogic, leaveAllianceLogic, delegateChiefRoleLogic, showAllianceLogic, kickFromAllianceLogic, pendingAllianceInviteLogic, acceptAllianceInviteLogic, declineAllianceInviteLogic, rescindPendingInviteLogic, showInviterPendingInvitesLogic, showInviteePendingInvitesLogic, showOwnAllianceLogic } = require('../../utils/genesisTrials/alliance');
+const {
+    createAllianceLogic,
+    disbandAllianceLogic,
+    leaveAllianceLogic,
+    delegateChiefRoleLogic,
+    showAllianceLogic,
+    kickFromAllianceLogic,
+    pendingAllianceInviteLogic,
+    acceptAllianceInviteLogic,
+    declineAllianceInviteLogic,
+    rescindPendingInviteLogic,
+    showInviterPendingInvitesLogic,
+    showInviteePendingInvitesLogic,
+    showOwnAllianceLogic,
+} = require('../../utils/genesisTrials/alliance');
 
 /**
  * Creates an alliance for the user.
