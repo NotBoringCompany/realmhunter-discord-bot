@@ -9,8 +9,8 @@ const tagsLeaderboardLogic = async (client) => {
     try {
         // we query the users database and get their userId and tags collected so far.
         const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
-        // sort by hunterTags in descending order and limit to 100 users.
-        const userQuery = await User.find({}).sort({ hunterTags: -1 }).limit(100);
+        // sort by hunterTags in descending order and limit to 25 users (limit for amount of fields on a discord embed.)
+        const userQuery = await User.find({}).sort({ hunterTags: -1 }).limit(25);
 
         // if no users yet, we return an empty embed.
         if (!userQuery) {
