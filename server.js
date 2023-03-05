@@ -287,12 +287,12 @@ client.on('ready', async c => {
 
     mongoose.connect(process.env.MONGODB_URI);
 
-    // //CRON JOBS (SCHEDULERS)
-    // nextTagDistributionScheduler.start();
-    // await distributeTagScheduler(client);
-    // await restartDailyTagsAllowance();
-    // await removeExpiredInvitesScheduler();
-    // await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
+    //CRON JOBS (SCHEDULERS)
+    nextTagDistributionScheduler.start();
+    await distributeTagScheduler(client);
+    await restartDailyTagsAllowance();
+    await removeExpiredInvitesScheduler();
+    await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
 
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,
