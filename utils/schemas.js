@@ -20,7 +20,7 @@ const DiscordUserSchema = new mongoose.Schema(
         contributionTagsEarned: Number,
         // pointer to alliance object via its object ID in RHDiscordAllianceData.
         _p_alliance: String,
-        nation: String,
+        _p_nation: String,
     },
     {
         versionKey: false,
@@ -110,10 +110,32 @@ const AlliancePendingInviteSchema = new mongoose.Schema(
     },
 );
 
+const NationsSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        nation: String,
+        members: Array,
+        tagsStolen: Number,
+        tagsEarned: Number,
+    },
+    {
+        versionKey: false,
+    },
+);
+
 module.exports = {
     DiscordUserSchema,
     ContributionSchema,
     TagsSchema,
     AllianceSchema,
     AlliancePendingInviteSchema,
+    NationsSchema,
 };
