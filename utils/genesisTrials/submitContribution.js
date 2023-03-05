@@ -90,7 +90,7 @@ const submitContributionToDB = async (userId, url) => {
     } catch (err) {
         console.log({
             errorFrom: 'submitContributionToDB',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };

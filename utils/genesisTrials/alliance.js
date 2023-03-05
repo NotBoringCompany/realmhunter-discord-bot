@@ -135,7 +135,7 @@ const createAllianceLogic = async (userId, allianceName) => {
     } catch (err) {
         console.log({
             errorFrom: 'createAllianceLogic',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -320,7 +320,7 @@ const pendingAllianceInviteLogic = async (inviterId, inviteeId) => {
     } catch (err) {
         console.log({
             errorFrom: 'pendingAllianceInviteLogic',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -405,7 +405,7 @@ const showInviterPendingInvitesLogic = async (client, inviterId) => {
     } catch (err) {
         console.log({
             errorFrom: 'showInviterPendingInvitesLogic',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -483,7 +483,7 @@ const showInviteePendingInvitesLogic = async (client, inviteeId) => {
     } catch (err) {
         console.log({
             errorFrom: 'showInviteePendingInvitesLogic',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -538,7 +538,7 @@ const rescindPendingInviteLogic = async (inviterId, inviteeId) => {
     } catch (err) {
         console.log({
             errorFrom: 'rescindPendingInvitesLogic',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -624,7 +624,7 @@ const acceptAllianceInviteLogic = async (inviteeId, allianceName) => {
     } catch (err) {
         console.log({
             errorFrom: 'acceptAllianceInviteLogic',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -687,7 +687,7 @@ const declineAllianceInviteLogic = async (inviteeId, allianceName) => {
     } catch (err) {
         console.log({
             errorFrom: 'declineAllianceInviteLogic',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -778,7 +778,7 @@ const disbandAllianceLogic = async (userId) => {
     } catch (err) {
         console.log({
             errorFrom: 'disbandAllianceLogic',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -867,7 +867,7 @@ const leaveAllianceLogic = async (userId) => {
     } catch (err) {
         console.log({
             errorFrom: 'leaveAllianceLogic',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -961,7 +961,7 @@ const delegateChiefRoleLogic = async (userId, newChiefId) => {
     } catch (err) {
         console.log({
             errorFrom: 'delegateChiefRoleLogic',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -1011,7 +1011,7 @@ const showAllianceLogic = async (client, allianceName) => {
     } catch (err) {
         console.log({
             errorFrom: 'showAllianceLogic',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -1087,7 +1087,7 @@ const showOwnAllianceLogic = async (client, userId) => {
     } catch (err) {
         console.log({
             errorFrom: 'showOwnAllianceLogic',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -1188,7 +1188,7 @@ const kickFromAllianceLogic = async (userId, targetId) => {
     } catch (err) {
         console.log({
             errorFrom: 'kickFromAllianceLogic',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
@@ -1223,7 +1223,7 @@ const removeExpiredInvitesScheduler = async () => {
     } catch (err) {
         console.log({
             errorFrom: 'removeExpiredInvitesScheduler',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };

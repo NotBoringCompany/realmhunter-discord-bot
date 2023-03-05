@@ -25,7 +25,7 @@ const showSubmitContributionEmbed = async (message) => {
     } catch (err) {
         console.log({
             errorFrom: 'showSubmitContributionEmbed',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };

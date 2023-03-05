@@ -23,7 +23,7 @@ const checkTagsCollected = async (userId) => {
     } catch (err) {
         console.log({
             errorFrom: 'checkTagsCollected',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };

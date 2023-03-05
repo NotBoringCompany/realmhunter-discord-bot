@@ -41,7 +41,7 @@ const giveRole = async (interaction, role) => {
     } catch (err) {
         console.log({
             errorFrom: 'giveRole',
-            errorMessage: err.message,
+            errorMessage: err,
         });
     }
 };
