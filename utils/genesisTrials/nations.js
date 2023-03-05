@@ -157,8 +157,6 @@ const giveNationRole = async (interaction, role) => {
         const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
         const nationQuery = await Nation.findOne({ nation: roleToGive.name });
 
-        console.log(nationQuery);
-
         // if nation isn't found, something went wrong.
         // we request them to submit a ticket.
         if (!nationQuery) {
