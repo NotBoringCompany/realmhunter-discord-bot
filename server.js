@@ -35,6 +35,9 @@ const { showInviterPendingInvitesLogic, removeExpiredInvitesScheduler } = requir
 const { showTagsLeaderboard, tagsLeaderboardScheduler } = require('./utils/genesisTrials/tagsLeaderboard');
 const { showPartOneInfoEmbed } = require('./commands/genesisTrials/helpinfo');
 const { retrieveUnrewardedContributions, rewardContribution } = require('./commands/genesisTrials/rewardContributions');
+const { showNationRoleEmbed } = require('./commands/genesisTrials/nations');
+const { createRole } = require('./commands/createRoles');
+const { nationButtonInteraction } = require('./interactions/buttons/nationRoles');
 
 const client = new Client({
     intents: [
@@ -78,8 +81,26 @@ client.on('messageCreate', async (message) => {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         const { status, message: contributionsMessage } = await rewardContribution(message).catch((err) => console.log(err));
 
-        await message.channel.send(contributionsMessage);
+        // if there's an error status, send the message in the channel where the command was sent
+        if (status === 'error') {
+            await message.channel.send(contributionsMessage);
+        // otherwise, send it to the #rewarded-contributions channel
+        } else {
+            await client.channels.cache.get(process.env.REWARDED_CONTRIBUTIONS_CHANNELID).send(contributionsMessage);
+        }
     }
+
+    if (message.content.toLowerCase() === '!shownationsroleembed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showNationRoleEmbed(message).catch((err) => console.log(err));
+    }
+
+    if (message.content.toLowerCase().startsWith('!createrole')) {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        const { status, message: roleMessage } = await createRole(message).catch((err) => console.log(err));
+        await message.channel.send(roleMessage);
+    }
+
     // if (message.content.toLowerCase() === '!testbothere') {
     //     if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
     //     await message.channel.send('I\'m here!');
@@ -216,6 +237,9 @@ client.on('messageCreate', async (message) => {
 
 // INTERACTION CREATE EVENT LISTENER
 client.on('interactionCreate', async (interaction) => {
+    if (interaction.isButton()) {
+        await nationButtonInteraction(interaction);
+    }
     // // button interactions
     // if (interaction.isButton()) {
     //     // when claim daily tags button is clicked. will run the `claimDailyTags` function to check if the user can claim their daily tags.

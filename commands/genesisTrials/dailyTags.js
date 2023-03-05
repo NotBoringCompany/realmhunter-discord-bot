@@ -1,7 +1,6 @@
 const { claimDailyTagsEmbed } = require('../../embeds/genesisTrials/dailyTags');
 const { claimDailyTagsLogic } = require('../../utils/genesisTrials/dailyTags');
 
-
 /**
  * Show the embed for claiming daily tags.
  */

@@ -44,7 +44,7 @@ const rewardContribution = async (message) => {
         console.log(hunt, rewardContribution, userId, contributionUrl);
 
         // make sure the commands are typed properly.
-        if (rewardContribution !== 'rewardContribution') {
+        if (rewardContribution.toLowerCase() !== 'rewardcontribution') {
             return {
                 status: 'error',
                 message: 'Invalid command.',

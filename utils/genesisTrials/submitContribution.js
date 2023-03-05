@@ -8,15 +8,15 @@ const { ContributionSchema } = require('../schemas');
  */
 const submitContributionToDB = async (userId, url) => {
     try {
-        // we first check if the user exists in the database. if not, we create a new entry for them.
-        const User = mongoose.model('ContributionData', ContributionSchema, 'RHDiscordContributionData');
-        const userQuery = await User.findOne({ userId: userId });
+        // we first check if the user exists in the contributions database. if not, we create a new entry for them.
+        const ContributionsData = mongoose.model('ContributionData', ContributionSchema, 'RHDiscordContributionData');
+        const contributionsQuery = await ContributionsData.findOne({ userId: userId });
 
-        // if user doesn't exist, we create a new document/user instance for them.
-        if (!userQuery) {
+        // if contribution doesn't exist, we create a new document/user instance for them.
+        if (!contributionsQuery) {
             const { _wperm, _rperm, _acl } = permissions(true, false);
 
-            const NewUser = new User(
+            const NewContribution = new ContributionsData(
                 {
                     _id: generateObjectId(),
                     _created_at: Date.now(),
@@ -35,7 +35,7 @@ const submitContributionToDB = async (userId, url) => {
                 },
             );
 
-            await NewUser.save();
+            await NewContribution.save();
             return {
                 status: 'success',
                 message: 'Your contribution has been submitted. Thank you! Our team will now check your work and get back to you.',
