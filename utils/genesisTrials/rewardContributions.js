@@ -1,9 +1,5 @@
-require('dotenv').config();
-
 const mongoose = require('mongoose');
 const { ContributionSchema, DiscordUserSchema } = require('../schemas');
-
-mongoose.connect(process.env.MONGODB_URI);
 
 /**
  * Retrieves ALL submitted contributions from `submitContributions`.

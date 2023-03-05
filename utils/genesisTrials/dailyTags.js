@@ -1,4 +1,3 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
 const { generateObjectId } = require('../cryptoUtils');
 const permissions = require('../dbPermissions');

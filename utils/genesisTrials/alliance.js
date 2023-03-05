@@ -1,4 +1,3 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
 const { showAllianceEmbed, showInviterPendingInvitesEmbed, showInviteePendingInvitesEmbed, showOwnAllianceEmbed } = require('../../embeds/genesisTrials/alliance');
 const { generateObjectId } = require('../cryptoUtils');
