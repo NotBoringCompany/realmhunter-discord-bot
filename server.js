@@ -53,7 +53,7 @@ for (const file of commandFiles) {
 
 // MESSAGE CREATE EVENT LISTENER
 client.on('messageCreate', async (message) => {
-    if (message.content.toLowerCase() === '!testreturncontributions') {
+    if (message.content.toLowerCase() === '!hunt unrewardedcontributions') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         const { status, message: contributionsMessage } = await retrieveUnrewardedContributions(message).catch((err) => console.log(err));
 

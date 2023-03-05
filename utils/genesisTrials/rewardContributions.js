@@ -58,7 +58,8 @@ const retrieveUnrewardedContributionsLogic = async () => {
         } else {
             const formattedContributionData = [];
             // we filter out all contributions that have been rewarded and only return their URL and user ID.
-            for (let i = 0; i < contributionData.length; i++) {
+            // we will only return 10 at a time to prevent the message to return an error from being too long.
+            for (let i = 0; i < 10; i++) {
                 const userId = contributionData[i].userId;
                 const contribution = contributionData[i].contributions[0];
 

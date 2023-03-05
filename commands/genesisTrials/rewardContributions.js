@@ -16,10 +16,12 @@ const retrieveUnrewardedContributions = async (message) => {
         // otherwise, we will loop for each contribution and return it in a message.
         } else {
             let contributionMessage = '';
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < contributions.length; i++) {
                 const contribution = contributions[i];
 
                 contributionMessage += `User ID: ${contribution.userId} - ${contribution.contributionUrl}\n`;
+
+                console.log(contribution);
             }
 
             return {
