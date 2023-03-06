@@ -129,14 +129,8 @@ const restartDailyTagsAllowance = async () => {
         // this cron job runs every day at 12:00 GMT.
         cron.schedule('00 12 * * *', async () => {
             const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
-            const userQuery = await User.find();
 
-            // sets the `dailyTagsClaimed` for every user to `false`, even when they haven't claimed their daily tags.
-            for (let i = 0; i < userQuery.length; i++) {
-                userQuery[i].dailyTagsClaimed = false;
-                userQuery[i]._updated_at = Date.now();
-                await userQuery[i].save();
-            }
+            await User.updateMany({}, { $set: { dailyTagsClaimed: false } });
         }, {
             timezone: 'Europe/London',
         });
@@ -154,14 +148,8 @@ const restartDailyTagsAllowance = async () => {
 const manuallyResetDailyTagsAllowance = async () => {
     try {
         const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
-        const userQuery = await User.find();
 
-        // sets the `dailyTagsClaimed` for every user to `false`, even when they haven't claimed their daily tags.
-        for (let i = 0; i < userQuery.length; i++) {
-            userQuery[i].dailyTagsClaimed = false;
-            userQuery[i]._updated_at = Date.now();
-            await userQuery[i].save();
-        }
+        await User.updateMany({}, { $set: { dailyTagsClaimed: false } });
 
         return {
             status: 'success',

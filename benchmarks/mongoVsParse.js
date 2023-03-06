@@ -1,7 +1,9 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 const Moralis = require('moralis-v1/node');
 const { parseJSON } = require('../utils/jsonParser');
 const { generateObjectId } = require('../utils/cryptoUtils');
+const { BenchmarkSchema } = require('../utils/schemas');
 
 const mongooseCollectionFind = async () => {
     mongoose.connect(process.env.MONGODB_URI);
@@ -91,6 +93,16 @@ const parseAddRecord = async () => {
 
     console.log(`Benchmark time Parse add record: ${end-start} ms`);
 };
+
+const updateManyMongo = async () => {
+    mongoose.connect(process.env.MONGODB_URI);
+    const Benchmark = mongoose.model('Benchmark', BenchmarkSchema, 'Benchmarking');
+
+    await Benchmark.updateMany({}, { $set: { name: 'Yes' } });
+
+    console.log('done');
+}
+
 
 const benchmark = async () => {
     await mongooseCollectionFind();

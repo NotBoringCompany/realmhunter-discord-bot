@@ -1,5 +1,23 @@
 const mongoose = require('mongoose');
 
+const BenchmarkSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        name: String,
+        age: Number,
+    }, {
+        versionKey: false,
+    },
+);
+
 const DiscordUserSchema = new mongoose.Schema(
     {
         _id: {
@@ -132,6 +150,7 @@ const NationsSchema = new mongoose.Schema(
 );
 
 module.exports = {
+    BenchmarkSchema,
     DiscordUserSchema,
     ContributionSchema,
     TagsSchema,
