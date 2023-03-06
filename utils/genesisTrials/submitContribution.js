@@ -42,14 +42,14 @@ const submitContributionToDB = async (userId, url) => {
             };
         // if user exists, we first check if they resubmitted an existing contribution.
         } else {
-            const getContributions = userQuery.contributions;
+            const getContributions = contributionsQuery.contributions;
 
             // if the user has previously submitted contributions, we check if they resubmitted an existing contribution.
             if (getContributions.length !== 0) {
                 const checkForDuplicate = getContributions.find(contribution => contribution.url.toLowerCase().includes(url.toLowerCase()));
                 // if no duplicates are found, we add the new contribution to the user's existing contributions.
                 if (!checkForDuplicate) {
-                    getContributions.push(
+                    contributionsQuery.contributions.push(
                         {
                             dateSubmitted: Date.now(),
                             url: url,
@@ -57,7 +57,7 @@ const submitContributionToDB = async (userId, url) => {
                         },
                     );
 
-                    await userQuery.save();
+                    await contributionsQuery.save();
 
                     return {
                         status: 'success',
@@ -72,14 +72,14 @@ const submitContributionToDB = async (userId, url) => {
                 }
             // if the user has no previous contributions, we add the new contribution to the user's existing contributions.
             } else {
-                getContributions.push(
+                contributionsQuery.contributions.push(
                     {
                         dateSubmitted: Date.now(),
                         url: url,
                     },
                 );
 
-                await userQuery.save();
+                await contributionsQuery.save();
 
                 return {
                     status: 'success',

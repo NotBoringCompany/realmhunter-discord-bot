@@ -132,11 +132,11 @@ const restartDailyTagsAllowance = async () => {
             const userQuery = await User.find();
 
             // sets the `dailyTagsClaimed` for every user to `false`, even when they haven't claimed their daily tags.
-            userQuery.forEach(async (user) => {
-                user.dailyTagsClaimed = false;
-                user._updated_at = Date.now();
-                await user.save();
-            });
+            for (let i = 0; i < userQuery.length; i++) {
+                userQuery[i].dailyTagsClaimed = false;
+                userQuery[i]._updated_at = Date.now();
+                await userQuery[i].save();
+            }
         }, {
             timezone: 'Europe/London',
         });
@@ -148,9 +148,34 @@ const restartDailyTagsAllowance = async () => {
     }
 };
 
+/**
+ * Manually resets the daily tags claiming allowance for all users. Just in case the cron job fails.
+ */
+const manuallyResetDailyTagsAllowance = async () => {
+    try {
+        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.find();
+
+        // sets the `dailyTagsClaimed` for every user to `false`, even when they haven't claimed their daily tags.
+        for (let i = 0; i < userQuery.length; i++) {
+            userQuery[i].dailyTagsClaimed = false;
+            userQuery[i]._updated_at = Date.now();
+            await userQuery[i].save();
+        }
+
+        return {
+            status: 'success',
+            message: 'Daily tags allowance has been reset.',
+        };
+    } catch (err) {
+        throw err;
+    }
+};
+
 module.exports = {
     claimDailyTagsLogic,
     dailyClaimableTags,
     checkJoinDateAndRole,
     restartDailyTagsAllowance,
+    manuallyResetDailyTagsAllowance,
 };

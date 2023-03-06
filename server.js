@@ -11,7 +11,7 @@ const mongoose = require('mongoose');
 const { distributeTags, nextTagDistributionScheduler, distributeTagScheduler, claimRandomTags, updateTagsClaimed } = require('./utils/genesisTrials/randomTagAppearance');
 const cron = require('node-cron');
 const { showClaimDailyTagsEmbed, claimDailyTags } = require('./commands/genesisTrials/dailyTags');
-const { restartDailyTagsAllowance } = require('./utils/genesisTrials/dailyTags');
+const { restartDailyTagsAllowance, manuallyResetDailyTagsAllowance } = require('./utils/genesisTrials/dailyTags');
 const { checkTagsCollected } = require('./utils/genesisTrials/checkTags');
 const { showCheckTagsCollected, showCheckTagsCollectedEmbed } = require('./commands/genesisTrials/checkTags');
 const { showRoleNotifEmbed } = require('./commands/roleNotif');
@@ -70,9 +70,10 @@ for (const file of commandFiles) {
 
 // MESSAGE CREATE EVENT LISTENER
 client.on('messageCreate', async (message) => {
-    if (message.content.toLowerCase() === '!testbot') {
+    if (message.content.toLowerCase() === '!resetDailyTagsAllowance') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await message.channel.send('Bot is working!');
+        const { message: resetMessage } = await manuallyResetDailyTagsAllowance(message).catch((err) => console.log(err));
+        await message.channel.send(resetMessage);
     }
 
     if (message.content.toLowerCase() === '!hunt unrewardedcontributions') {
