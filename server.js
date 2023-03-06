@@ -70,7 +70,7 @@ for (const file of commandFiles) {
 
 // MESSAGE CREATE EVENT LISTENER
 client.on('messageCreate', async (message) => {
-    if (message.content.toLowerCase() === '!resetDailyTagsAllowance') {
+    if (message.content.toLowerCase() === '!resetdailytagsallowance') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         const { message: resetMessage } = await manuallyResetDailyTagsAllowance().catch((err) => console.log(err));
         await message.channel.send(resetMessage);
