@@ -72,7 +72,7 @@ for (const file of commandFiles) {
 client.on('messageCreate', async (message) => {
     if (message.content.toLowerCase() === '!resetDailyTagsAllowance') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        const { message: resetMessage } = await manuallyResetDailyTagsAllowance(message).catch((err) => console.log(err));
+        const { message: resetMessage } = await manuallyResetDailyTagsAllowance().catch((err) => console.log(err));
         await message.channel.send(resetMessage);
     }
 
