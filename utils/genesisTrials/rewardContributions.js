@@ -112,7 +112,8 @@ const invalidateContributionLogic = async (userId, url) => {
             // if contribution is found, we delete it.
             } else {
                 // delete the contribution.
-                contributionsQuery.contributions.pull(contribution);
+                const contributionIndex = contributionsQuery.contributions.indexOf(contribution);
+                contributionsQuery.contributions.splice(contributionIndex, 1);
                 contributionsQuery._updated_at = Date.now();
                 await contributionsQuery.save();
 

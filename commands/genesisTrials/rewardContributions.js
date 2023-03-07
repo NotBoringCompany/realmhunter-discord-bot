@@ -1,4 +1,4 @@
-const { retrieveUnrewardedContributionsLogic, rewardContributionLogic } = require('../../utils/genesisTrials/rewardContributions');
+const { retrieveUnrewardedContributionsLogic, rewardContributionLogic, invalidateContributionLogic } = require('../../utils/genesisTrials/rewardContributions');
 
 /**
  * Calls the `retrieveUnrewardedContributionsLogic` function and retrieves a list of all contributions that have not been rewarded yet.
@@ -30,7 +30,40 @@ const retrieveUnrewardedContributions = async (message) => {
             };
         }
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'retrieveUnrewardedContributions',
+            errorMessage: err,
+        })
+    }
+};
+
+/**
+ * Calls the `invalidateContributionLogic` function and invalidates a contribution.
+ */
+const invalidateContribution = async (message) => {
+    try {
+        const [hunt, invalidateContribution, userId, contributionUrl] = message.content.split(' ');
+
+        if (!contributionUrl) {
+            return {
+                status: 'error',
+                message: 'Contribution URL is required.',
+            };
+        }
+
+        if (!userId) {
+            return {
+                status: 'error',
+                message: 'User ID is required.',
+            };
+        };
+
+        return await invalidateContributionLogic(userId, contributionUrl);
+    } catch (err) {
+        console.log({
+            errorFrom: 'invalidateContribution',
+            errorMessage: err,
+        });
     }
 };
 
@@ -74,11 +107,15 @@ const rewardContribution = async (message) => {
 
         return await rewardContributionLogic(userId, contributionUrl);
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'rewardContribution',
+            errorMessage: err,
+        });
     }
 };
 
 module.exports = {
     retrieveUnrewardedContributions,
+    invalidateContribution,
     rewardContribution,
 };

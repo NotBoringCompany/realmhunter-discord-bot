@@ -34,7 +34,7 @@ const {
 const { showInviterPendingInvitesLogic, removeExpiredInvitesScheduler } = require('./utils/genesisTrials/alliance');
 const { showTagsLeaderboard, tagsLeaderboardScheduler } = require('./utils/genesisTrials/tagsLeaderboard');
 const { showPartOneInfoEmbed } = require('./commands/genesisTrials/helpinfo');
-const { retrieveUnrewardedContributions, rewardContribution } = require('./commands/genesisTrials/rewardContributions');
+const { retrieveUnrewardedContributions, rewardContribution, invalidateContribution } = require('./commands/genesisTrials/rewardContributions');
 const { showNationRoleEmbed } = require('./commands/genesisTrials/nations');
 const { createRole } = require('./commands/createRoles');
 const { nationButtonInteraction } = require('./interactions/buttons/nationRoles');
@@ -103,6 +103,13 @@ client.on('messageCreate', async (message) => {
 
         const { message: resetMessage } = await restartDailyContributionTagsClaimed().catch((err) => console.log(err));
         await message.channel.send(resetMessage);
+    }
+
+    if (message.content.toLowerCase() === '!hunt invalidatecontribution') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+
+        const { message: invalidateMessage } = await invalidateContribution(message).catch((err) => console.log(err));
+        await message.channel.send(invalidateMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt rewardcontribution')) {
