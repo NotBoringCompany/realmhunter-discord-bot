@@ -107,6 +107,7 @@ const invalidateContributionLogic = async (userId, url) => {
             } else {
                 // delete the contribution.
                 contributionsQuery.contributions.pull(contribution);
+                contributionsQuery._updated_at = Date.now();
                 await contributionsQuery.save();
 
                 return {
@@ -183,10 +184,12 @@ const rewardContributionLogic = async (userId, url) => {
                     // 3. set `dailyContributionTagsClaimed` to true
                     if (!dailyContributionTagsClaimed) {
                         // we update the contribution to be marked as rewarded.
-                        await Contributions.updateOne({ userId: userId, 'contributions.url': url }, { $set: { 'contributions.$.rewarded': true } });
+                        await Contributions.updateOne({ userId: userId, 'contributions.url': url }, { $set: { 'contributions.$.rewarded': true, 'contributions.$._updated_at': Date.now() } });
 
                         userQuery.hunterTags += 10;
                         userQuery.dailyContributionTagsClaimed = true;
+                        userQuery.contributionTagsEarned += 10;
+                        userQuery._updated_at = Date.now();
 
                         await userQuery.save();
 

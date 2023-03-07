@@ -108,6 +108,7 @@ const createAllianceLogic = async (userId, allianceName) => {
 
                     // once the alliance is created, we store the alliance's object ID in the user's data
                     userQuery._p_alliance = `${process.env.ALLIANCE_DB_NAME}$${allianceObjId}`;
+                    userQuery._updated_at = Date.now();
 
                     await userQuery.save();
 
@@ -607,6 +608,7 @@ const acceptAllianceInviteLogic = async (inviteeId, allianceName) => {
 
                     // update the pointer in the invitee's document.
                     inviteeQuery._p_alliance = alliancePointer;
+                    inviteeQuery._updated_at = Date.now();
 
                     await inviteeQuery.save();
 
@@ -759,6 +761,7 @@ const disbandAllianceLogic = async (userId) => {
 
                             // set the alliance pointer to undefined.
                             userQuery._p_alliance = undefined;
+                            userQuery._updated_at = Date.now();
 
                             await userQuery.save();
                         };
@@ -843,6 +846,7 @@ const leaveAllianceLogic = async (userId) => {
                         /// remove the alliance pointer from the user.
                         // set the alliance pointer to undefined.
                         userQuery._p_alliance = undefined;
+                        userQuery._updated_at = Date.now();
 
                         await userQuery.save();
 
@@ -1172,6 +1176,7 @@ const kickFromAllianceLogic = async (userId, targetId) => {
                             } else {
                                 // otherwise, we will go ahead and remove the alliance's pointer from the target's _p_alliance field.
                                 targetQuery._p_alliance = undefined;
+                                targetQuery._updated_at = Date.now();
                                 await targetQuery.save();
 
                                 return {

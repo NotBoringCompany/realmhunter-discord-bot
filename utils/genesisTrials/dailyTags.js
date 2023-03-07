@@ -130,7 +130,7 @@ const restartDailyTagsAllowance = async () => {
         cron.schedule('00 12 * * *', async () => {
             const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
 
-            await User.updateMany({}, { $set: { dailyTagsClaimed: false } });
+            await User.updateMany({}, { $set: { dailyTagsClaimed: false, _updated_at: Date.now() } });
         }, {
             timezone: 'Europe/London',
         });
@@ -149,7 +149,7 @@ const manuallyResetDailyTagsAllowance = async () => {
     try {
         const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
 
-        await User.updateMany({}, { $set: { dailyTagsClaimed: false } });
+        await User.updateMany({}, { $set: { dailyTagsClaimed: false, _updated_at: Date.now() } });
 
         return {
             status: 'success',

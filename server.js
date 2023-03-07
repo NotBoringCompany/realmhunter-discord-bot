@@ -38,6 +38,7 @@ const { retrieveUnrewardedContributions, rewardContribution } = require('./comma
 const { showNationRoleEmbed } = require('./commands/genesisTrials/nations');
 const { createRole } = require('./commands/createRoles');
 const { nationButtonInteraction } = require('./interactions/buttons/nationRoles');
+const { manuallyRewardTags } = require('./commands/genesisTrials/manualRewarding');
 
 const client = new Client({
     intents: [
@@ -70,6 +71,19 @@ for (const file of commandFiles) {
 
 // MESSAGE CREATE EVENT LISTENER
 client.on('messageCreate', async (message) => {
+    if (message.content.toLowerCase().startsWith('!hunt manuallyrewardtags')) {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        const { status, message: rewardMessage } = await manuallyRewardTags(message).catch((err) => console.log(err));
+
+        // if error, send the message in the channel where the command was sent
+        if (status === 'error') {
+            await message.channel.send(rewardMessage);
+        // otherwise, send it to #general-chat.
+        } else {
+            await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send(rewardMessage);
+        }
+    }
+
     if (message.content.toLowerCase() === '!resetdailytagsallowance') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         const { message: resetMessage } = await manuallyResetDailyTagsAllowance().catch((err) => console.log(err));

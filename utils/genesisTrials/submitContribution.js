@@ -57,6 +57,7 @@ const submitContributionToDB = async (userId, url) => {
                         },
                     );
 
+                    contributionsQuery._updated_at = Date.now();
                     await contributionsQuery.save();
 
                     return {
@@ -79,6 +80,7 @@ const submitContributionToDB = async (userId, url) => {
                     },
                 );
 
+                contributionsQuery._updated_at = Date.now();
                 await contributionsQuery.save();
 
                 return {

@@ -271,6 +271,7 @@ const giveNationRole = async (interaction, role) => {
 
                     // add the nation pointer to the user's data.
                     userQuery._p_nation = `${process.env.NATIONS_DB_NAME}$${nationQuery._id}`;
+                    userQuery._updated_at = Date.now();
                     await userQuery.save();
 
                     return {
@@ -313,6 +314,7 @@ const giveNationRole = async (interaction, role) => {
 
                     // then, we remove the user's nation pointer from the user's data.
                     userQuery._p_nation = undefined;
+                    userQuery._updated_at = Date.now();
                     await userQuery.save();
 
                     // then, we remove the user's current nation role.
@@ -352,6 +354,7 @@ const giveNationRole = async (interaction, role) => {
 
                     // once we've added the user to the new nation, we add the user's nation pointer to the user's data.
                     userQuery._p_nation = `${process.env.NATIONS_DB_NAME}$${nationQuery._id}`;
+                    userQuery._updated_at = Date.now();
                     await userQuery.save();
 
                     // finally, we add the user's new nation role.
