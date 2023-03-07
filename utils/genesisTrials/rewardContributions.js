@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { ContributionSchema, DiscordUserSchema } = require('../schemas');
+const cron = require('node-cron');
 
 /**
  * Retrieves ALL submitted contributions from `submitContributions`.
@@ -54,8 +55,7 @@ const retrieveUnrewardedContributionsLogic = async () => {
         } else {
             const formattedContributionData = [];
             // we filter out all contributions that have been rewarded and only return their URL and user ID.
-            // we will only return 10 at a time to prevent the message to return an error from being too long.
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < contributionData.length; i++) {
                 const userId = contributionData[i].userId;
                 const contribution = contributionData[i].contributions[0];
 
@@ -67,10 +67,16 @@ const retrieveUnrewardedContributionsLogic = async () => {
                 }
             }
 
+            const finalContributionData = [];
+            // we only return the first 10 unrewarded contributions to prevent a too long message.
+            for (let j = 0; j < 10; j++) {
+                finalContributionData.push(formattedContributionData[j]);
+            }
+
             return {
                 status: 'success',
                 message: 'Unrewarded contributions retrieved.',
-                contributions: formattedContributionData,
+                contributions: finalContributionData,
             };
         }
     } catch (err) {
@@ -212,10 +218,49 @@ const rewardContributionLogic = async (userId, url) => {
     }
 };
 
+/**
+ * Changes `dailyContributionTagsClaimed` to false for all users, even if it was already false.
+ */
+const restartDailyContributionTagsClaimed = async () => {
+    try {
+        const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
+
+        await User.updateMany({}, { $set: { dailyContributionTagsClaimed: false } });
+
+        return {
+            status: 'success',
+            message: 'All users\' `dailyContributionTagsClaimed` set to false.',
+        };
+    } catch (err) {
+        console.log({
+            errorFrom: 'restartDailyContributionTagsClaimed',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
+ * Calls `restartDailyContributionTagsClaimed` every day at 12pm GMT.
+ */
+const restartDailyContributionTagsClaimedScheduler = async () => {
+    try {
+        cron.schedule('0 12 * * *', async () => {
+            await restartDailyContributionTagsClaimed();
+        });
+    } catch (err) {
+        console.log({
+            errorFrom: 'restartDailyContributionTagsClaimedScheduler',
+            errorMessage: err,
+        });
+    }
+};
+
 module.exports = {
     retrieveSubmittedContributionsLogic,
     retrieveUnrewardedContributionsLogic,
     invalidateContributionLogic,
     rewardContributionLogic,
+    restartDailyContributionTagsClaimed,
+    restartDailyContributionTagsClaimedScheduler,
 };
 

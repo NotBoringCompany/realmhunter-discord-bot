@@ -39,6 +39,7 @@ const { showNationRoleEmbed } = require('./commands/genesisTrials/nations');
 const { createRole } = require('./commands/createRoles');
 const { nationButtonInteraction } = require('./interactions/buttons/nationRoles');
 const { manuallyRewardTags } = require('./commands/genesisTrials/manualRewarding');
+const { restartDailyContributionTagsClaimedScheduler, restartDailyContributionTagsClaimed } = require('./utils/genesisTrials/rewardContributions');
 
 const client = new Client({
     intents: [
@@ -95,6 +96,13 @@ client.on('messageCreate', async (message) => {
         const { status, message: contributionsMessage } = await retrieveUnrewardedContributions(message).catch((err) => console.log(err));
 
         await message.channel.send(contributionsMessage);
+    }
+
+    if (message.content.toLowerCase() === '!hunt manuallyresetdailycontributiontagsclaimed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+
+        const { message: resetMessage } = await restartDailyContributionTagsClaimed().catch((err) => console.log(err));
+        await message.channel.send(resetMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt rewardcontribution')) {
@@ -312,6 +320,7 @@ client.on('ready', async c => {
     await distributeTagScheduler(client);
     await restartDailyTagsAllowance();
     await removeExpiredInvitesScheduler();
+    await restartDailyContributionTagsClaimedScheduler();
     await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
 
     await Moralis.start({
