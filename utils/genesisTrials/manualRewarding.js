@@ -46,7 +46,11 @@ const manuallyRewardTagsLogic = async (userId, tagsToGive, reason) => {
             };
         // otherwise, we add `tagsToGive` tags to the user's hunterTags.
         } else {
-            userQuery.hunterTags += parseInt(tagsToGive);
+            if (!userQuery.hunterTags) {
+                userQuery.hunterTags = parseInt(tagsToGive);
+            } else {
+                userQuery.hunterTags += parseInt(tagsToGive);
+            }
             userQuery._updated_at = Date.now();
 
             await userQuery.save();
