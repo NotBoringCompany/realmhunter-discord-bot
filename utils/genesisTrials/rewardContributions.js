@@ -195,7 +195,13 @@ const rewardContributionLogic = async (userId, url) => {
 
                         userQuery.hunterTags += 10;
                         userQuery.dailyContributionTagsClaimed = true;
-                        userQuery.contributionTagsEarned += 10;
+
+                        if (!userQuery.contributionTagsEarned) {
+                            userQuery.contributionTagsEarned = 10;
+                        } else {
+                            userQuery.contributionTagsEarned += 10;
+                        }
+
                         userQuery._updated_at = Date.now();
 
                         await userQuery.save();
