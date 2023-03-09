@@ -208,6 +208,11 @@ const claimFirstQuestTags = async (userId) => {
                     entryQuery.claimed = true;
                     entryQuery._updated_at = Date.now();
                     await entryQuery.save();
+
+                    return {
+                        status: 'success',
+                        message: `You have collected ${tagsToClaim} cookies. Keep participating in our quests!`,
+                    };
                 }
             }
         }
