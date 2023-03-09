@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const { generateObjectId } = require('../cryptoUtils');
 const permissions = require('../dbPermissions');
-const { DiscordUserSchema, NationsSchema } = require('../schemas');
+const { DiscordUserSchema, NationsSchema, NationLeadVoteSchema } = require('../schemas');
+const { checkJoinDateAndRole } = require('./dailyTags');
 
 /**
  * All currently available nations to choose from (from the poll results).
@@ -375,8 +376,193 @@ const giveNationRole = async (interaction, role) => {
     }
 };
 
+/**
+ * Buttons for the representative vote embed.
+ */
+const representativeVoteButtons = () => {
+    return [
+        {
+            type: 2,
+            style: 1,
+            label: 'Vote Now',
+            custom_id: 'nationRepresentativeVoteButton',
+        },
+        {
+            type: 2,
+            style: 1,
+            label: 'Rescind Vote',
+            custom_id: 'nationRepresentativeRescindVoteButton',
+        },
+    ];
+};
+
+/**
+ * Get the nation of the voter who clicked on the button(s).
+ */
+const getVotersNation = async (userId) => {
+    try {
+        // we query the user.
+        const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: userId });
+
+        // if the user doesn't exist, then we assume they don't have a nation anyway.
+        // we throw an error.
+        if (!userQuery) {
+            return {
+                status: 'error',
+                message: 'You need to be in a nation to vote for a representative.',
+                nation: undefined,
+            };
+        // if the user does exist, we check if they have a nation pointer.
+        } else {
+            const nationPointer = userQuery._p_nation;
+
+            // if they don't have a nation pointer, then they're not in a nation. we throw an error.
+            if (!nationPointer) {
+                return {
+                    status: 'error',
+                    message: 'You need to be in a nation to vote for a representative.',
+                    nation: undefined,
+                };
+            // otherwise, we query the nation.
+            } else {
+                const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
+                // split the pointer to get the obj ID
+                const nationObjId = nationPointer.split('$')[1];
+                const nationQuery = await Nation.findOne({ _id: nationObjId });
+
+                // if somehow nation can't be found, we throw an error.
+                if (!nationQuery) {
+                    return {
+                        status: 'error',
+                        message: 'Nation not found. Please submit a ticket.',
+                        nation: undefined,
+                    };
+                // otherwise, we return the nation's name
+                } else {
+                    const nationName = nationQuery.nation;
+
+                    // if name is undefined, then something went wrong. we throw an error.
+                    if (!nationName) {
+                        return {
+                            status: 'error',
+                            message: 'Nation name not found. Please submit a ticket.',
+                            nation: undefined,
+                        };
+                    } else {
+                        return {
+                            status: 'success',
+                            message: 'Nation found.',
+                            nation: nationName,
+                        };
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.log({
+            errorFrom: 'getVotersNation',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
+ * Gets how many votes the voter has available raw (i.e. not including the votes they've already casted)
+ * Based on if they have the GPW role, joined before 1 Jan 2023 00:00 GMT or have a server booster role.
+ */
+const getVotesAvailableRaw = (interaction) => {
+    try {
+        let votesAvailable = 0;
+
+        // first, we do a few checks.
+        const { joinDate, hasWLRole, hasServerBoosterRole } = checkJoinDateAndRole(interaction);
+
+        // if the user has the WL role, they have 4 base votes.
+        if (hasWLRole) {
+            votesAvailable = 4;
+        // if the user joined before the date requirement, they have 4 base votes.
+        } else if (joinDate <= process.env.JOIN_DATE_REQUIREMENT) {
+            votesAvailable = 4;
+        // otherwise, they have 2 base votes.
+        } else {
+            votesAvailable = 2;
+        }
+
+        // now, we check if they are a Server Booster. if they are, they get an additional 1 vote.
+        if (hasServerBoosterRole) {
+            votesAvailable += 1;
+        }
+
+        return votesAvailable;
+    } catch (err) {
+        console.log({
+            errorFrom: 'getVotesAvailableRaw',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
+ * Get how many votes the voter has left. This includes the amount of votes available raw minus the amount of votes they've already casted.
+ */
+const getCurrentVotesAvailable = async (interaction) => {
+    try {
+        const votesAvailableRaw = getVotesAvailableRaw(interaction);
+
+        // if there's an error getting the votes available raw, we throw an error.
+        if (!votesAvailableRaw) {
+            return {
+                status: 'error',
+                message: 'Error getting votes available.',
+            };
+        // otherwise, we now check how many votes they've already casted.
+        } else {
+            const Votes = mongoose.model('Votes', NationLeadVoteSchema, 'RHDiscordNationLeadVotes');
+            const votesQuery = await Votes.findOne({ voterId: interaction.user.id });
+
+            // if they haven't casted any votes, we return the amount of votes available raw.
+            if (!votesQuery) {
+                return {
+                    status: 'success',
+                    message: `You have ${votesAvailableRaw} votes available.`,
+                };
+            // otherwise, we check how many votes they've casted by checking the array's length.
+            } else {
+                const nomineesVotedLength = votesQuery.nomineesVoted.length;
+
+                const votesAvailable = votesAvailableRaw - nomineesVotedLength;
+
+                // if they have no votes left, we let them know.
+                // sometimes, this can be less than 0 if they were a server booster and no longer are.
+                // just to make sure, we put <= 0.
+                if (votesAvailable <= 0) {
+                    return {
+                        status: 'error',
+                        message: 'You have no votes left.',
+                    };
+                } else {
+                    return {
+                        status: 'success',
+                        message: `You still have ${votesAvailable} votes available.`,
+                    };
+                }
+            }
+        }
+    } catch (err) {
+        console.log({
+            errorFrom: 'getCurrentVotesAvailable',
+            errorMessage: err,
+        });
+    }
+};
+
 module.exports = {
     nationRoles,
     giveNationRole,
     nationTemplate,
+    representativeVoteButtons,
+    getVotersNation,
+    getVotesAvailableRaw,
+    getCurrentVotesAvailable,
 };

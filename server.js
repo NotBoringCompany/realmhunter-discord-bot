@@ -16,7 +16,7 @@ const { checkTagsCollected } = require('./utils/genesisTrials/checkTags');
 const { showCheckTagsCollected, showCheckTagsCollectedEmbed } = require('./commands/genesisTrials/checkTags');
 const { showRoleNotifEmbed } = require('./commands/roleNotif');
 const { giveRole } = require('./utils/discord/roleNotif');
-const { 
+const {
     createAlliance,
     disbandAlliance,
     leaveAlliance,
@@ -35,11 +35,15 @@ const { showInviterPendingInvitesLogic, removeExpiredInvitesScheduler } = requir
 const { showTagsLeaderboard, tagsLeaderboardScheduler } = require('./utils/genesisTrials/tagsLeaderboard');
 const { showPartOneInfoEmbed } = require('./commands/genesisTrials/helpinfo');
 const { retrieveUnrewardedContributions, rewardContribution, invalidateContribution } = require('./commands/genesisTrials/rewardContributions');
-const { showNationRoleEmbed } = require('./commands/genesisTrials/nations');
+const { showNationRoleEmbed, showRepresentativeVotingEmbed } = require('./commands/genesisTrials/nations');
 const { createRole } = require('./commands/createRoles');
 const { nationButtonInteraction } = require('./interactions/buttons/nationRoles');
 const { manuallyRewardTags } = require('./commands/genesisTrials/manualRewarding');
 const { restartDailyContributionTagsClaimedScheduler, restartDailyContributionTagsClaimed } = require('./utils/genesisTrials/rewardContributions');
+const { representativeVotingModal } = require('./modals/nations');
+const { getVotersNation } = require('./utils/genesisTrials/nations');
+const { claimFirstQuestTags } = require('./utils/genesisTrials/questWinners');
+const { showFirstQuestWinnerButtons } = require('./commands/genesisTrials/questWinners');
 
 const client = new Client({
     intents: [
@@ -72,6 +76,15 @@ for (const file of commandFiles) {
 
 // MESSAGE CREATE EVENT LISTENER
 client.on('messageCreate', async (message) => {
+    if (message.content.toLowerCase() === '!showrepresentativevotingembed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showRepresentativeVotingEmbed(message);
+    }
+
+    if (message.content.toLowerCase() === '!showquestcollectcookiebuttons') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showFirstQuestWinnerButtons(message);
+    }
     if (message.content.toLowerCase().startsWith('!hunt manuallyrewardtags')) {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         const { status, message: rewardMessage } = await manuallyRewardTags(message).catch((err) => console.log(err));
@@ -268,6 +281,22 @@ client.on('messageCreate', async (message) => {
 // INTERACTION CREATE EVENT LISTENER
 client.on('interactionCreate', async (interaction) => {
     if (interaction.isButton()) {
+        if (interaction.customId === 'nationRepresentativeVoteButton') {
+            // get the user's nation first
+            const { status, message: nationMessage, nation } = await getVotersNation(interaction.user.id);
+            // if there's an error, send the error message
+            if (status === 'error') {
+                await interaction.reply({ content: nationMessage, ephemeral: true });
+            // otherwise, show the modal.
+            } else {
+                await interaction.showModal(representativeVotingModal(nation));
+            }
+        }
+
+        if (interaction.customId === 'questCollectCookies') {
+            const { message: questMessage } = await claimFirstQuestTags(interaction.user.id);
+            await interaction.reply({ content: questMessage, ephemeral: true });
+        }
         // if nation button is clicked. will run the `nationButtonInteraction` function to check if the user can get a nation.
         await nationButtonInteraction(interaction);
 

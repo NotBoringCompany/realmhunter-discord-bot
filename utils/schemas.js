@@ -149,6 +149,45 @@ const NationsSchema = new mongoose.Schema(
     },
 );
 
+const NationLeadVoteSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        voterId: String,
+        _p_nation: String,
+        nomineesVoted: Array,
+    }, {
+        versionKey: false,
+    },
+);
+
+const QuestEntriesSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        userId: String,
+        isWinner: Boolean,
+        claimed: Boolean,
+    },
+    {
+        versionKey: false,
+    },
+);
+
 module.exports = {
     BenchmarkSchema,
     DiscordUserSchema,
@@ -157,4 +196,6 @@ module.exports = {
     AllianceSchema,
     AlliancePendingInviteSchema,
     NationsSchema,
+    NationLeadVoteSchema,
+    QuestEntriesSchema,
 };

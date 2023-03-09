@@ -19,6 +19,7 @@
     "parse-server": "^6.0.0"
   },
   "devDependencies": {
+    "convert-csv-to-json": "^2.0.0",
     "eslint": "^8.35.0",
     "eslint-config-google": "^0.14.0"
   }

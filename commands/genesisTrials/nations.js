@@ -1,5 +1,5 @@
-const { nationRoleEmbed } = require('../../embeds/genesisTrials/nations');
-const { nationRoles } = require('../../utils/genesisTrials/nations');
+const { nationRoleEmbed, representativeVotingEmbed } = require('../../embeds/genesisTrials/nations');
+const { nationRoles, representativeVoteButtons } = require('../../utils/genesisTrials/nations');
 
 const showNationRoleEmbed = async (message) => {
     try {
@@ -29,10 +29,33 @@ const showNationRoleEmbed = async (message) => {
             ],
         });
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'showNationRoleEmbed',
+            errorMessage: err,
+        });
+    }
+};
+
+const showRepresentativeVotingEmbed = async (message) => {
+    try {
+        await message.channel.send({
+            embeds: [representativeVotingEmbed],
+            components: [
+                {
+                    type: 1,
+                    components: representativeVoteButtons(),
+                },
+            ],
+        });
+    } catch (err) {
+        console.log({
+            errorFrom: 'showRepresentativeVotingEmbed',
+            errorMessage: err,
+        });
     }
 };
 
 module.exports = {
     showNationRoleEmbed,
+    showRepresentativeVotingEmbed,
 };
