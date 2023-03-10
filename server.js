@@ -41,9 +41,10 @@ const { nationButtonInteraction } = require('./interactions/buttons/nationRoles'
 const { manuallyRewardTags } = require('./commands/genesisTrials/manualRewarding');
 const { restartDailyContributionTagsClaimedScheduler, restartDailyContributionTagsClaimed } = require('./utils/genesisTrials/rewardContributions');
 const { representativeVotingModal } = require('./modals/nations');
-const { getVotersNation } = require('./utils/genesisTrials/nations');
+const { getVotersNation, getCurrentVotesAvailable, submitVote, rescindVote } = require('./utils/genesisTrials/nations');
 const { claimFirstQuestTags } = require('./utils/genesisTrials/questWinners');
 const { showFirstQuestWinnerButtons } = require('./commands/genesisTrials/questWinners');
+const { nationLeadVotesInteraction } = require('./interactions/buttons/nationLeadVotes');
 
 const client = new Client({
     intents: [
@@ -281,17 +282,7 @@ client.on('messageCreate', async (message) => {
 // INTERACTION CREATE EVENT LISTENER
 client.on('interactionCreate', async (interaction) => {
     if (interaction.isButton()) {
-        if (interaction.customId === 'nationRepresentativeVoteButton') {
-            // get the user's nation first
-            const { status, message: nationMessage, nation } = await getVotersNation(interaction.user.id);
-            // if there's an error, send the error message
-            if (status === 'error') {
-                await interaction.reply({ content: nationMessage, ephemeral: true });
-            // otherwise, show the modal.
-            } else {
-                await interaction.showModal(representativeVotingModal(nation));
-            }
-        }
+        await nationLeadVotesInteraction(interaction);
 
         if (interaction.customId === 'questCollectCookies') {
             const { message: questMessage } = await claimFirstQuestTags(interaction.user.id);
@@ -341,6 +332,20 @@ client.on('interactionCreate', async (interaction) => {
             const { message } = await submitContributionToDB(userId, url);
 
             await interaction.reply({ content: message, ephemeral: true });
+        }
+
+        if (interaction.customId === 'representativeVotingModal') {
+            const nomineeId = interaction.fields.getTextInputValue('nomineeId');
+            const { message: voteMessage } = await submitVote(interaction, nomineeId);
+
+            await interaction.reply({ content: voteMessage, ephemeral: true });
+        }
+
+        if (interaction.customId === 'rescindRepresentativeVoteModal') {
+            const nomineeId = interaction.fields.getTextInputValue('nomineeToRescindId');
+            const { message: voteMessage } = await rescindVote(interaction, nomineeId);
+
+            await interaction.reply({ content: voteMessage, ephemeral: true });
         }
     }
 });

@@ -26,7 +26,8 @@ const representativeVotingEmbed = new EmbedBuilder()
                 name: '__**How many votes can I cast?**__',
                 value: `Regular citizens can cast a total of **TWO** votes.
                 If you have a **Genesis Pass Whitelist** role OR joined before **${new Date(parseInt(process.env.JOIN_DATE_REQUIREMENT)* 1000).toUTCString()}**, you can cast a total of **FOUR** votes.\n\
-                If you are a **SERVER BOOSTER**, you will get an **ADDITIONAL** vote, so you can either get three or five votes in total.`,
+                If you are a **SERVER BOOSTER**, you will get an **ADDITIONAL** vote, so you can either get three or five votes in total. \n\
+                You can check how many votes you have left by clicking the 'Check votes left' button.`,
             },
             {
                 name: '__**Can I vote for another nation\'s lead or vice representative?**__',
@@ -48,9 +49,15 @@ const representativeVotingEmbed = new EmbedBuilder()
                 It\'s completely up to you.',
             },
             {
+                name: '__**How do I check who I\'ve voted for?**__',
+                value: `Click on the 'Check who I voted for' button to see who you\'ve voted for.`,
+            },
+            {
                 name: '__**I voted for the wrong nominee or I want to change my vote. How do I do this?**__',
-                value: 'Click on the Rescind Vote button to remove your vote from whoever you voted for. \n\
-                As long as the voting period is still ongoing, you will get one vote back for every vote you rescinded.',
+                value: `Click on the 'Rescind Vote' button to remove your vote from whoever you voted for. \n\
+                As long as the voting period is still ongoing, you will get one vote back for every vote you rescinded. \n\
+                Please note that if you voted for the same nominee multiple times, you will need to rescind the vote for that many times to completely remove your vote from that nominee. \n\
+                Otherwise, it will only remove one vote from that nominee each time.`,
             },
             {
                 name: '__**How will the lead and vice representatives be chosen?**__',

@@ -393,6 +393,18 @@ const representativeVoteButtons = () => {
             label: 'Rescind Vote',
             custom_id: 'nationRepresentativeRescindVoteButton',
         },
+        {
+            type: 2,
+            style: 1,
+            label: 'Check votes left',
+            custom_id: 'nationRepresentativeCheckVotesLeftButton',
+        },
+        {
+            type: 2,
+            style: 1,
+            label: 'Check who I voted for',
+            custom_id: 'nationRepresentativeCheckVotesButton',
+        },
     ];
 };
 
@@ -510,6 +522,8 @@ const getCurrentVotesAvailable = async (interaction) => {
     try {
         const votesAvailableRaw = getVotesAvailableRaw(interaction);
 
+        console.log(votesAvailableRaw);
+
         // if there's an error getting the votes available raw, we throw an error.
         if (!votesAvailableRaw) {
             return {
@@ -557,6 +571,210 @@ const getCurrentVotesAvailable = async (interaction) => {
     }
 };
 
+/**
+ * Submits a vote for a nominee.
+ */
+const submitVote = async (interaction, nomineeId) => {
+    try {
+        // at this point, the user should already have a nation from the previous check.
+        // we query the vote database.
+        const Votes = mongoose.model('Votes', NationLeadVoteSchema, 'RHDiscordNationLeadVotes');
+        const votesQuery = await Votes.findOne({ voterId: interaction.user.id });
+
+        // since the user should already have a nation, we query the user's nation via RHDiscordUserData.
+        const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: interaction.user.id });
+
+        // if the user doesn't exist, we throw an error.
+        if (!userQuery) {
+            return {
+                status: 'error',
+                message: 'User not found in database. Please submit a ticket.',
+            };
+        }
+
+        // we get the nation pointer.
+        const nationPointer = userQuery._p_nation;
+
+        // if the nation pointer is undefined, we throw an error.
+        if (!nationPointer) {
+            return {
+                status: 'error',
+                message: 'You are not in a nation. Please join a nation before voting.',
+            };
+        }
+
+        // we now check if the nominee is in the same nation as the voter.
+        const nomineeQuery = await User.findOne({ userId: nomineeId });
+
+        // if the nominee doesn't exist, we throw an error.
+        if (!nomineeQuery) {
+            return {
+                status: 'error',
+                message: 'Nominee not found.',
+            };
+        }
+
+        // we get the nominee's nation pointer.
+        const nomineeNationPointer = nomineeQuery._p_nation;
+
+        // if the nominee's nation pointer is undefined, we throw an error.
+        if (!nomineeNationPointer) {
+            return {
+                status: 'error',
+                message: 'Nominee is not in a nation.',
+            };
+        }
+
+        // if the nominee is not in the same nation as the voter, we throw an error.
+        if (nomineeNationPointer !== nationPointer) {
+            return {
+                status: 'error',
+                message: 'Nominee is not in your nation.',
+            };
+        }
+
+        // if the voter doesn't exist, we create a new document for them.
+        if (!votesQuery) {
+            const { _wperm, _rperm, _acl } = permissions(true, false);
+            const NewVote = new Votes(
+                {
+                    _id: generateObjectId(),
+                    _created_at: Date.now(),
+                    _updated_at: Date.now(),
+                    _wperm: _wperm,
+                    _rperm: _rperm,
+                    _acl: _acl,
+                    voterId: interaction.user.id,
+                    _p_nation: nationPointer,
+                    nomineesVoted: [nomineeId],
+                },
+            );
+
+            await NewVote.save();
+
+            return {
+                status: 'success',
+                message: 'Vote submitted. Thank you!',
+            };
+        // otherwise, we check if the users still have enough votes left.
+        } else {
+            // this should already be checked beforehand, but just as an extra precaution.
+            const votesLeft = await getCurrentVotesAvailable(interaction);
+
+            // if the user has no votes left, we throw an error.
+            if (votesLeft.status === 'error') {
+                return {
+                    status: 'error',
+                    message: votesLeft.message,
+                };
+            } else {
+                // otherwise, we add the nominee to the array.
+                votesQuery.nomineesVoted.push(nomineeId);
+
+                await votesQuery.save();
+
+                return {
+                    status: 'success',
+                    message: 'Vote submitted. Thank you!',
+                };
+            }
+        }
+    } catch (err) {
+        console.log({
+            errorFrom: 'submitVote',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
+ * Rescinds a vote for a nominee.
+ */
+const rescindVote = async (interaction, nomineeId) => {
+    try {
+        // first, we check if the user exists in the Votes database.
+        const Votes = mongoose.model('Votes', NationLeadVoteSchema, 'RHDiscordNationLeadVotes');
+        const votesQuery = await Votes.findOne({ voterId: interaction.user.id });
+
+        // if the user doesn't exist, we throw an error.
+        if (!votesQuery) {
+            return {
+                status: 'error',
+                message: 'You have not voted for anyone.',
+            };
+        }
+
+        // we get the index of the nomineeId from the `nomineesVoted` array.
+        const nomineeIndex = votesQuery.nomineesVoted.indexOf(nomineeId);
+
+        // if the nomineeId is not in the array, we throw an error.
+        if (nomineeIndex === -1) {
+            return {
+                status: 'error',
+                message: 'You have not voted for this nominee.',
+            };
+        }
+
+        // otherwise, we remove the nomineeId from the array.
+        votesQuery.nomineesVoted.splice(nomineeIndex, 1);
+
+        await votesQuery.save();
+
+        return {
+            status: 'success',
+            message: 'Vote rescinded.',
+        };
+    } catch (err) {
+        console.log({
+            errorFrom: 'rescindVote',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
+ * Gets all of the voter's nominees as a single string.
+ */
+const checkVotersNominees = async (voterId) => {
+    try {
+        const Votes = mongoose.model('Votes', NationLeadVoteSchema, 'RHDiscordNationLeadVotes');
+        const votesQuery = await Votes.findOne({ voterId: voterId });
+
+        let nominees = 'You have voted for: \n';
+
+        if (!votesQuery) {
+            return {
+                status: 'error',
+                message: 'You have not voted for anyone.',
+            };
+        }
+
+        // we get the array of nominees.
+        const nomineesVoted = votesQuery.nomineesVoted;
+
+        for (let i = 0; i < nomineesVoted.length; i++) {
+            const nomineeId = nomineesVoted[i];
+
+            nominees += `<@${nomineeId}> \n`;
+        }
+
+        if (nominees === 'You have voted for: \n') {
+            return {
+                status: 'error',
+                message: 'You have not voted for anyone.',
+            };
+        }
+
+        return {
+            status: 'success',
+            message: nominees,
+        };
+    } catch (err) {
+        throw err;
+    }
+};
+
 module.exports = {
     nationRoles,
     giveNationRole,
@@ -565,4 +783,7 @@ module.exports = {
     getVotersNation,
     getVotesAvailableRaw,
     getCurrentVotesAvailable,
+    submitVote,
+    rescindVote,
+    checkVotersNominees,
 };
