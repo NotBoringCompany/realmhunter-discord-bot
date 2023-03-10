@@ -236,9 +236,9 @@ const questEntriesTagClaimButton = () => {
 };
 
 module.exports = {
-    getFirstQuestWinners,
-    getAllFirstQuestEntries,
-    addAllFirstQuestEntriesAndWinners,
+    // getFirstQuestWinners,
+    // getAllFirstQuestEntries,
+    // addAllFirstQuestEntriesAndWinners,
     claimFirstQuestTags,
     questEntriesTagClaimButton,
 };
