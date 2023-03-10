@@ -6,120 +6,120 @@ const mongoose = require('mongoose');
 const permissions = require('../dbPermissions');
 const { generateObjectId } = require('../cryptoUtils');
 
-/**
- * All winners for the first quest.
- */
-const firstQuestWinners = JSON.parse(
-    fs.readFileSync(
-        path.join(__dirname, '../../files/questWinners/first-quest-winners.json'),
-    ),
-);
+// /**
+//  * All winners for the first quest.
+//  */
+// const firstQuestWinners = JSON.parse(
+//     fs.readFileSync(
+//         path.join(__dirname, '../../files/questWinners/first-quest-winners.json'),
+//     ),
+// );
 
-/**
- * All entries for the first quest.
- */
-const firstQuestEntries = JSON.parse(
-    fs.readFileSync(
-        path.join(__dirname, '../../files/questWinners/first-quest-all-entries.json'),
-    ),
-);
+// /**
+//  * All entries for the first quest.
+//  */
+// const firstQuestEntries = JSON.parse(
+//     fs.readFileSync(
+//         path.join(__dirname, '../../files/questWinners/first-quest-all-entries.json'),
+//     ),
+// );
 
-/**
- * Get the Discord ID of the first quest winner.
- */
-const getFirstQuestWinners = () => {
-    // get the winners' discord IDs
-    const winnerDiscordIds = [];
-    firstQuestWinners.forEach((winner) => {
-        // if the URL exists.
-        if (winner.Discord) {
-            const getId = getDiscordId(winner);
-            winnerDiscordIds.push(getId);
-        // if the URL doesn't exist, we need to query `firstQuestEntries` to find the other instance of entries that has the Discord ID.
-        } else {
-            const userEmail = winner.Email;
-            const dataWithDiscordId = firstQuestEntries.find((entry) => entry.Email === userEmail && entry.Discord);
-            const getId = getDiscordId(dataWithDiscordId);
-            winnerDiscordIds.push(getId);
-        }
-    });
+// /**
+//  * Get the Discord ID of the first quest winner.
+//  */
+// const getFirstQuestWinners = () => {
+//     // get the winners' discord IDs
+//     const winnerDiscordIds = [];
+//     firstQuestWinners.forEach((winner) => {
+//         // if the URL exists.
+//         if (winner.Discord) {
+//             const getId = getDiscordId(winner);
+//             winnerDiscordIds.push(getId);
+//         // if the URL doesn't exist, we need to query `firstQuestEntries` to find the other instance of entries that has the Discord ID.
+//         } else {
+//             const userEmail = winner.Email;
+//             const dataWithDiscordId = firstQuestEntries.find((entry) => entry.Email === userEmail && entry.Discord);
+//             const getId = getDiscordId(dataWithDiscordId);
+//             winnerDiscordIds.push(getId);
+//         }
+//     });
 
-    return winnerDiscordIds;
-};
+//     return winnerDiscordIds;
+// };
 
-/**
- * Get all the Discord IDs of the first quest entries.
- */
-const getAllFirstQuestEntries = () => {
-    const entriesData = [];
+// /**
+//  * Get all the Discord IDs of the first quest entries.
+//  */
+// const getAllFirstQuestEntries = () => {
+//     const entriesData = [];
 
-    const winners = getFirstQuestWinners();
+//     const winners = getFirstQuestWinners();
 
-    firstQuestEntries.forEach((entry) => {
-        // check if discord URL exists, if `entriesData` array doesn't already contain the ID and is not already part of the winners.
-        if (entry.Discord && !entriesData.includes(getDiscordId(entry)) && !winners.includes(getDiscordId(entry))) {
-            entriesData.push(getDiscordId(entry));
-        }
-    });
+//     firstQuestEntries.forEach((entry) => {
+//         // check if discord URL exists, if `entriesData` array doesn't already contain the ID and is not already part of the winners.
+//         if (entry.Discord && !entriesData.includes(getDiscordId(entry)) && !winners.includes(getDiscordId(entry))) {
+//             entriesData.push(getDiscordId(entry));
+//         }
+//     });
 
-    return entriesData;
-};
+//     return entriesData;
+// };
 
-/**
- * Gets the Discord ID from the entry. Only works with our quest entries.
- */
-const getDiscordId = (data) => {
-    const split = data.Discord.split('@me/')[1];
-    const getSub = split.substring(0, split.indexOf('#'));
-    return getSub;
-};
+// /**
+//  * Gets the Discord ID from the entry. Only works with our quest entries.
+//  */
+// const getDiscordId = (data) => {
+//     const split = data.Discord.split('@me/')[1];
+//     const getSub = split.substring(0, split.indexOf('#'));
+//     return getSub;
+// };
 
-/**
- * Add all the first quest entries and winners to the database.
- */
-const addAllFirstQuestEntriesAndWinners = async () => {
-    try {
-        const Entries = mongoose.model('QuestEntries', QuestEntriesSchema, 'RHDiscordFirstQuestEntries');
+// /**
+//  * Add all the first quest entries and winners to the database.
+//  */
+// const addAllFirstQuestEntriesAndWinners = async () => {
+//     try {
+//         const Entries = mongoose.model('QuestEntries', QuestEntriesSchema, 'RHDiscordFirstQuestEntries');
 
-        const { _wperm, _rperm, _acl } = permissions(true, false);
+//         const { _wperm, _rperm, _acl } = permissions(true, false);
 
-        // insert the winners first.
-        const winners = getFirstQuestWinners();
-        await Entries.insertMany(winners.map((winner) => {
-            return {
-                _id: generateObjectId(),
-                _created_at: Date.now(),
-                _updated_at: Date.now(),
-                _wperm: _wperm,
-                _rperm: _rperm,
-                _acl: _acl,
-                userId: winner,
-                isWinner: true,
-                claimed: false,
-            };
-        }));
+//         // insert the winners first.
+//         const winners = getFirstQuestWinners();
+//         await Entries.insertMany(winners.map((winner) => {
+//             return {
+//                 _id: generateObjectId(),
+//                 _created_at: Date.now(),
+//                 _updated_at: Date.now(),
+//                 _wperm: _wperm,
+//                 _rperm: _rperm,
+//                 _acl: _acl,
+//                 userId: winner,
+//                 isWinner: true,
+//                 claimed: false,
+//             };
+//         }));
 
-        const entries = getAllFirstQuestEntries();
-        await Entries.insertMany(entries.map((entry) => {
-            return {
-                _id: generateObjectId(),
-                _created_at: Date.now(),
-                _updated_at: Date.now(),
-                _wperm: _wperm,
-                _rperm: _rperm,
-                _acl: _acl,
-                userId: entry,
-                isWinner: false,
-                claimed: false,
-            };
-        }));
-    } catch (err) {
-        console.log({
-            errorFrom: 'addAllFirstQuestEntriesAndWinners',
-            errorMessage: err,
-        });
-    }
-};
+//         const entries = getAllFirstQuestEntries();
+//         await Entries.insertMany(entries.map((entry) => {
+//             return {
+//                 _id: generateObjectId(),
+//                 _created_at: Date.now(),
+//                 _updated_at: Date.now(),
+//                 _wperm: _wperm,
+//                 _rperm: _rperm,
+//                 _acl: _acl,
+//                 userId: entry,
+//                 isWinner: false,
+//                 claimed: false,
+//             };
+//         }));
+//     } catch (err) {
+//         console.log({
+//             errorFrom: 'addAllFirstQuestEntriesAndWinners',
+//             errorMessage: err,
+//         });
+//     }
+// };
 
 /**
  * Lets users who entered and who won to claim their tags from the first quest.
