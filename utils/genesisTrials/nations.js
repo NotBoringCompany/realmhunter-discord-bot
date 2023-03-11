@@ -596,6 +596,19 @@ const submitVote = async (interaction, nomineeId) => {
         // we get the nation pointer.
         const nationPointer = userQuery._p_nation;
 
+        // we check if the user's nation is part of a union.
+        const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
+        // split to get the nation's object ID
+        const nationObjId = nationPointer.split('$')[1];
+        const nationQuery = await Nation.findOne({ _id: nationObjId });
+
+        if (!nationQuery) {
+            return {
+                status: 'error',
+                message: 'Nation not found in database. Please submit a ticket.',
+            };
+        }
+
         // if the nation pointer is undefined, we throw an error.
         if (!nationPointer) {
             return {
@@ -617,6 +630,7 @@ const submitVote = async (interaction, nomineeId) => {
 
         // we get the nominee's nation pointer.
         const nomineeNationPointer = nomineeQuery._p_nation;
+        const nomineeNationQuery = await Nation.findOne({ _id: nomineeNationPointer.split('$')[1] });
 
         // if the nominee's nation pointer is undefined, we throw an error.
         if (!nomineeNationPointer) {
@@ -627,11 +641,26 @@ const submitVote = async (interaction, nomineeId) => {
         }
 
         // if the nominee is not in the same nation as the voter, we throw an error.
-        if (nomineeNationPointer !== nationPointer) {
-            return {
-                status: 'error',
-                message: 'Nominee is not in your nation.',
-            };
+        // check if user's nation and nominee's nation is in a union.
+        const union = nationQuery.union;
+        const nomineeUnion = nomineeNationQuery.union;
+
+        if (union) {
+            // if union exists for user's nation, check if nominee's nation is in the same union.
+            if (nomineeUnion !== union) {
+                return {
+                    status: 'error',
+                    message: 'Nominee is not in your union.',
+                };
+            }
+        // if union doesn't exist, check if nominee's nation is the same as user's nation.
+        } else {
+            if (nomineeNationPointer !== nationPointer) {
+                return {
+                    status: 'error',
+                    message: 'Nominee is not in your nation.',
+                };
+            }
         }
 
         // if the voter doesn't exist, we create a new document for them.

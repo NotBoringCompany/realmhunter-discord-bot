@@ -143,6 +143,7 @@ const NationsSchema = new mongoose.Schema(
         members: Array,
         tagsStolen: Number,
         tagsEarned: Number,
+        union: String,
     },
     {
         versionKey: false,
