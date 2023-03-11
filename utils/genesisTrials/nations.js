@@ -775,6 +775,20 @@ const checkVotersNominees = async (voterId) => {
     }
 };
 
+// /**
+//  * 
+//  */
+// const stakeTags = async (userId) => {
+//     try {
+
+//     } catch (err) {
+//         console.log({
+//             errorFrom: 'stakeTags',
+//             errorMessage: err,
+//         });
+//     }
+// };
+
 module.exports = {
     nationRoles,
     giveNationRole,

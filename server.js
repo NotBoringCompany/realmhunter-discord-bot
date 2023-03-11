@@ -119,7 +119,7 @@ client.on('messageCreate', async (message) => {
         await message.channel.send(resetMessage);
     }
 
-    if (message.content.toLowerCase() === '!hunt invalidatecontribution') {
+    if (message.content.toLowerCase().startsWith('!hunt invalidatecontribution')) {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
 
         const { message: invalidateMessage } = await invalidateContribution(message).catch((err) => console.log(err));
