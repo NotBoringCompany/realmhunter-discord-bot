@@ -54,30 +54,35 @@ const retrieveUnrewardedContributionsLogic = async () => {
             };
         } else {
             const formattedContributionData = [];
-            // we filter out all contributions that have been rewarded and only return their URL and user ID.
-            for (let i = 0; i < contributionData.length; i++) {
-                const userId = contributionData[i].userId;
-                const contribution = contributionData[i].contributions[0];
+            if (contributionData.length > 0) {
+                // we filter out all contributions that have been rewarded and only return their URL and user ID.
+                for (let i = 0; i < contributionData.length; i++) {
+                    const userId = contributionData[i].userId;
 
-                if (!contribution.rewarded) {
-                    formattedContributionData.push({
-                        userId: userId,
-                        contributionUrl: contribution.url,
-                    });
+                    if (contributionData[i].contributions.length > 0) {
+                        const contribution = contributionData[i].contributions[0];
+
+                        if (!contribution.rewarded) {
+                            formattedContributionData.push({
+                                userId: userId,
+                                contributionUrl: contribution.url,
+                            });
+                        }
+                    }
                 }
-            }
 
-            const finalContributionData = [];
-            // we only return the first 10 unrewarded contributions to prevent a too long message.
-            for (let j = 0; j < 10; j++) {
-                finalContributionData.push(formattedContributionData[j]);
-            }
+                const finalContributionData = [];
+                // we only return the first 10 unrewarded contributions to prevent a too long message.
+                for (let j = 0; j < 10; j++) {
+                    finalContributionData.push(formattedContributionData[j]);
+                }
 
-            return {
-                status: 'success',
-                message: 'Unrewarded contributions retrieved.',
-                contributions: finalContributionData,
-            };
+                return {
+                    status: 'success',
+                    message: 'Unrewarded contributions retrieved.',
+                    contributions: finalContributionData,
+                };
+            }
         }
     } catch (err) {
         throw err;
