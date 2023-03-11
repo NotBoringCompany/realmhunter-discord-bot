@@ -598,6 +598,15 @@ const submitVote = async (interaction, nomineeId) => {
 
         // we check if the user's nation is part of a union.
         const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
+
+        // if the nation pointer is undefined, we throw an error.
+        if (!nationPointer) {
+            return {
+                status: 'error',
+                message: 'You are not in a nation. Please join a nation before voting.',
+            };
+        }
+
         // split to get the nation's object ID
         const nationObjId = nationPointer.split('$')[1];
         const nationQuery = await Nation.findOne({ _id: nationObjId });
@@ -606,14 +615,6 @@ const submitVote = async (interaction, nomineeId) => {
             return {
                 status: 'error',
                 message: 'Nation not found in database. Please submit a ticket.',
-            };
-        }
-
-        // if the nation pointer is undefined, we throw an error.
-        if (!nationPointer) {
-            return {
-                status: 'error',
-                message: 'You are not in a nation. Please join a nation before voting.',
             };
         }
 
@@ -630,9 +631,6 @@ const submitVote = async (interaction, nomineeId) => {
 
         // we get the nominee's nation pointer.
         const nomineeNationPointer = nomineeQuery._p_nation;
-        // split to get the nation's object ID
-        const nomineeNationObjId = nomineeNationPointer.split('$')[1];
-        const nomineeNationQuery = await Nation.findOne({ _id: nomineeNationObjId });
 
         // if the nominee's nation pointer is undefined, we throw an error.
         if (!nomineeNationPointer) {
@@ -641,6 +639,10 @@ const submitVote = async (interaction, nomineeId) => {
                 message: 'Nominee is not in a nation.',
             };
         }
+
+        // split to get the nation's object ID
+        const nomineeNationObjId = nomineeNationPointer.split('$')[1];
+        const nomineeNationQuery = await Nation.findOne({ _id: nomineeNationObjId });
 
         // if the nominee is not in the same nation as the voter, we throw an error.
         // check if user's nation and nominee's nation is in a union.
