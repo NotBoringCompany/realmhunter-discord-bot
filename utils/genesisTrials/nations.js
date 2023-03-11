@@ -630,7 +630,9 @@ const submitVote = async (interaction, nomineeId) => {
 
         // we get the nominee's nation pointer.
         const nomineeNationPointer = nomineeQuery._p_nation;
-        const nomineeNationQuery = await Nation.findOne({ _id: nomineeNationPointer.split('$')[1] });
+        // split to get the nation's object ID
+        const nomineeNationObjId = nomineeNationPointer.split('$')[1];
+        const nomineeNationQuery = await Nation.findOne({ _id: nomineeNationObjId });
 
         // if the nominee's nation pointer is undefined, we throw an error.
         if (!nomineeNationPointer) {
