@@ -33,7 +33,7 @@ const retrieveUnrewardedContributions = async (message) => {
         console.log({
             errorFrom: 'retrieveUnrewardedContributions',
             errorMessage: err,
-        })
+        });
     }
 };
 
