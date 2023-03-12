@@ -30,7 +30,37 @@ const rescindRepresentativeVoteModal = new ModalBuilder()
         ),
     ]);
 
+const stakeTagsModal = new ModalBuilder()
+    .setCustomId('stakeNationTagsModal')
+    .setTitle('Stake cookies for your nation!')
+    .addComponents([
+        new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+                .setCustomId('cookiesToStakeAmount')
+                .setLabel('Enter amount of cookies to stake')
+                .setPlaceholder('e.g.: 100')
+                .setStyle(TextInputStyle.Short)
+                .setMinLength(1),
+        ),
+    ]);
+
+const unstakeTagsModal = new ModalBuilder()
+    .setCustomId('unstakeNationTagsModal')
+    .setTitle('Unstake your staked cookies')
+    .addComponents([
+        new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+                .setCustomId('cookiesToUnstakeAmount')
+                .setLabel('Enter amount of cookies to unstake')
+                .setPlaceholder('e.g.: 100')
+                .setStyle(TextInputStyle.Short)
+                .setMinLength(1),
+        ),
+    ]);
+
 module.exports = {
     representativeVotingModal,
     rescindRepresentativeVoteModal,
+    stakeTagsModal,
+    unstakeTagsModal,
 };

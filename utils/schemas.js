@@ -141,9 +141,12 @@ const NationsSchema = new mongoose.Schema(
         _acl: Object,
         nation: String,
         members: Array,
-        tagsStolen: Number,
+        stakedTags: Array,
         tagsEarned: Number,
+        pendingTagsEarned: Number,
         union: String,
+        challengesCompleted: Array,
+        challengesCompletedToday: Array,
     },
     {
         versionKey: false,

@@ -35,16 +35,17 @@ const { showInviterPendingInvitesLogic, removeExpiredInvitesScheduler } = requir
 const { showTagsLeaderboard, tagsLeaderboardScheduler } = require('./utils/genesisTrials/tagsLeaderboard');
 const { showPartOneInfoEmbed } = require('./commands/genesisTrials/helpinfo');
 const { retrieveUnrewardedContributions, rewardContribution, invalidateContribution } = require('./commands/genesisTrials/rewardContributions');
-const { showNationRoleEmbed, showRepresentativeVotingEmbed } = require('./commands/genesisTrials/nations');
+const { showNationRoleEmbed, showRepresentativeVotingEmbed, showStakeTagsEmbed } = require('./commands/genesisTrials/nations');
 const { createRole } = require('./commands/createRoles');
 const { nationButtonInteraction } = require('./interactions/buttons/nationRoles');
 const { manuallyRewardTags } = require('./commands/genesisTrials/manualRewarding');
 const { restartDailyContributionTagsClaimedScheduler, restartDailyContributionTagsClaimed } = require('./utils/genesisTrials/rewardContributions');
 const { representativeVotingModal } = require('./modals/nations');
-const { getVotersNation, getCurrentVotesAvailable, submitVote, rescindVote } = require('./utils/genesisTrials/nations');
+const { getVotersNation, getCurrentVotesAvailable, submitVote, rescindVote, stakeTags, unstakeTags } = require('./utils/genesisTrials/nations');
 const { claimFirstQuestTags } = require('./utils/genesisTrials/questWinners');
 const { showFirstQuestWinnerButtons } = require('./commands/genesisTrials/questWinners');
 const { nationLeadVotesInteraction } = require('./interactions/buttons/nationLeadVotes');
+const { nationTagStakingInteraction } = require('./interactions/buttons/nationTagStaking');
 
 const client = new Client({
     intents: [
@@ -77,6 +78,11 @@ for (const file of commandFiles) {
 
 // MESSAGE CREATE EVENT LISTENER
 client.on('messageCreate', async (message) => {
+    if (message.content.toLowerCase() === '!showstaketagsembed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showStakeTagsEmbed(message);
+    }
+
     if (message.content.toLowerCase() === '!showrepresentativevotingembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         await showRepresentativeVotingEmbed(message);
@@ -282,6 +288,7 @@ client.on('messageCreate', async (message) => {
 // INTERACTION CREATE EVENT LISTENER
 client.on('interactionCreate', async (interaction) => {
     if (interaction.isButton()) {
+        await nationTagStakingInteraction(interaction);
         await nationLeadVotesInteraction(interaction);
 
         if (interaction.customId === 'questCollectCookies') {
@@ -323,6 +330,19 @@ client.on('interactionCreate', async (interaction) => {
 
     // modal submit interactions
     if (interaction.type === InteractionType.ModalSubmit) {
+        if (interaction.customId === 'stakeNationTagsModal') {
+            const cookiesToStake = interaction.fields.getTextInputValue('cookiesToStakeAmount');
+            const { message: stakeMessage } = await stakeTags(interaction.user.id, parseInt(cookiesToStake));
+
+            await interaction.reply({ content: stakeMessage, ephemeral: true });
+        }
+
+        if (interaction.customId === 'unstakeNationTagsModal') {
+            const cookiesToUnstake = interaction.fields.getTextInputValue('cookiesToUnstakeAmount');
+            const { message: unstakeMessage } = await unstakeTags(interaction.user.id, parseInt(cookiesToUnstake));
+
+            await interaction.reply({ content: unstakeMessage, ephemeral: true });
+        }
         // if a user submits a contribution, we run the `submitContributionToDB` function to upload the contribution to the database.
         if (interaction.customId === 'submitContributionModal') {
             // get the user id and the contribution work url from the modal

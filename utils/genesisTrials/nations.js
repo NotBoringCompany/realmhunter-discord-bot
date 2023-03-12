@@ -817,19 +817,286 @@ const checkVotersNominees = async (voterId) => {
     }
 };
 
-// /**
-//  * 
-//  */
-// const stakeTags = async (userId) => {
-//     try {
+/**
+ * Stakes tags for your nation.
+ */
+const stakeTags = async (userId, stakeAmount) => {
+    try {
+        // first, we check if the user exists.
+        const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: userId });
 
-//     } catch (err) {
-//         console.log({
-//             errorFrom: 'stakeTags',
-//             errorMessage: err,
-//         });
-//     }
-// };
+        // if the user doesn't exist, then they're not in a nation and can't stake anyway.
+        if (!userQuery) {
+            return {
+                status: 'error',
+                message: 'You are not in a nation. You cannot stake.',
+            };
+        // otherwise, we check if the user has a nation.
+        } else {
+            const nationPointer = userQuery._p_nation;
+
+            // if they're not in a nation, they can't stake.
+            if (!nationPointer) {
+                return {
+                    status: 'error',
+                    message: 'You are not in a nation. You cannot stake.',
+                };
+            // otherwise, we query the nation via the pointer.
+            } else {
+                const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
+                // split the pointer to get the nation's object ID.
+                const nationObjId = nationPointer.split('$')[1];
+                const nationQuery = await Nation.findOne({ _id: nationObjId });
+
+                // if nation doesn't exist, then throw an error.
+                if (!nationQuery) {
+                    return {
+                        status: 'error',
+                        message: 'Error while finding nation. Please submit a ticket.',
+                    };
+                // otherwise, we first of all check if the nation contains the user via the `members` array.
+                } else {
+                    // we check if the user data already exists in the `stakedTags` array.
+                    const stakedTags = nationQuery.stakedTags;
+                    const userStaked = stakedTags.find((data) => data.userId === userId);
+
+                    // we also check if the user has enough tags to stake `stakeAmount`.
+                    const checkTagsAmount = userQuery.hunterTags;
+
+                    // if the user doesn't have enough tags, we throw an error.
+                    if (checkTagsAmount < stakeAmount) {
+                        return {
+                            status: 'error',
+                            message: 'You do not have enough cookies to stake.',
+                        };
+                    }
+
+                    // if user hasn't staked, we add them to the array.
+                    if (!userStaked) {
+                        nationQuery.stakedTags.push({
+                            userId: userId,
+                            stakeAmount: stakeAmount,
+                        });
+                        nationQuery._updated_at = Date.now();
+                        await nationQuery.save();
+
+                        return {
+                            status: 'success',
+                            message: `Successfully staked ${stakeAmount} cookies.`,
+                        };
+                    } else {
+                        // otherwise, we use `updateOne` to add the stake amount to the user's existing data.
+                        await Nation.updateOne({ _id: nationObjId, 'stakedTags.userId': userId }, { $set: { 'stakedTags.$.stakeAmount': userStaked.stakeAmount + stakeAmount } });
+
+                        // remove the tags from the user's account.
+                        userQuery.hunterTags -= stakeAmount;
+                        userQuery._updated_at = Date.now();
+
+                        await userQuery.save();
+
+                        return {
+                            status: 'success',
+                            message: `Successfully staked ${stakeAmount} cookies.`,
+                        };
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.log({
+            errorFrom: 'stakeTags',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
+ * Buttons to stake and unstake tags.
+ */
+const stakeTagsButtons = () => {
+    return [
+        {
+            type: 2,
+            style: 1,
+            label: 'Stake cookies',
+            custom_id: 'stakeNationTagsButton',
+        },
+        {
+            type: 2,
+            style: 1,
+            label: 'Unstake cookies',
+            custom_id: 'unstakeNationTagsButton',
+        },
+        {
+            type: 2,
+            style: 1,
+            label: 'Check cookies staked amount',
+            custom_id: 'checkStakedNationTagsButton',
+        },
+    ];
+};
+
+/**
+ * Unstakes staked tags for your nation.
+ */
+const unstakeTags = async (userId, unstakeAmount) => {
+    try {
+        // first we check if the user exists.
+        const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: userId });
+
+        // if the user doesn't exist, then they're not in a nation and can't unstake anyway.
+        if (!userQuery) {
+            return {
+                status: 'error',
+                message: 'You are not in a nation. You have nothing to unstake.',
+            };
+        // otherwise, we check if the user has a nation.
+        } else {
+            const nationPointer = userQuery._p_nation;
+
+            // if they're not in a nation, they can't unstake.
+            if (!nationPointer) {
+                return {
+                    status: 'error',
+                    message: 'You are not in a nation. You have nothing to unstake.',
+                };
+            // otherwise, we query the nation via the pointer.
+            } else {
+                const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
+                // split the pointer to get the nation's object ID.
+                const nationObjId = nationPointer.split('$')[1];
+                const nationQuery = await Nation.findOne({ _id: nationObjId });
+
+                // if nation doesnt exist, something is wrong, throw an error.
+                if (!nationQuery) {
+                    return {
+                        status: 'error',
+                        message: 'Error while finding nation. Please submit a ticket.',
+                    };
+                // otherwise, we check if `stakedTags` contains the user.
+                } else {
+                    const stakedTags = nationQuery.stakedTags;
+
+                    // we check if the user data already exists in the `stakedTags` array.
+                    const userStaked = stakedTags.find((data) => data.userId === userId);
+
+                    // if the user hasn't staked anything, we throw an error.
+                    if (!userStaked) {
+                        return {
+                            status: 'error',
+                            message: 'You have not staked anything.',
+                        };
+                    // otherwise, we check if the user has enough staked to unstake `unstakeAmount`.
+                    } else {
+                        const checkStakedAmount = userStaked.stakeAmount;
+
+                        // if they are trying to unstake more than they have staked, we throw an error.
+                        if (checkStakedAmount - unstakeAmount < 0) {
+                            return {
+                                status: 'error',
+                                message: 'You cannot unstake more than you have currently staked.',
+                            };
+                        } else {
+                            // otherwise, we use `updateOne` to remove the stake amount from the user's existing data.
+                            await Nation.updateOne({ _id: nationObjId, 'stakedTags.userId': userId }, { $set: { 'stakedTags.$.stakeAmount': userStaked.stakeAmount - unstakeAmount } });
+
+                            // add the tags to the user's account.
+                            userQuery.hunterTags += unstakeAmount;
+                            userQuery._updated_at = Date.now();
+
+                            await userQuery.save();
+
+                            return {
+                                status: 'success',
+                                message: `Successfully unstaked ${unstakeAmount} cookies.`,
+                            };
+                        }
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.log({
+            errorFrom: 'unstakeTags',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
+ * Gets the current amount of tags staked for a nation.
+ */
+const getCurrentTagsStaked = async (userId) => {
+    try {
+        // we check if the user exists
+        const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: userId });
+
+        // if user doesn't exist, we throw an error.
+        if (!userQuery) {
+            return {
+                status: 'error',
+                message: 'You have not staked any cookies.',
+            };
+        // otherwise, we get their nation pointer.
+        } else {
+            const nationPointer = userQuery._p_nation;
+
+            // if no nation pointer, throw an error.
+            if (!nationPointer) {
+                return {
+                    status: 'error',
+                    message: 'You have not staked any cookies.',
+                };
+            // otherwise, we query the nation via the pointer.
+            } else {
+                const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
+                // split the pointer to get the nation's object ID.
+                const nationObjId = nationPointer.split('$')[1];
+                const nationQuery = await Nation.findOne({ _id: nationObjId });
+
+                // if nation doesnt exist, something is wrong, throw an error.
+                if (!nationQuery) {
+                    return {
+                        status: 'error',
+                        message: 'Error while finding nation. Please submit a ticket.',
+                    };
+                // otherwise, we get the staked tags.
+                } else {
+                    const stakedTags = nationQuery.stakedTags;
+                    // we find the user
+                    const userStaked = stakedTags.find((data) => data.userId === userId);
+
+                    if (!userStaked) {
+                        return {
+                            status: 'error',
+                            message: 'You have not staked any cookies.',
+                        };
+                    } else {
+                        if (!userStaked.stakeAmount) {
+                            return {
+                                status: 'error',
+                                message: 'You have not staked any cookies.',
+                            };
+                        } else {
+                            return {
+                                status: 'success',
+                                message: `You have staked ${userStaked.stakeAmount} cookies.`,
+                            };
+                        }
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.log({
+            errorFrom: 'getCurrentTagsStaked',
+            errorMessage: err,
+        });
+    }
+};
 
 module.exports = {
     nationRoles,
@@ -842,4 +1109,8 @@ module.exports = {
     submitVote,
     rescindVote,
     checkVotersNominees,
+    stakeTags,
+    stakeTagsButtons,
+    unstakeTags,
+    getCurrentTagsStaked,
 };
