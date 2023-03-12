@@ -280,92 +280,98 @@ const giveNationRole = async (interaction, role) => {
                         message: `You have joined Nation ${roleToGive.name}.`,
                     };
                 }
+            // UPDATE: if they're already in a nation, return a message saying they CANNOT change nations.
+            // (UPDATE FROM 12 MARCH. WILL REMOVE AFTER GENESIS TRIALS END.)
             } else {
-                // split the pointer to get the nation name and the object ID.
-                const nationObjId = nationPointer.split('$')[1];
-                const currentNationQuery = await Nation.findOne({ _id: nationObjId });
+                return {
+                    status: 'error',
+                    message: 'You are temporarily not allowed to change nations.',
+                };
+                // // split the pointer to get the nation name and the object ID.
+                // const nationObjId = nationPointer.split('$')[1];
+                // const currentNationQuery = await Nation.findOne({ _id: nationObjId });
 
-                // if the nation isn't found, something went wrong.
-                if (!currentNationQuery) {
-                    return {
-                        status: 'error',
-                        message: 'Nation to add not found. Please submit a ticket.',
-                    };
-                }
+                // // if the nation isn't found, something went wrong.
+                // if (!currentNationQuery) {
+                //     return {
+                //         status: 'error',
+                //         message: 'Nation to add not found. Please submit a ticket.',
+                //     };
+                // }
 
-                // if the user is already in the same nation, we return an error.
-                if (currentNationQuery.nation.toLowerCase() === roleToGive.name.toLowerCase()) {
-                    return {
-                        status: 'error',
-                        message: 'You are already in this nation.',
-                    };
-                // otherwise, we do a few things:
-                // 1. remove the user from the current nation (remove from members array)
-                // 2. remove the user's nation pointer from the user's data.
-                // 3. remove the user's current nation role.
-                // 4. add the user to the new nation (add to members array)
-                // 5. add the user's nation pointer to the user's data.
-                // 6. add the user's new nation role.
-                } else {
-                    // remove the user from the current nation.
-                    const currentNationMembers = currentNationQuery.members;
-                    const memberIndex = currentNationMembers.findIndex(m => m.userId === interaction.user.id);
-                    currentNationQuery.members.splice(memberIndex, 1);
-                    await currentNationQuery.save();
+                // // if the user is already in the same nation, we return an error.
+                // if (currentNationQuery.nation.toLowerCase() === roleToGive.name.toLowerCase()) {
+                //     return {
+                //         status: 'error',
+                //         message: 'You are already in this nation.',
+                //     };
+                // // otherwise, we do a few things:
+                // // 1. remove the user from the current nation (remove from members array)
+                // // 2. remove the user's nation pointer from the user's data.
+                // // 3. remove the user's current nation role.
+                // // 4. add the user to the new nation (add to members array)
+                // // 5. add the user's nation pointer to the user's data.
+                // // 6. add the user's new nation role.
+                // } else {
+                //     // remove the user from the current nation.
+                //     const currentNationMembers = currentNationQuery.members;
+                //     const memberIndex = currentNationMembers.findIndex(m => m.userId === interaction.user.id);
+                //     currentNationQuery.members.splice(memberIndex, 1);
+                //     await currentNationQuery.save();
 
-                    // then, we remove the user's nation pointer from the user's data.
-                    userQuery._p_nation = undefined;
-                    userQuery._updated_at = Date.now();
-                    await userQuery.save();
+                //     // then, we remove the user's nation pointer from the user's data.
+                //     userQuery._p_nation = undefined;
+                //     userQuery._updated_at = Date.now();
+                //     await userQuery.save();
 
-                    // then, we remove the user's current nation role.
-                    const currentNationRole = interaction.guild.roles.cache.find(r => r.name.toLowerCase() === currentNationQuery.nation.toLowerCase());
-                    await interaction.member.roles.remove(currentNationRole);
+                //     // then, we remove the user's current nation role.
+                //     const currentNationRole = interaction.guild.roles.cache.find(r => r.name.toLowerCase() === currentNationQuery.nation.toLowerCase());
+                //     await interaction.member.roles.remove(currentNationRole);
 
-                    // then, we add the user to the new nation.
-                    // first, we check if the nation has members.
-                    const newNationMembers = nationQuery.members;
+                //     // then, we add the user to the new nation.
+                //     // first, we check if the nation has members.
+                //     const newNationMembers = nationQuery.members;
 
-                    // if the nation doesn't have members yet, we add the user to the members array.
-                    if (!newNationMembers) {
-                        nationQuery.members = [{
-                            userId: interaction.user.id,
-                            member: 'role',
-                        }];
+                //     // if the nation doesn't have members yet, we add the user to the members array.
+                //     if (!newNationMembers) {
+                //         nationQuery.members = [{
+                //             userId: interaction.user.id,
+                //             member: 'role',
+                //         }];
 
-                        await nationQuery.save();
-                    // otherwise, we check if the user is already in the list (precautionary measures).
-                    } else {
-                        // if the user is already in the list, we return an error.
-                        if (newNationMembers.find(m => m.userId === interaction.user.id)) {
-                            return {
-                                status: 'error',
-                                message: 'You are already in this nation.',
-                            };
-                        // if the user isn't in the list, we add them.
-                        } else {
-                            nationQuery.members.push({
-                                userId: interaction.user.id,
-                                member: 'role',
-                            });
+                //         await nationQuery.save();
+                //     // otherwise, we check if the user is already in the list (precautionary measures).
+                //     } else {
+                //         // if the user is already in the list, we return an error.
+                //         if (newNationMembers.find(m => m.userId === interaction.user.id)) {
+                //             return {
+                //                 status: 'error',
+                //                 message: 'You are already in this nation.',
+                //             };
+                //         // if the user isn't in the list, we add them.
+                //         } else {
+                //             nationQuery.members.push({
+                //                 userId: interaction.user.id,
+                //                 member: 'role',
+                //             });
 
-                            await nationQuery.save();
-                        }
-                    }
+                //             await nationQuery.save();
+                //         }
+                //     }
 
-                    // once we've added the user to the new nation, we add the user's nation pointer to the user's data.
-                    userQuery._p_nation = `${process.env.NATIONS_DB_NAME}$${nationQuery._id}`;
-                    userQuery._updated_at = Date.now();
-                    await userQuery.save();
+                //     // once we've added the user to the new nation, we add the user's nation pointer to the user's data.
+                //     userQuery._p_nation = `${process.env.NATIONS_DB_NAME}$${nationQuery._id}`;
+                //     userQuery._updated_at = Date.now();
+                //     await userQuery.save();
 
-                    // finally, we add the user's new nation role.
-                    await interaction.member.roles.add(roleToGive);
+                //     // finally, we add the user's new nation role.
+                //     await interaction.member.roles.add(roleToGive);
 
-                    return {
-                        status: 'success',
-                        message: `You have joined Nation ${roleToGive.name}.`,
-                    };
-                }
+                //     return {
+                //         status: 'success',
+                //         message: `You have joined Nation ${roleToGive.name}.`,
+                //     };
+                // }
             }
         }
     } catch (err) {
@@ -804,7 +810,10 @@ const checkVotersNominees = async (voterId) => {
             message: nominees,
         };
     } catch (err) {
-        throw err;
+        console.log({
+            errorFrom: 'checkVotersNominees',
+            errorMessage: err,
+        });
     }
 };
 

@@ -288,6 +288,7 @@ client.on('interactionCreate', async (interaction) => {
             const { message: questMessage } = await claimFirstQuestTags(interaction.user.id);
             await interaction.reply({ content: questMessage, ephemeral: true });
         }
+
         // if nation button is clicked. will run the `nationButtonInteraction` function to check if the user can get a nation.
         await nationButtonInteraction(interaction);
 
