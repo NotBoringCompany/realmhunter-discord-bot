@@ -5,15 +5,17 @@ const nationLeadVotesInteraction = async (interaction) => {
     try {
         switch (interaction.customId) {
             case 'nationRepresentativeVoteButton':
-                const { status: voterStatus, message: voterMessage } = await getCurrentVotesAvailable(interaction);
-                // if there's an error when getting the votes, send the error message. else, proceed.
-                if (voterStatus === 'error') {
-                    await interaction.reply({ content: voterMessage, ephemeral: true });
-                    return;
-                }
+                await interaction.reply({ content: 'Voting closed.', ephemeral: true });
+                return;
+                // const { status: voterStatus, message: voterMessage } = await getCurrentVotesAvailable(interaction);
+                // // if there's an error when getting the votes, send the error message. else, proceed.
+                // if (voterStatus === 'error') {
+                //     await interaction.reply({ content: voterMessage, ephemeral: true });
+                //     return;
+                // }
 
-                // get the user's nation first
-                const { status: nationStatus, message: nationMessage, nation } = await getVotersNation(interaction.user.id);
+                // // get the user's nation first
+                // const { status: nationStatus, message: nationMessage, nation } = await getVotersNation(interaction.user.id);
                 // if there's an error, send the error message.
                 if (nationStatus === 'error') {
                     await interaction.reply({ content: nationMessage, ephemeral: true });
@@ -23,8 +25,9 @@ const nationLeadVotesInteraction = async (interaction) => {
                     return;
                 }
             case 'nationRepresentativeRescindVoteButton':
-                await interaction.showModal(rescindRepresentativeVoteModal);
-                return;
+                await interaction.reply({ content: 'Voting closed.', ephemeral: true });
+                // await interaction.showModal(rescindRepresentativeVoteModal);
+                // return;
             case 'nationRepresentativeCheckVotesLeftButton':
                 const { message: currentVotesMsg } = await getCurrentVotesAvailable(interaction);
                 return await interaction.reply({ content: currentVotesMsg, ephemeral: true });

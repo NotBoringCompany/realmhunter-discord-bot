@@ -528,8 +528,6 @@ const getCurrentVotesAvailable = async (interaction) => {
     try {
         const votesAvailableRaw = getVotesAvailableRaw(interaction);
 
-        console.log(votesAvailableRaw);
-
         // if there's an error getting the votes available raw, we throw an error.
         if (!votesAvailableRaw) {
             return {
@@ -818,10 +816,99 @@ const checkVotersNominees = async (voterId) => {
 };
 
 /**
+ * Gets all vote results for all nominees.
+ */
+const getVoteResults = async () => {
+    try {
+        // get the vote database
+        const Votes = mongoose.model('Votes', NationLeadVoteSchema, 'RHDiscordNationLeadVotes');
+        const votesQuery = await Votes.find();
+
+        // if there's an error getting votes, we throw an error.
+        if (!votesQuery) {
+            return {
+                status: 'error',
+                message: 'Error getting votes.',
+            };
+        // else, we get the 'nomineesVoted' array from each votesQuery.
+        } else {
+            const nomineesData = [];
+            // we want to get the nomineesVoted array from each votesQuery and add it to the nomineesData array.
+            // if the participant doesn't exist yet, we add it to the array with their userId and their voteTotal.
+            // if the participant does exist, we add 1 to their voteTotal.
+            for (let i = 0; i < votesQuery.length; i++) {
+                const nomineesVoted = votesQuery[i].nomineesVoted;
+                for (let j = 0; j < nomineesVoted.length; j++) {
+                    const nominee = nomineesVoted[j];
+                    const participantExists = nomineesData.find((participant) => participant.userId === nominee);
+                    if (!participantExists) {
+                        nomineesData.push({
+                            userId: nominee,
+                            voteTotal: 1,
+                        });
+                    } else {
+                        participantExists.voteTotal++;
+                    }
+                }
+            }
+
+            // sort it from highest votes to lowest votes.
+            nomineesData.sort((a, b) => b.voteTotal - a.voteTotal);
+            
+            // we now query the user's data and check their nation for each nominee.
+            const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
+            const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
+
+            for (let i = 0; i < nomineesData.length; i++) {
+                const userQuery = await User.findOne({ userId: nomineesData[i].userId });
+
+                if (userQuery) {
+                    const nationPointer = userQuery._p_nation;
+
+                    if (nationPointer) {
+                        // split the pointer to get the nation's object ID.
+                        const nationObjId = nationPointer.split('$')[1];
+                        const nationQuery = await Nation.findOne({ _id: nationObjId });
+
+                        if (nationQuery) {
+                            nomineesData[i].nation = nationQuery.nation;
+                            if (nationQuery.union) {
+                                nomineesData[i].union = nationQuery.union;
+                            }
+                        }
+                    }
+                }
+            }
+
+            console.log(nomineesData);
+        }
+    } catch (err) {
+        console.log({
+            errorFrom: 'getVoteResults',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
  * Stakes tags for your nation.
  */
 const stakeTags = async (userId, stakeAmount) => {
     try {
+        if (isNaN(stakeAmount)) {
+            return {
+                status: 'error',
+                message: 'Please enter a valid number.',
+            };
+        }
+
+        if (stakeAmount < 1) {
+            return {
+                status: 'error',
+                message: 'You cannot stake less than 1 cookie.',
+            };
+        }
+
         // first, we check if the user exists.
         const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
         const userQuery = await User.findOne({ userId: userId });
@@ -942,6 +1029,20 @@ const stakeTagsButtons = () => {
  */
 const unstakeTags = async (userId, unstakeAmount) => {
     try {
+        if (isNaN(unstakeAmount)) {
+            return {
+                status: 'error',
+                message: 'Please enter a valid number.',
+            };
+        }
+
+        if (unstakeAmount < 1) {
+            return {
+                status: 'error',
+                message: 'You cannot unstake less than 1 cookie.',
+            };
+        }
+
         // first we check if the user exists.
         const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
         const userQuery = await User.findOne({ userId: userId });
@@ -1098,6 +1199,39 @@ const getCurrentTagsStaked = async (userId) => {
     }
 };
 
+// /**
+//  * Gets the cumulative amount of tags staked for a nation OR union (across all members)
+//  */
+// const getNationCumulativeTagsStaked = async (nationName) => {
+//     try {
+//         // we get the nation from their name
+//         const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
+//         const nationQuery = await Nation.findOne({ nationName: nationName });
+
+//         // if nation can't be found, throw error.
+//         if (!nationQuery) {
+//             return {
+//                 status: 'error',
+//                 message: 'Nation not found.',
+//             };
+//         // else, we get the stakedTags array.
+//         } else {
+//             const stakedTags = nationQuery.stakedTags;
+
+//             // if the array is empty, we return 0. otherwise, we reduce the array to get the total amount staked.
+//             return {
+//                 status: 'success',
+//                 message: stakedTags.length === 0 ? 0 : stakedTags.reduce((a, b) => a + b.stakeAmount, 0),
+//             };
+//         }
+//     } catch (err) {
+//         console.log({
+//             errorFrom: 'getNationCumulativeTagsStaked',
+//             errorMessage: err,
+//         });
+//     }
+// };
+
 module.exports = {
     nationRoles,
     giveNationRole,
@@ -1113,4 +1247,5 @@ module.exports = {
     stakeTagsButtons,
     unstakeTags,
     getCurrentTagsStaked,
+    getNationCumulativeTagsStaked,
 };
