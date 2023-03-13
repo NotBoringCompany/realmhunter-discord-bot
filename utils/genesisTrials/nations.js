@@ -1247,5 +1247,5 @@ module.exports = {
     stakeTagsButtons,
     unstakeTags,
     getCurrentTagsStaked,
-    getNationCumulativeTagsStaked,
+    // getNationCumulativeTagsStaked,
 };
