@@ -17,8 +17,7 @@ const checkTagsCollected = async (userId) => {
         } else {
             return {
                 status: 'success',
-                message: `You have collected ${userQuery.hunterTags} cookies so far. Keep it up and the Gatekeeper may be happy. \n\
-                If this is less than what you expect, please make sure you aren't staking any cookies for your nation.`,
+                message: `You have collected ${userQuery.hunterTags} cookies so far. Keep it up and the Gatekeeper may be happy.`,
             };
         }
     } catch (err) {
