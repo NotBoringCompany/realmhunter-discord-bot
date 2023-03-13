@@ -394,7 +394,7 @@ client.on('ready', async c => {
     await removeExpiredInvitesScheduler();
     await restartDailyContributionTagsClaimedScheduler();
     await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
-    await cumulativeNationTagsStakedScheduler(process.env.CUMULATIVE_NATION_TAGS_STAKED_MESSAGEID, client);
+    await cumulativeNationTagsStakedScheduler(process.env.CUMULATIVE_COOKIES_STAKED_EMBED_MESSAGEID, client);
 
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,
