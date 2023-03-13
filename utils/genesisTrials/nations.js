@@ -1296,6 +1296,8 @@ const cumulativeNationTagsStakedScheduler = async (msgId, client) => {
             const stakingLeaderboardChannel = await client.channel.fetch(process.env.CUMULATIVE_COOKIES_STAKED_EMBED_CHANNELID);
             const stakingLeaderboardMsg = await stakingLeaderboardChannel.messages.fetch(msgId);
 
+            console.log(stakingLeaderboardMsg);
+
             const { embed } = await showCumulativeNationTagsStaked();
 
             await stakingLeaderboardMsg.edit({ embeds: [embed] });
