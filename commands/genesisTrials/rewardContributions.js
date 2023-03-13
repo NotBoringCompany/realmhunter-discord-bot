@@ -19,7 +19,7 @@ const retrieveUnrewardedContributions = async (message) => {
             for (let i = 0; i < contributions.length; i++) {
                 const contribution = contributions[i];
 
-                if (contribution.length > 0) {
+                if (contribution) {
                     contributionMessage += `User ID: ${contribution.userId} - ${contribution.contributionUrl}\n`;
                 }
 
