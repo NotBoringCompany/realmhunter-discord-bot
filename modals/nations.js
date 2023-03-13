@@ -58,9 +58,32 @@ const unstakeTagsModal = new ModalBuilder()
         ),
     ]);
 
+const distributeNationPendingTagsModal = new ModalBuilder()
+    .setCustomId('distributeNationPendingTagsModal')
+    .setTitle('Distribute cookies to your members')
+    .addComponents([
+        new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+                .setCustomId('cookiesToDistributeUserId')
+                .setLabel('User ID of the member')
+                .setPlaceholder('e.g.: 123456789012345678')
+                .setStyle(TextInputStyle.Short)
+                .setMinLength(1),
+        ),
+        new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+                .setCustomId('cookiesToDistributeAmount')
+                .setLabel('Enter amount of cookies to distribute')
+                .setPlaceholder('e.g.: 100')
+                .setStyle(TextInputStyle.Short)
+                .setMinLength(1),
+        ),
+    ]);
+
 module.exports = {
     representativeVotingModal,
     rescindRepresentativeVoteModal,
     stakeTagsModal,
     unstakeTagsModal,
+    distributeNationPendingTagsModal,
 };

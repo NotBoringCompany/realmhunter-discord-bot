@@ -1,5 +1,5 @@
-const { nationRoleEmbed, representativeVotingEmbed, stakeTagsEmbed } = require('../../embeds/genesisTrials/nations');
-const { nationRoles, representativeVoteButtons, stakeTagsButtons } = require('../../utils/genesisTrials/nations');
+const { nationRoleEmbed, representativeVotingEmbed, stakeTagsEmbed, distributeNationPendingTagsEmbed } = require('../../embeds/genesisTrials/nations');
+const { nationRoles, representativeVoteButtons, stakeTagsButtons, sendPendingNationTagsLogic, distributeNationPendingTagsButtons } = require('../../utils/genesisTrials/nations');
 
 const showNationRoleEmbed = async (message) => {
     try {
@@ -74,8 +74,56 @@ const showStakeTagsEmbed = async (message) => {
     }
 };
 
+const sendPendingNationTags = async (message) => {
+    try {
+        const [hunt, rewardNation, nationName, cookiesToGive] = message.content.split(' ');
+
+        if (nationName.charAt(0) !== nationName.charAt(0).toUpperCase()) {
+            return {
+                status: 'error',
+                message: 'Nation name must start with a capital letter.',
+            };
+        }
+
+        if (isNaN(cookiesToGive)) {
+            return {
+                status: 'error',
+                message: 'Cookies to reward must be a number.',
+            };
+        }
+
+        return await sendPendingNationTagsLogic(nationName, cookiesToGive);
+    } catch (err) {
+        console.log({
+            errorFrom: 'sendPendingNationTags',
+            errorMessage: err,
+        });
+    }
+};
+
+const showDistributeNationPendingTagsEmbed = async (message) => {
+    try {
+        await message.channel.send({
+            embeds: [distributeNationPendingTagsEmbed],
+            components: [
+                {
+                    type: 1,
+                    components: distributeNationPendingTagsButtons(),
+                },
+            ],
+        });
+    } catch (err) {
+        console.log({
+            errorFrom: 'showDistributeNationPendingTagsEmbed',
+            errorMessage: err,
+        });
+    }
+};
+
 module.exports = {
     showNationRoleEmbed,
     showRepresentativeVotingEmbed,
     showStakeTagsEmbed,
+    sendPendingNationTags,
+    showDistributeNationPendingTagsEmbed,
 };

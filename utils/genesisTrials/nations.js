@@ -1308,6 +1308,197 @@ const cumulativeNationTagsStakedScheduler = async (msgId, client) => {
     }
 };
 
+/**
+ * Sends a nation that won a challenge some pending tags.
+ */
+const sendPendingNationTagsLogic = async (nationName, tagsToAdd) => {
+    try {
+        const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
+        const nationQuery = await Nation.findOne({ nation: nationName });
+
+        // if nation doesnt exist, throw an error.
+        if (!nationQuery) {
+            return {
+                status: 'error',
+                message: 'Nation not found. Please make the nation is typed correctly.',
+            };
+        // otherwise, add the tags to `pendingTagsEarned`.
+        } else {
+            if (!nationQuery.pendingTagsEarned) {
+                nationQuery.pendingTagsEarned = tagsToAdd;
+            } else {
+                nationQuery.pendingTagsEarned += tagsToAdd;
+            }
+
+            await nationQuery.save();
+
+            return {
+                status: 'success',
+                message: `${nationName} has been awarded ${tagsToAdd} cookies.`,
+            };
+        }
+    } catch (err) {
+        console.log({
+            errorFrom: 'sendPendingNationTagsLogic',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
+ * Buttons to stake and unstake tags.
+ */
+const distributeNationPendingTagsButtons = () => {
+    return [
+        {
+            type: 2,
+            style: 1,
+            label: 'Distribute Now',
+            custom_id: 'distributeNationPendingTagsButton',
+        },
+        {
+            type: 2,
+            style: 1,
+            label: 'Check pending cookies earned',
+            custom_id: 'checkNationPendingTagsButton',
+        },
+    ];
+};
+
+/**
+ * Checks how many pending tags a nation/union has earned from winning challenges.
+ */
+const checkNationPendingTags = async (interaction) => {
+    try {
+        const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: interaction.user.id });
+
+        let pendingTags = 0;
+
+        if (!userQuery) {
+            return {
+                status: 'error',
+                message: 'User not found on database.',
+            };
+        } else {
+            // get the nation pointer
+            const nationPointer = userQuery._p_nation;
+
+            if (!nationPointer) {
+                return {
+                    status: 'error',
+                    message: 'You are not part of a nation.',
+                };
+            }
+            // get the nation of the user
+            const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
+            // get the nation's obj ID by splitting.
+            const nationObjId = nationPointer.split('$')[1];
+            const nationQuery = await Nation.findOne({ _id: nationObjId });
+
+            if (!nationQuery) {
+                return {
+                    status: 'error',
+                    message: 'Nation not found on database.',
+                };
+            } else {
+                // check if the nation is part of a union.
+                if (nationQuery.union) {
+                    // get ALL the pending tags earned by the union.
+                    const nationsQuery = await Nation.find({ union: nationQuery.union });
+                    for (let i = 0; i < nationsQuery.length; i++) {
+                        if (nationsQuery[i].pendingTagsEarned) {
+                            pendingTags += nationsQuery[i].pendingTagsEarned;
+                        }
+                    }
+                } else {
+                    // get the pending tags earned by the nation.
+                    if (nationQuery.pendingTagsEarned) {
+                        pendingTags = nationQuery.pendingTagsEarned;
+                    }
+                }
+            }
+        }
+
+        return {
+            status: 'success',
+            message: `Your nation/union has ${pendingTags} pending cookies.`,
+            pendingCookies: pendingTags,
+        };
+    } catch (err) {
+        console.log({
+            errorFrom: 'checkNationPendingTags',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
+ * Distributes pending tags to a member. Only callable by the representative of each nation/union.
+ */
+const distributePendingTagsToMember = async (interaction, userToGiveId, tagsToDistribute) => {
+    try {
+        const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: userToGiveId });
+
+        if (!userQuery) {
+            return {
+                status: 'error',
+                message: 'Please require the user to collect daily cookies first to exist on the database.',
+            };
+        } else {
+            // we first check if the user is within the nation/union.
+            const userNationPointer = userQuery._p_nation;
+
+            const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
+            // split the nation pointer to get the obj ID.
+            const nationObjId = userNationPointer.split('$')[1];
+            const nationQuery = await Nation.findOne({ _id: nationObjId });
+
+            if (!nationQuery) {
+                return {
+                    status: 'error',
+                    message: 'Error while retrieving nation.',
+                };
+            // otherwise, we distribute the tags to the user.
+            } else {
+                // first, we check if the nation/union has enough pending tags to distribute.
+                const { pendingCookies: nationPendingTagsEarned } = await checkNationPendingTags(interaction);
+
+                if (nationPendingTagsEarned < tagsToDistribute) {
+                    return {
+                        status: 'error',
+                        message: 'Your nation/union does not have enough cookies to distribute.',
+                    };
+                } else {
+                    // we do two things:
+                    // 1. reduce the pending tags earned by the nation/union by `tagsToDistribute`.
+                    // 2. add `tagsToDistribute` to the user's `hunterTags`.
+                    nationQuery.pendingTagsEarned -= tagsToDistribute;
+                    nationQuery._updated_at = Date.now();
+
+                    await nationQuery.save();
+
+                    userQuery.hunterTags += tagsToDistribute;
+                    userQuery._updated_at = Date.now();
+
+                    await userQuery.save();
+
+                    return {
+                        status: 'success',
+                        message: `Distributed ${tagsToDistribute} cookies to <@${userToGiveId}.`,
+                    };
+                }
+            }
+        }
+    } catch (err) {
+        console.log({
+            errorFrom: 'distributePendingTagsToMember',
+            errorMessage: err,
+        });
+    }
+};
+
 module.exports = {
     nationRoles,
     giveNationRole,
@@ -1326,4 +1517,8 @@ module.exports = {
     getNationCumulativeTagsStakedLogic,
     showCumulativeNationTagsStaked,
     cumulativeNationTagsStakedScheduler,
+    sendPendingNationTagsLogic,
+    distributeNationPendingTagsButtons,
+    checkNationPendingTags,
+    distributePendingTagsToMember,
 };

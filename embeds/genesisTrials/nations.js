@@ -88,10 +88,25 @@ const cumulativeNationTagsStakedEmbed = (leaderboard) => {
         .setFooter({ text: 'Leaderboard is updated every 10 minutes.' });
 };
 
+const distributeNationPendingTagsEmbed = new EmbedBuilder()
+    .setColor(0x42ca9f)
+    .setTitle('Distribute earned cookies to your members!')
+    .setDescription('Click on the Distribute Now button to distribute.')
+    .setFields(
+        {
+            name: '__**How many cookies can I distribute?**__',
+            value: 'You can distribute as many cookies as you want to any member. Just remember that some members may deserve more cookies.',
+        },
+        {
+            name: '__**How can I check how many pending cookies my nation/union has?**__',
+            value: `Click on the 'Check pending cookies earned' button to check.`,
+        },
+    );
 
 module.exports = {
     nationRoleEmbed,
     representativeVotingEmbed,
     stakeTagsEmbed,
     cumulativeNationTagsStakedEmbed,
+    distributeNationPendingTagsEmbed,
 };

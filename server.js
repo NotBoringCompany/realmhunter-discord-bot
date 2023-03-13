@@ -35,17 +35,18 @@ const { showInviterPendingInvitesLogic, removeExpiredInvitesScheduler } = requir
 const { showTagsLeaderboard, tagsLeaderboardScheduler } = require('./utils/genesisTrials/tagsLeaderboard');
 const { showPartOneInfoEmbed } = require('./commands/genesisTrials/helpinfo');
 const { retrieveUnrewardedContributions, rewardContribution, invalidateContribution } = require('./commands/genesisTrials/rewardContributions');
-const { showNationRoleEmbed, showRepresentativeVotingEmbed, showStakeTagsEmbed } = require('./commands/genesisTrials/nations');
+const { showNationRoleEmbed, showRepresentativeVotingEmbed, showStakeTagsEmbed, sendPendingNationTags, showDistributeNationPendingTagsEmbed } = require('./commands/genesisTrials/nations');
 const { createRole } = require('./commands/createRoles');
 const { nationButtonInteraction } = require('./interactions/buttons/nationRoles');
 const { manuallyRewardTags } = require('./commands/genesisTrials/manualRewarding');
 const { restartDailyContributionTagsClaimedScheduler, restartDailyContributionTagsClaimed } = require('./utils/genesisTrials/rewardContributions');
 const { representativeVotingModal } = require('./modals/nations');
-const { getVotersNation, getCurrentVotesAvailable, submitVote, rescindVote, stakeTags, unstakeTags, showCumulativeNationTagsStaked, cumulativeNationTagsStakedScheduler } = require('./utils/genesisTrials/nations');
+const { getVotersNation, getCurrentVotesAvailable, submitVote, rescindVote, stakeTags, unstakeTags, showCumulativeNationTagsStaked, cumulativeNationTagsStakedScheduler, distributePendingTagsToMember } = require('./utils/genesisTrials/nations');
 const { claimFirstQuestTags } = require('./utils/genesisTrials/questWinners');
 const { showFirstQuestWinnerButtons } = require('./commands/genesisTrials/questWinners');
 const { nationLeadVotesInteraction } = require('./interactions/buttons/nationLeadVotes');
 const { nationTagStakingInteraction } = require('./interactions/buttons/nationTagStaking');
+const { nationPendingTagsDistribution } = require('./interactions/buttons/nationPendingTags');
 
 const client = new Client({
     intents: [
@@ -78,6 +79,21 @@ for (const file of commandFiles) {
 
 // MESSAGE CREATE EVENT LISTENER
 client.on('messageCreate', async (message) => {
+    if (message.content.toLowerCase().startsWith('!hunt rewardnation')) {
+        if (
+            !message.member._roles.includes(process.env.CREATORS_ROLEID) ||
+            !message.member._roles.includes(process.env.MODS_ROLEID)
+        ) return;
+
+        const { status, message: rewardNationMessage } = await sendPendingNationTags(message);
+        return await message.channel.send(rewardNationMessage);
+    }
+
+    if (message.content.toLowerCase() === '!showdistributenationpendingtagsembed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showDistributeNationPendingTagsEmbed(message);
+    }
+
     if (message.content.toLowerCase() === '!showcumulativenationtagsstaked') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         const { status, message: cumulativeMessage, embed } = await showCumulativeNationTagsStaked();
@@ -298,6 +314,7 @@ client.on('messageCreate', async (message) => {
 // INTERACTION CREATE EVENT LISTENER
 client.on('interactionCreate', async (interaction) => {
     if (interaction.isButton()) {
+        await nationPendingTagsDistribution(interaction);
         await nationTagStakingInteraction(interaction);
         await nationLeadVotesInteraction(interaction);
 
@@ -340,6 +357,14 @@ client.on('interactionCreate', async (interaction) => {
 
     // modal submit interactions
     if (interaction.type === InteractionType.ModalSubmit) {
+        if (interaction.customId === 'distributeNationPendingTagsModal') {
+            const userId = interaction.fields.getTextInputValue('cookiesToDistributeUserId');
+            const amountToGive = interaction.fields.getTextInputValue('cookiesToDistributeAmount');
+
+            const { message: distributeMessage } = await distributePendingTagsToMember(interaction, userId, parseInt(amountToGive));
+            await interaction.reply({ content: distributeMessage, ephemeral: true });
+        }
+
         if (interaction.customId === 'stakeNationTagsModal') {
             const cookiesToStake = interaction.fields.getTextInputValue('cookiesToStakeAmount');
             const { message: stakeMessage } = await stakeTags(interaction.user.id, parseInt(cookiesToStake));
