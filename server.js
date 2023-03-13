@@ -41,7 +41,7 @@ const { nationButtonInteraction } = require('./interactions/buttons/nationRoles'
 const { manuallyRewardTags } = require('./commands/genesisTrials/manualRewarding');
 const { restartDailyContributionTagsClaimedScheduler, restartDailyContributionTagsClaimed } = require('./utils/genesisTrials/rewardContributions');
 const { representativeVotingModal } = require('./modals/nations');
-const { getVotersNation, getCurrentVotesAvailable, submitVote, rescindVote, stakeTags, unstakeTags } = require('./utils/genesisTrials/nations');
+const { getVotersNation, getCurrentVotesAvailable, submitVote, rescindVote, stakeTags, unstakeTags, showCumulativeNationTagsStaked, cumulativeNationTagsStakedScheduler } = require('./utils/genesisTrials/nations');
 const { claimFirstQuestTags } = require('./utils/genesisTrials/questWinners');
 const { showFirstQuestWinnerButtons } = require('./commands/genesisTrials/questWinners');
 const { nationLeadVotesInteraction } = require('./interactions/buttons/nationLeadVotes');
@@ -78,6 +78,16 @@ for (const file of commandFiles) {
 
 // MESSAGE CREATE EVENT LISTENER
 client.on('messageCreate', async (message) => {
+    if (message.content.toLowerCase() === '!showcumulativenationtagsstaked') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        const { status, message: cumulativeMessage, embed } = await showCumulativeNationTagsStaked();
+
+        if (status === 'error') {
+            return await message.channel.send(cumulativeMessage);
+        } else {
+            return await message.channel.send({ embeds: [embed] });
+        }
+    }
     if (message.content.toLowerCase() === '!showstaketagsembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         await showStakeTagsEmbed(message);
@@ -384,6 +394,7 @@ client.on('ready', async c => {
     await removeExpiredInvitesScheduler();
     await restartDailyContributionTagsClaimedScheduler();
     await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
+    await cumulativeNationTagsStakedScheduler(process.env.CUMULATIVE_NATION_TAGS_STAKED_MESSAGEID, client);
 
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,

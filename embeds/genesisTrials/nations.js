@@ -79,8 +79,19 @@ const stakeTagsEmbed = new EmbedBuilder()
             value: `You can unstake any staked cookies by clicking the 'Unstake' button.`,
         },
     );
+
+const cumulativeNationTagsStakedEmbed = (leaderboard) => {
+    return new EmbedBuilder()
+        .setColor(0x42ca9f)
+        .setTitle('Cumulative cookies staked per nation/union')
+        .setFields(leaderboard)
+        .setFooter({ text: 'Leaderboard is updated every 10 minutes.' });
+};
+
+
 module.exports = {
     nationRoleEmbed,
     representativeVotingEmbed,
     stakeTagsEmbed,
+    cumulativeNationTagsStakedEmbed,
 };

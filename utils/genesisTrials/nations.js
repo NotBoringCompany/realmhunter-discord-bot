@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
+const { cumulativeNationTagsStakedEmbed } = require('../../embeds/genesisTrials/nations');
 const { generateObjectId } = require('../cryptoUtils');
 const permissions = require('../dbPermissions');
 const { DiscordUserSchema, NationsSchema, NationLeadVoteSchema } = require('../schemas');
 const { checkJoinDateAndRole } = require('./dailyTags');
+const cron = require('node-cron');
 
 /**
  * All currently available nations to choose from (from the poll results).
@@ -1199,38 +1201,112 @@ const getCurrentTagsStaked = async (userId) => {
     }
 };
 
-// /**
-//  * Gets the cumulative amount of tags staked for a nation OR union (across all members)
-//  */
-// const getNationCumulativeTagsStaked = async (nationName) => {
-//     try {
-//         // we get the nation from their name
-//         const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
-//         const nationQuery = await Nation.findOne({ nationName: nationName });
+/**
+ * Gets the cumulative amount of tags staked for ALL nations and unions.
+ */
+const getNationCumulativeTagsStakedLogic = async () => {
+    try {
+        const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
 
-//         // if nation can't be found, throw error.
-//         if (!nationQuery) {
-//             return {
-//                 status: 'error',
-//                 message: 'Nation not found.',
-//             };
-//         // else, we get the stakedTags array.
-//         } else {
-//             const stakedTags = nationQuery.stakedTags;
+        const unions = ['NaN', 'Union A', 'Union B', 'Union C', 'Union D'];
 
-//             // if the array is empty, we return 0. otherwise, we reduce the array to get the total amount staked.
-//             return {
-//                 status: 'success',
-//                 message: stakedTags.length === 0 ? 0 : stakedTags.reduce((a, b) => a + b.stakeAmount, 0),
-//             };
-//         }
-//     } catch (err) {
-//         console.log({
-//             errorFrom: 'getNationCumulativeTagsStaked',
-//             errorMessage: err,
-//         });
-//     }
-// };
+        const leaderboard = [];
+
+        for (let i = 0; i < unions.length; i++) {
+            // if union is 'NaN', get all nations that don't have a union (i.e. union === undefined)
+            if (unions[i] === 'NaN') {
+                const nationsQuery = await Nation.find({ union: { $exists: false } });
+                // loop through each nation and add the total staked tags to the leaderboard.
+                for (let j = 0; j < nationsQuery.length; j++) {
+                    const nation = nationsQuery[j].nation;
+                    const stakedTags = nationsQuery[j].stakedTags;
+
+                    let totalStaked = 0;
+
+                    if (stakedTags && stakedTags.length > 0) {
+                        for (let k = 0; k < stakedTags.length; k++) {
+                            totalStaked += stakedTags[k].stakeAmount;
+                        }
+                    }
+
+                    leaderboard.push({
+                        name: nation,
+                        value: totalStaked.toString(),
+                    });
+                }
+            // if they're part of a union, we get all nations that are part of that union.
+            // we then add the total staked tags from ALL the nations within that union to the leaderboard.
+            } else {
+                const nationsQuery = await Nation.find({ union: unions[i] });
+
+                let totalStaked = 0;
+                // loop through each nation and add the total staked tags to the leaderboard.
+                for (let j = 0; j < nationsQuery.length; j++) {
+                    const stakedTags = nationsQuery[j].stakedTags;
+
+                    if (stakedTags && stakedTags.length > 0) {
+                        for (let k = 0; k < stakedTags.length; k++) {
+                            totalStaked += stakedTags[k].stakeAmount;
+                        }
+                    }
+                }
+
+                leaderboard.push({
+                    name: unions[i],
+                    value: totalStaked.toString(),
+                });
+            }
+        }
+
+        return {
+            embed: cumulativeNationTagsStakedEmbed(leaderboard),
+            status: 'success',
+            message: 'Successfully retrieved cumulative tags staked.',
+        };
+    } catch (err) {
+        console.log({
+            errorFrom: 'getNationCumulativeTagsStakedLogic',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
+ * Shows the cumulative amount of tags staked for ALL nations and unions.
+ */
+const showCumulativeNationTagsStaked = async () => {
+    try {
+        return await getNationCumulativeTagsStakedLogic();
+    } catch (err) {
+        console.log({
+            errorFrom: 'showCumulativeNationTagsStaked',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
+ * Scheduler to update the cumulative tags staked for nations and unions every 10 minutes.
+ */
+const cumulativeNationTagsStakedScheduler = async (msgId, client) => {
+    try {
+        cron.schedule('*/10 * * * *', async () => {
+            console.log('editing cumulative tags staked embed');
+
+            const stakingLeaderboardChannel = await client.channel.fetch(process.env.CUMULATIVE_COOKIES_STAKED_EMBED_CHANNELID);
+            const stakingLeaderboardMsg = await stakingLeaderboardChannel.messages.fetch(msgId);
+
+            const { embed } = await showCumulativeNationTagsStaked();
+
+            await stakingLeaderboardMsg.edit({ embeds: [embed] });
+        });
+    } catch (err) {
+        console.log({
+            errorFrom: 'cumulativeNationTagsStakedScheduler',
+            errorMessage: err,
+        });
+    }
+};
 
 module.exports = {
     nationRoles,
@@ -1247,5 +1323,7 @@ module.exports = {
     stakeTagsButtons,
     unstakeTags,
     getCurrentTagsStaked,
-    // getNationCumulativeTagsStaked,
+    getNationCumulativeTagsStakedLogic,
+    showCumulativeNationTagsStaked,
+    cumulativeNationTagsStakedScheduler,
 };

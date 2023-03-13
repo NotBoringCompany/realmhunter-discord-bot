@@ -44,7 +44,7 @@ const getVoteResults = async () => {
 
             // sort it from highest votes to lowest votes.
             nomineesData.sort((a, b) => b.voteTotal - a.voteTotal);
-            
+
             // we now query the user's data and check their nation for each nominee.
             const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
             const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
@@ -54,6 +54,7 @@ const getVoteResults = async () => {
 
                 if (userQuery) {
                     const nationPointer = userQuery._p_nation;
+
 
                     if (nationPointer) {
                         // split the pointer to get the nation's object ID.
@@ -79,5 +80,3 @@ const getVoteResults = async () => {
         });
     }
 };
-
-// getVoteResults();
