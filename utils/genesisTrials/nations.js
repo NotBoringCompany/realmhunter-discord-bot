@@ -1558,7 +1558,9 @@ const getAllNationMembersStakingLogic = async (interaction) => {
                         const userId = stakedTags[i].userId;
                         const stakeAmount = stakedTags[i].stakeAmount;
 
-                        stakedData += `<@${userId}>: ${stakeAmount}\n`;
+                        if (stakeAmount > 0) {
+                            stakedData += `<@${userId}>: ${stakeAmount}\n`;
+                        }
                     }
                 }
             // if they are part of a union, get all the members of the union and how much they're staking each.
@@ -1575,7 +1577,9 @@ const getAllNationMembersStakingLogic = async (interaction) => {
                             const userId = stakedTags[j].userId;
                             const stakeAmount = stakedTags[j].stakeAmount;
 
-                            stakedData += `<@${userId}>: ${stakeAmount}\n`;
+                            if (stakeAmount > 0) {
+                                stakedData += `<@${userId}>: ${stakeAmount}\n`;
+                            }
                         }
                     }
                 }
