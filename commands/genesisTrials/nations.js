@@ -76,7 +76,9 @@ const showStakeTagsEmbed = async (message) => {
 
 const sendPendingNationTags = async (message) => {
     try {
-        const [hunt, rewardNation, nationName, cookiesToGive] = message.content.split(' ');
+        const [hunt, rewardNation, nationName, cookiesToGive, ...challenge] = message.content.split(' ');
+
+        //
 
         if (nationName.charAt(0) !== nationName.charAt(0).toUpperCase()) {
             return {
@@ -94,7 +96,7 @@ const sendPendingNationTags = async (message) => {
             };
         }
 
-        return await sendPendingNationTagsLogic(nationName, cookiesToGive);
+        return await sendPendingNationTagsLogic(nationName, cookiesToGive, challenge.join(' '));
     } catch (err) {
         console.log({
             errorFrom: 'sendPendingNationTags',
