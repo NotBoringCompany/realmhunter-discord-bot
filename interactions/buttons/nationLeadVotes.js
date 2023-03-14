@@ -17,13 +17,13 @@ const nationLeadVotesInteraction = async (interaction) => {
                 // // get the user's nation first
                 // const { status: nationStatus, message: nationMessage, nation } = await getVotersNation(interaction.user.id);
                 // if there's an error, send the error message.
-                if (nationStatus === 'error') {
-                    await interaction.reply({ content: nationMessage, ephemeral: true });
-                    return;
-                } else {
-                    await interaction.showModal(representativeVotingModal(nation));
-                    return;
-                }
+                // if (nationStatus === 'error') {
+                //     await interaction.reply({ content: nationMessage, ephemeral: true });
+                //     return;
+                // } else {
+                //     await interaction.showModal(representativeVotingModal(nation));
+                //     return;
+                // }
             case 'nationRepresentativeRescindVoteButton':
                 await interaction.reply({ content: 'Voting closed.', ephemeral: true });
                 // await interaction.showModal(rescindRepresentativeVoteModal);

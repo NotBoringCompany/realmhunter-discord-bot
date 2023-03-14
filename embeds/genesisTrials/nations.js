@@ -101,6 +101,10 @@ const distributeNationPendingTagsEmbed = new EmbedBuilder()
             name: '__**How can I check how many pending cookies my nation/union has?**__',
             value: `Click on the 'Check pending cookies earned' button to check.`,
         },
+        {
+            name: '__**I want to check how many cookies my member(s) have staked so I can distribute it fairly. How to do that?**__',
+            value: `Click on the 'Check member\'s staked amount' button to check.`,
+        },
     );
 
 module.exports = {

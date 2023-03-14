@@ -1362,6 +1362,12 @@ const distributeNationPendingTagsButtons = () => {
             label: 'Check pending cookies earned',
             custom_id: 'checkNationPendingTagsButton',
         },
+        {
+            type: 2,
+            style: 1,
+            label: 'Check members staked amount',
+            custom_id: 'checkNationMembersStakeAmountButton',
+        },
     ];
 };
 
@@ -1499,6 +1505,96 @@ const distributePendingTagsToMember = async (interaction, userToGiveId, tagsToDi
     }
 };
 
+/**
+ * Gets the cumulative tags staked by the interaction user's nation.
+ */
+const getAllNationMembersStakingLogic = async (interaction) => {
+    try {
+        // we get the user's data
+        const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: interaction.user.id });
+
+        let stakedData = '';
+
+        if (!userQuery) {
+            return {
+                status: 'error',
+                message: 'Error while finding your data in the userbase. Error. Please report to the devs.',
+            };
+        // if user is found, we get the nation.
+        } else {
+            const nationPointer = userQuery._p_nation;
+
+            if (!nationPointer) {
+                return {
+                    status: 'error',
+                    message: 'You are not part of a nation. Error. Please report to the devs.',
+                };
+            }
+
+            // query the nation
+            const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
+            // get the nation's obj ID by splitting.
+            const nationObjId = nationPointer.split('$')[1];
+            const nationQuery = await Nation.findOne({ _id: nationObjId });
+
+            if (!nationQuery) {
+                return {
+                    status: 'error',
+                    message: 'Nation not found on database. Error. Please report to the devs.',
+                };
+            }
+
+            // check if the nation is part of a union.
+            const union = nationQuery.union;
+
+            // if they're not part of a union, get all the members of the nation and how much they're staking each.
+            if (!union) {
+                // query the `stakedTags` array and get the members and their staked tags.
+                const stakedTags = nationQuery.stakedTags;
+
+                if (stakedTags.length > 0) {
+                    for (let i = 0; i < stakedTags.length; i++) {
+                        const userId = stakedTags[i].userId;
+                        const stakeAmount = stakedTags[i].stakeAmount;
+
+                        stakedData += `<@${userId}>: ${stakeAmount}\n`;
+                    }
+                }
+            // if they are part of a union, get all the members of the union and how much they're staking each.
+            } else {
+                // query the union
+                const unionQuery = await Nation.find({ union: union });
+
+                // for each nation in the union, get the members and their staked tags.
+                for (let i = 0; i < unionQuery.length; i++) {
+                    const stakedTags = unionQuery[i].stakedTags;
+
+                    if (stakedTags.length > 0) {
+                        for (let j = 0; j < stakedTags.length; j++) {
+                            const userId = stakedTags[j].userId;
+                            const stakeAmount = stakedTags[j].stakeAmount;
+
+                            stakedData += `<@${userId}>: ${stakeAmount}\n`;
+                        }
+                    }
+                }
+            }
+        }
+
+        return {
+            status: 'success',
+            message: 'Successfully retrieved your nation/union\'s staked tags data.',
+            stakedData: stakedData,
+        };
+    } catch (err) {
+        console.log({
+            errorFrom: 'getAllNationMembersStakingLogic',
+            errorMessage: err,
+        });
+    }
+};
+
 module.exports = {
     nationRoles,
     giveNationRole,
@@ -1521,4 +1617,5 @@ module.exports = {
     distributeNationPendingTagsButtons,
     checkNationPendingTags,
     distributePendingTagsToMember,
+    getAllNationMembersStakingLogic,
 };
