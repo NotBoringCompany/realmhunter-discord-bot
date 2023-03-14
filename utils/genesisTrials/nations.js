@@ -980,6 +980,12 @@ const stakeTags = async (userId, stakeAmount) => {
 
                         // remove the tags from the user's account.
                         userQuery.hunterTags -= stakeAmount;
+                        // add `true` to the doubleTagEligibility if now is before 15 March 14:00 GMT
+                        const now = Math.floor(new Date().getTime() / 1000);
+
+                        if (now < process.env.UNSTAKE_LOSE_ELIGIBILITY_TIMESTAMP) {
+                            userQuery.doubleTagEligibility = true;
+                        }
                         userQuery._updated_at = Date.now();
 
                         await userQuery.save();
@@ -1108,6 +1114,13 @@ const unstakeTags = async (userId, unstakeAmount) => {
                             // add the tags to the user's account.
                             userQuery.hunterTags += unstakeAmount;
                             userQuery._updated_at = Date.now();
+
+                            const now = Math.floor(new Date().getTime() / 1000);
+
+                            // after 15 March 14:00 GMT, users who unstake will lose their doubleTagEligibility.
+                            if (now > process.env.UNSTAKE_LOSE_ELIGIBILITY_TIMESTAMP) {
+                                userQuery.doubleTagEligibility = false;
+                            }
 
                             await userQuery.save();
 
