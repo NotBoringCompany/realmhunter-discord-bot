@@ -1500,7 +1500,7 @@ const distributePendingTagsToMember = async (interaction, userToGiveId, tagsToDi
 
                     return {
                         status: 'success',
-                        message: `Distributed ${tagsToDistribute} cookies to <@${userToGiveId}.`,
+                        message: `Distributed ${tagsToDistribute} cookies to <@${userToGiveId}>.`,
                     };
                 }
             }
