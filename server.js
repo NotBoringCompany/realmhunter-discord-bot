@@ -85,6 +85,9 @@ client.on('messageCreate', async (message) => {
             !message.member._roles.includes(process.env.MODS_ROLEID)
         ) return;
 
+        console.log('rewarded from', message.author.id);
+        console.log('rewarder is either creator or mod: ', message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.MODS_ROLEID));
+
         const { status, message: rewardNationMessage } = await sendPendingNationTags(message);
         return await message.channel.send(rewardNationMessage);
     }

@@ -1329,12 +1329,13 @@ const sendPendingNationTagsLogic = async (nationName, tagsToAdd) => {
             } else {
                 nationQuery.pendingTagsEarned += tagsToAdd;
             }
-
+            nationQuery.tagsEarned += tagsToAdd;
             await nationQuery.save();
 
             return {
                 status: 'success',
                 message: `${nationName} has been awarded ${tagsToAdd} cookies.`,
+                // winMessage: `<@&${nationName}`
             };
         }
     } catch (err) {
