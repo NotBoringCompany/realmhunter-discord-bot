@@ -1479,7 +1479,7 @@ const distributePendingTagsToMember = async (interaction, userToGiveId, tagsToDi
                 // first, we check if the nation/union has enough pending tags to distribute.
                 const { pendingCookies: nationPendingTagsEarned } = await checkNationPendingTags(interaction);
 
-                if (nationPendingTagsEarned < tagsToDistribute) {
+                if (nationPendingTagsEarned < parseInt(tagsToDistribute)) {
                     return {
                         status: 'error',
                         message: 'Your nation/union does not have enough cookies to distribute.',
@@ -1488,12 +1488,12 @@ const distributePendingTagsToMember = async (interaction, userToGiveId, tagsToDi
                     // we do two things:
                     // 1. reduce the pending tags earned by the nation/union by `tagsToDistribute`.
                     // 2. add `tagsToDistribute` to the user's `hunterTags`.
-                    nationQuery.pendingTagsEarned -= tagsToDistribute;
+                    nationQuery.pendingTagsEarned -= parseInt(tagsToDistribute);
                     nationQuery._updated_at = Date.now();
 
                     await nationQuery.save();
 
-                    userQuery.hunterTags += tagsToDistribute;
+                    userQuery.hunterTags += parseInt(tagsToDistribute);
                     userQuery._updated_at = Date.now();
 
                     await userQuery.save();

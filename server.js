@@ -367,7 +367,7 @@ client.on('interactionCreate', async (interaction) => {
             const userId = interaction.fields.getTextInputValue('cookiesToDistributeUserId');
             const amountToGive = interaction.fields.getTextInputValue('cookiesToDistributeAmount');
 
-            const { message: distributeMessage } = await distributePendingTagsToMember(interaction, userId, parseInt(amountToGive));
+            const { message: distributeMessage } = await distributePendingTagsToMember(interaction, userId, amountToGive);
             await interaction.reply({ content: distributeMessage, ephemeral: true });
         }
 
