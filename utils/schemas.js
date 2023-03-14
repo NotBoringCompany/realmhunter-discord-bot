@@ -39,6 +39,7 @@ const DiscordUserSchema = new mongoose.Schema(
         // pointer to alliance object via its object ID in RHDiscordAllianceData.
         _p_alliance: String,
         _p_nation: String,
+        doubleTagEligibility: Boolean,
     },
     {
         versionKey: false,
