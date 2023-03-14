@@ -84,9 +84,14 @@ client.on('messageCreate', async (message) => {
             console.log('rewarded from', message.author.id);
             console.log('rewarder is either creator or mod: ', message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.MODS_ROLEID));
 
-            const { status, message: rewardNationMessage } = await sendPendingNationTags(message);
+            const { status, message: rewardNationMessage, winMessage } = await sendPendingNationTags(message);
             console.log('sent');
-            return await message.channel.send(rewardNationMessage);
+            await message.channel.send(rewardNationMessage);
+            if (winMessage) {
+                await client.channels.cache.get(process.env.NATION_CHALLENGES_LOG_CHANNELID).send(winMessage);
+            }
+
+            return;
         }
     }
 
@@ -161,7 +166,7 @@ client.on('messageCreate', async (message) => {
 
     if (message.content.toLowerCase().startsWith('!hunt rewardcontribution')) {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        const { status, message: contributionsMessage } = await rewardContribution(message).catch((err) => console.log(err));
+        const { status, message: contributionsMessage, winning } = await rewardContribution(message).catch((err) => console.log(err));
 
         // if there's an error status, send the message in the channel where the command was sent
         if (status === 'error') {

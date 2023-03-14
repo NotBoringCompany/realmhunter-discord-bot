@@ -1311,7 +1311,7 @@ const cumulativeNationTagsStakedScheduler = async (msgId, client) => {
 /**
  * Sends a nation that won a challenge some pending tags.
  */
-const sendPendingNationTagsLogic = async (nationName, tagsToAdd) => {
+const sendPendingNationTagsLogic = async (nationName, tagsToAdd, challenge) => {
     try {
         const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
         const nationQuery = await Nation.findOne({ nation: nationName });
@@ -1321,6 +1321,7 @@ const sendPendingNationTagsLogic = async (nationName, tagsToAdd) => {
             return {
                 status: 'error',
                 message: 'Nation not found. Please make the nation is typed correctly.',
+                winMessage: undefined,
             };
         // otherwise, add the tags to `pendingTagsEarned`.
         } else {
@@ -1341,7 +1342,7 @@ const sendPendingNationTagsLogic = async (nationName, tagsToAdd) => {
             return {
                 status: 'success',
                 message: `${nationName} has been awarded ${tagsToAdd} cookies.`,
-                // winMessage: `<@&${nationName}`
+                winMessage: `<@&${nationName}> has won the ${challenge} challenge and has been awarded ${tagsToAdd} cookies.`,
             };
         }
     } catch (err) {

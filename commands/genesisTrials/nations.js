@@ -82,6 +82,7 @@ const sendPendingNationTags = async (message) => {
             return {
                 status: 'error',
                 message: 'Nation name must start with a capital letter.',
+                winMessage: undefined,
             };
         }
 
@@ -89,6 +90,7 @@ const sendPendingNationTags = async (message) => {
             return {
                 status: 'error',
                 message: 'Cookies to reward must be a number.',
+                winMessage: undefined,
             };
         }
 
