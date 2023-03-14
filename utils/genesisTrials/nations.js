@@ -1329,7 +1329,13 @@ const sendPendingNationTagsLogic = async (nationName, tagsToAdd) => {
             } else {
                 nationQuery.pendingTagsEarned += tagsToAdd;
             }
-            nationQuery.tagsEarned += tagsToAdd;
+
+            if (!nationQuery.tagsEarned) {
+                nationQuery.tagsEarned = tagsToAdd;
+            } else {
+                nationQuery.tagsEarned += tagsToAdd;
+            }
+
             await nationQuery.save();
 
             return {
