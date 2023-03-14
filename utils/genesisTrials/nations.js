@@ -1493,7 +1493,11 @@ const distributePendingTagsToMember = async (interaction, userToGiveId, tagsToDi
 
                     await nationQuery.save();
 
-                    userQuery.hunterTags += parseInt(tagsToDistribute);
+                    if (userQuery.hunterTags) {
+                        userQuery.hunterTags += parseInt(tagsToDistribute);
+                    } else {
+                        userQuery.hunterTags = parseInt(tagsToDistribute);
+                    }
                     userQuery._updated_at = Date.now();
 
                     await userQuery.save();
