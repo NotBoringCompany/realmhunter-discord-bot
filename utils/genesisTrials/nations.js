@@ -1461,51 +1461,58 @@ const distributePendingTagsToMember = async (interaction, userToGiveId, tagsToDi
                 message: 'Please require the user to collect daily cookies first to exist on the database.',
             };
         } else {
-            // we first check if the user is within the nation/union.
-            const userNationPointer = userQuery._p_nation;
+            // check if the nation/union of the rewarder has enough pending tags to distribute.
+            const { pendingCookies: nationPendingTagsEarned } = await checkNationPendingTags(interaction);
 
-            const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
-            // split the nation pointer to get the obj ID.
-            const nationObjId = userNationPointer.split('$')[1];
-            const nationQuery = await Nation.findOne({ _id: nationObjId });
-
-            if (!nationQuery) {
+            if (nationPendingTagsEarned < parseInt(tagsToDistribute)) {
                 return {
                     status: 'error',
-                    message: 'Error while retrieving nation.',
+                    message: 'Your nation/union does not have enough pending cookies to distribute.',
                 };
-            // otherwise, we distribute the tags to the user.
             } else {
-                // first, we check if the nation/union has enough pending tags to distribute.
-                const { pendingCookies: nationPendingTagsEarned } = await checkNationPendingTags(interaction);
+                // get the nation of the interaction user
+                const rewarderQuery = await User.findOne({ userId: interaction.user.id });
 
-                if (nationPendingTagsEarned < parseInt(tagsToDistribute)) {
+                if (!rewarderQuery) {
                     return {
                         status: 'error',
-                        message: 'Your nation/union does not have enough cookies to distribute.',
+                        message: 'Error while retrieving rewarder data.',
                     };
                 } else {
-                    // we do two things:
-                    // 1. reduce the pending tags earned by the nation/union by `tagsToDistribute`.
-                    // 2. add `tagsToDistribute` to the user's `hunterTags`.
-                    nationQuery.pendingTagsEarned -= parseInt(tagsToDistribute);
-                    nationQuery._updated_at = Date.now();
+                    // get the nation pointer
+                    const rewarderNationPointer = rewarderQuery._p_nation;
+                    const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
+                    // get the nation's obj ID by splitting.
+                    const rewarderNationObjId = rewarderNationPointer.split('$')[1];
+                    const nationQuery = await Nation.findOne({ _id: rewarderNationObjId });
 
-                    await nationQuery.save();
-
-                    if (userQuery.hunterTags) {
-                        userQuery.hunterTags += parseInt(tagsToDistribute);
+                    if (!nationQuery) {
+                        return {
+                            status: 'error',
+                            message: 'Error while retrieving nation data.',
+                        };
                     } else {
-                        userQuery.hunterTags = parseInt(tagsToDistribute);
+                        // we do two things:
+                        // 1. reduce the pending tags earned by the nation/union by `tagsToDistribute`.
+                        // 2. add `tagsToDistribute` to the user's `hunterTags`.
+                        nationQuery.pendingTagsEarned -= parseInt(tagsToDistribute);
+                        nationQuery._updated_at = Date.now();
+
+                        await nationQuery.save();
+
+                        if (userQuery.hunterTags) {
+                            userQuery.hunterTags += parseInt(tagsToDistribute);
+                        } else {
+                            userQuery.hunterTags = parseInt(tagsToDistribute);
+                        }
+                        userQuery._updated_at = Date.now();
+                        await userQuery.save();
+
+                        return {
+                            status: 'success',
+                            message: `Successfully distributed ${tagsToDistribute} pending cookies to <@${userToGiveId}>.`,
+                        };
                     }
-                    userQuery._updated_at = Date.now();
-
-                    await userQuery.save();
-
-                    return {
-                        status: 'success',
-                        message: `Distributed ${tagsToDistribute} cookies to <@${userToGiveId}>.`,
-                    };
                 }
             }
         }
