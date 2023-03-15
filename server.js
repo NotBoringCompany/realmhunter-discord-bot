@@ -373,9 +373,16 @@ client.on('interactionCreate', async (interaction) => {
 
         if (interaction.customId === 'stakeNationTagsModal') {
             const cookiesToStake = interaction.fields.getTextInputValue('cookiesToStakeAmount');
-            const { message: stakeMessage } = await stakeTags(interaction.user.id, parseInt(cookiesToStake));
+            const now = Math.floor(new Date().getTime() / 1000);
 
-            await interaction.reply({ content: stakeMessage, ephemeral: true });
+            // if its already 15 March 14:00 GMT, then the user cannot stake anymore.
+            if (now > process.env.UNSTAKE_LOSE_ELIGIBILITY_TIMESTAMP) {
+                await interaction.reply({ content: 'Staking period is over.', ephemeral: true });
+            } else {
+                const { message: stakeMessage } = await stakeTags(interaction.user.id, parseInt(cookiesToStake));
+
+                await interaction.reply({ content: stakeMessage, ephemeral: true });
+            }
         }
 
         if (interaction.customId === 'unstakeNationTagsModal') {
