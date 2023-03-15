@@ -131,4 +131,4 @@ const getAllStakers = async () => {
     }
 };
 
-getAllStakers();
+// getAllStakers();
