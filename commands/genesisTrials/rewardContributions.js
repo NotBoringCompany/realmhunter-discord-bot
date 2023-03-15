@@ -44,7 +44,7 @@ const retrieveUnrewardedContributions = async (message) => {
  */
 const invalidateContribution = async (message) => {
     try {
-        const [hunt, invalidateContribution, userId, contributionUrl] = message.content.split(' ');
+        const [hunt, invalidateContribution, userId, ...contributionUrl] = message.content.split(' ');
 
         if (!contributionUrl) {
             return {
@@ -60,7 +60,7 @@ const invalidateContribution = async (message) => {
             };
         };
 
-        return await invalidateContributionLogic(userId, contributionUrl);
+        return await invalidateContributionLogic(userId, contributionUrl.join(' '));
     } catch (err) {
         console.log({
             errorFrom: 'invalidateContribution',
@@ -74,7 +74,7 @@ const invalidateContribution = async (message) => {
  */
 const rewardContribution = async (message) => {
     try {
-        const [hunt, rewardContribution, userId, contributionUrl] = message.content.split(' ');
+        const [hunt, rewardContribution, userId, ...contributionUrl] = message.content.split(' ');
 
         console.log(hunt, rewardContribution, userId, contributionUrl);
 
@@ -107,7 +107,7 @@ const rewardContribution = async (message) => {
             };
         }
 
-        return await rewardContributionLogic(userId, contributionUrl);
+        return await rewardContributionLogic(userId, contributionUrl.join(' '));
     } catch (err) {
         console.log({
             errorFrom: 'rewardContribution',
