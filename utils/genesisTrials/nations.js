@@ -1355,7 +1355,7 @@ const sendPendingNationTagsLogic = async (nationName, tagsToAdd, challenge) => {
             return {
                 status: 'success',
                 message: `${nationName} has been awarded ${tagsToAdd} cookies.`,
-                winMessage: `${nationName} has won the ${challenge} challenge and has been awarded ${tagsToAdd} cookies.`,
+                winMessage: `${nationName} has been awarded ${tagsToAdd} cookies for ${challenge}.`,
             };
         }
     } catch (err) {
