@@ -1339,15 +1339,15 @@ const sendPendingNationTagsLogic = async (nationName, tagsToAdd, challenge) => {
         // otherwise, add the tags to `pendingTagsEarned`.
         } else {
             if (!nationQuery.pendingTagsEarned) {
-                nationQuery.pendingTagsEarned = tagsToAdd;
+                nationQuery.pendingTagsEarned = parseInt(tagsToAdd);
             } else {
-                nationQuery.pendingTagsEarned += tagsToAdd;
+                nationQuery.pendingTagsEarned += parseInt(tagsToAdd);
             }
 
             if (!nationQuery.tagsEarned) {
-                nationQuery.tagsEarned = tagsToAdd;
+                nationQuery.tagsEarned = parseInt(tagsToAdd);
             } else {
-                nationQuery.tagsEarned += tagsToAdd;
+                nationQuery.tagsEarned += parseInt(tagsToAdd);
             }
 
             await nationQuery.save();

@@ -86,25 +86,43 @@ mongoose.connect(process.env.MONGODB_URI);
  */
 const getAllStakers = async () => {
     try {
-        const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
-        // we only want to find nations that have stakers
-        const nationQuery = await Nation.find({ stakedTags: { $exists: true } });
+        const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
+        // get all users that have `doubleTagEligibility` set to true.
+        const userQuery = await User.find({ doubleTagEligibility: true });
 
-        let stakers = [];
+        console.log(userQuery.length);
+        // const Nation = mongoose.model('Nation', NationsSchema, 'RHDiscordNationsData');
+        // // we only want to find nations that have stakers
+        // const nationQuery = await Nation.find({ stakedTags: { $exists: true } });
 
-        for (let i = 0; i < nationQuery.length; i++) {
-            const nation = nationQuery[i];
+        // let stakers = [];
 
-            // get all the user IDs from the `stakedTags` array.
-            for (let j = 0; j < nation.stakedTags.length; j++) {
-                const stakedTags = nation.stakedTags[j];
-                if (stakedTags && stakedTags.stakeAmount > 0) {
-                    stakers.push(stakedTags.userId);
-                }
-            }
-        }
+        // for (let i = 0; i < nationQuery.length; i++) {
+        //     const nation = nationQuery[i];
 
-        console.log(stakers);
+        //     // get all the user IDs from the `stakedTags` array.
+        //     for (let j = 0; j < nation.stakedTags.length; j++) {
+        //         const stakedTags = nation.stakedTags[j];
+        //         if (stakedTags && stakedTags.stakeAmount > 0) {
+        //             stakers.push(stakedTags.userId);
+        //         }
+        //     }
+        // }
+
+        // const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
+
+        // for (let i = 0; i < stakers.length; i++) {
+        //     // for each staker, we query the user data and add the eligiblity to doubleTagEligibility.
+        //     const staker = stakers[i];
+        //     const userQuery = await User.findOne({ userId: staker });
+
+        //     if (userQuery) {
+        //         userQuery.doubleTagEligibility = true;
+        //         await userQuery.save();
+        //     }
+        // }
+
+        // console.log('done');
     } catch (err) {
         console.log({
             errorFrom: 'getAllStakers',
@@ -113,4 +131,4 @@ const getAllStakers = async () => {
     }
 };
 
-// getAllStakers();
+getAllStakers();
