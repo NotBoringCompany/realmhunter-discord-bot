@@ -142,6 +142,30 @@ const nbmonCaptured = async (nbmonId) => {
 };
 
 /**
+ * Checks if the user has enough cookies to capture an NBMon. Requires 90 cookies.
+ */
+const enoughCookiesToCapture = async (userId) => {
+    try {
+        const User = mongoose.model('UserData', UserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: userId });
+
+        if (!userQuery) {
+            return {
+                status: 'error',
+                message: 'Not enough cookies to capture the NBMon.',
+            };
+        }
+
+        if (userQuery.hunterTags <)
+    } catch (err) {
+        console.log({
+            errorFrom: 'enoughCookiesToCapture',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
  * Gets the timestamp of the previous NBMon that appeared.
  */
 const prevNBMonAppearance = async () => {
@@ -265,7 +289,11 @@ const nbmonAppearanceScheduler = async (client) => {
 
             console.log(rand);
 
-            if (rand === 1) {
+            const now = Math.floor(new Date().getTime() / 1000);
+            const prevAppearance = await prevNBMonAppearance();
+
+            // if rand is either 1 or the time passed between now and the previous NBMon is over an hour, we will show the nbmon.
+            if (rand === 1 || now - prevAppearance >= 3600) {
                 const { status, message } = await nbmonAppears(client);
                 if (status === 'error') {
                     // we don't need to show this message in the general chat.

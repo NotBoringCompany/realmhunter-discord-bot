@@ -32,7 +32,7 @@ const stats = () => {
         rarity: rarity(),
         level: 1,
         hp: 30,
-        atk: 30,
+        atk: 5,
         def: 30,
     };
 };
