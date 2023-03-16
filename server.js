@@ -49,6 +49,7 @@ const { nationTagStakingInteraction } = require('./interactions/buttons/nationTa
 const { nationPendingTagsDistribution } = require('./interactions/buttons/nationPendingTags');
 const { nbmonAppears, nbmonAppearanceScheduler } = require('./utils/genesisTrialsPt2/nbmonAppearance');
 const { captureNBMon } = require('./commands/genesisTrialsPt2/nbmonAppearance');
+const { delay } = require('./utils/delay');
 
 const client = new Client({
     intents: [
@@ -84,6 +85,8 @@ client.on('messageCreate', async (message) => {
     if (message.content.startsWith('!hunt captureNBMon')) {
         const { message: captureNBMonMessage } = await captureNBMon(message);
         await message.channel.send(captureNBMonMessage);
+        // delay 2 seconds to prevent spamming.
+        await delay(2000);
     }
     // if (message.content.toLowerCase().startsWith('!hunt rewardnation')) {
     //     if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.MODS_ROLEID)) {

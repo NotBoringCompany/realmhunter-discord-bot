@@ -3,11 +3,10 @@ const mongoose = require('mongoose');
 const { nbmonAppearanceEmbed } = require('../../embeds/genesisTrialsPt2/nbmonAppearance');
 const { generateObjectId } = require('../cryptoUtils');
 const permissions = require('../dbPermissions');
-const { NBMonSchema } = require('../schemas');
+const { NBMonSchema, DiscordUserSchema } = require('../schemas');
 const { stats, genusData } = require('./nbmonStatRandomizer');
 const cron = require('node-cron');
 
-mongoose.connect(process.env.MONGODB_URI);
 /**
  * Adds an NBMon to the database once it appears.
  */
@@ -142,30 +141,6 @@ const nbmonCaptured = async (nbmonId) => {
 };
 
 /**
- * Checks if the user has enough cookies to capture an NBMon. Requires 90 cookies.
- */
-const enoughCookiesToCapture = async (userId) => {
-    try {
-        const User = mongoose.model('UserData', UserSchema, 'RHDiscordUserData');
-        const userQuery = await User.findOne({ userId: userId });
-
-        if (!userQuery) {
-            return {
-                status: 'error',
-                message: 'Not enough cookies to capture the NBMon.',
-            };
-        }
-
-        if (userQuery.hunterTags <)
-    } catch (err) {
-        console.log({
-            errorFrom: 'enoughCookiesToCapture',
-            errorMessage: err,
-        });
-    }
-};
-
-/**
  * Gets the timestamp of the previous NBMon that appeared.
  */
 const prevNBMonAppearance = async () => {
@@ -246,6 +221,25 @@ const captureNBMonLogic = async (nbmonId, userId) => {
             };
         }
 
+        // we now check if the user has enough tags to capture the NBMon.
+        // requires 100 TAGS! (may change).
+        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: userId });
+
+        if (!userQuery) {
+            return {
+                status: 'error',
+                message: 'Not enough cookies to capture the NBMon.',
+            };
+        }
+
+        if (userQuery.hunterTags < 100) {
+            return {
+                status: 'error',
+                message: 'Not enough cookies to capture the NBMon.',
+            };
+        }
+
 
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
         const nbmonQuery = await NBMon.findOne({ nbmonId: nbmonId });
@@ -258,11 +252,27 @@ const captureNBMonLogic = async (nbmonId, userId) => {
             };
         }
 
+        // we will now check if the user has captured more than 5 nbmons already.
+        // if they have, we will not allow them to capture more.
+        const nbmonUserQuery = await NBMon.find({ capturedBy: userId });
+        if (nbmonUserQuery.length >= 5) {
+            return {
+                status: 'error',
+                message: `<@${userId}, you have already captured 5 NBMons. You're not allowed to capture more.`,
+            };
+        }
+
+        // once all checks are done, we will now capture the NBMon.
+        userQuery.hunterTags -= 100;
+        userQuery._updated_at = Date.now();
+
         // if the nbmon has not been captured, we update the database.
         // we update the `capturedTimestamp` and the `capturedBy` fields.
         nbmonQuery.capturedBy = userId;
         nbmonQuery.capturedTimestamp = Math.floor(new Date().getTime() / 1000);
+        nbmonQuery._updated_at = Date.now();
 
+        await userQuery.save();
         await nbmonQuery.save();
 
         return {
@@ -292,8 +302,10 @@ const nbmonAppearanceScheduler = async (client) => {
             const now = Math.floor(new Date().getTime() / 1000);
             const prevAppearance = await prevNBMonAppearance();
 
+            const isOverAnHour = now - prevAppearance >= 3600;
+
             // if rand is either 1 or the time passed between now and the previous NBMon is over an hour, we will show the nbmon.
-            if (rand === 1 || now - prevAppearance >= 3600) {
+            if (rand === 1 || isOverAnHour) {
                 const { status, message } = await nbmonAppears(client);
                 if (status === 'error') {
                     // we don't need to show this message in the general chat.
