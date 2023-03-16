@@ -47,6 +47,7 @@ const { showFirstQuestWinnerButtons } = require('./commands/genesisTrials/questW
 const { nationLeadVotesInteraction } = require('./interactions/buttons/nationLeadVotes');
 const { nationTagStakingInteraction } = require('./interactions/buttons/nationTagStaking');
 const { nationPendingTagsDistribution } = require('./interactions/buttons/nationPendingTags');
+const { nbmonAppears } = require('./utils/genesisTrialsPt2/nbmonAppearance');
 
 const client = new Client({
     intents: [
@@ -79,6 +80,10 @@ for (const file of commandFiles) {
 
 // MESSAGE CREATE EVENT LISTENER
 client.on('messageCreate', async (message) => {
+    if (message.content.toLowerCase() === '!checknbmonappearance') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        return await nbmonAppears(client);
+    }
     // if (message.content.toLowerCase().startsWith('!hunt rewardnation')) {
     //     if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.MODS_ROLEID)) {
     //         console.log('rewarded from', message.author.id);

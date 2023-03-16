@@ -29,6 +29,7 @@ const rarity = () => {
 const stats = () => {
     // all stats will start as 30 for each nbmon at level 1 for the sake of simplicity.
     return {
+        rarity: rarity(),
         level: 1,
         hp: 30,
         atk: 30,
@@ -36,8 +37,32 @@ const stats = () => {
     };
 };
 
+const genusData = () => {
+    // everyday, new genera will be available. but for now, these are the available ones:
+    const genera = [
+        {
+            name: 'Roggo',
+            image: 'https://i.imgur.com/dknMetM.png',
+        },
+        {
+            name: 'Birvo',
+            image: 'https://i.imgur.com/yn0edec.png',
+        },
+        {
+            name: 'Dranexx',
+            image: 'https://i.imgur.com/R0TYgP1.png',
+        },
+    ];
+
+    const genusRand = Math.floor(Math.random() * genera.length);
+
+    console.log(genera[genusRand]);
+    return genera[genusRand];
+};
+
 module.exports = {
     rarity,
     stats,
+    genusData,
 };
 

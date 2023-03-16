@@ -208,7 +208,7 @@ const NBMonSchema = new mongoose.Schema(
         genus: String,
         appearanceTimestamp: Number,
         capturedTimestamp: Number,
-        _p_capturedBy: String,
+        capturedBy: String,
         stats: Object,
     },
     {
