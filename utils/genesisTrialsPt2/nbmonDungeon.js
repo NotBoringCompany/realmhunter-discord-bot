@@ -87,14 +87,24 @@ const appendMsgIds = async (nbmonId, appearanceMsgId, statsMsgId) => {
 };
 
 /**
- * Called when `userId` uses `attackerId` (NBMON) to attack `bossId`.
+ * Called when `userId` uses `attackerId` (NBMON) to attack the most recent boss.
  */
-const attackBoss = async (userId, bossId, attackerId) => {
+const attackBoss = async (userId, attackerId) => {
     try {
+        // checks if `userId` owns `attackerId`. if not, return error.
+        const checkOwned = await checkIfOwned(userId, attackerId);
+
+        if (!checkOwned) {
+            return {
+                status: 'error',
+                message: 'You do not own this NBMon.',
+            };
+        }
+
         const BossNBMon = mongoose.model('NBMonBossData', BossNBMonSchema, 'RHDiscordBossNBMonData');
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
 
-        const bossQuery = await BossNBMon.findOne({ nbmonId: bossId });
+        const bossQuery = await BossNBMon.findOne().sort({ nbmonId: -1 });
         const attackerQuery = await NBMon.findOne({ nbmonId: attackerId });
 
         if (!bossQuery) {
@@ -148,9 +158,10 @@ const attackBoss = async (userId, bossId, attackerId) => {
 
                 bossQuery.damagedBy.push(data);
             } else {
-                // if user has attacked before, we add the damage dealt to the previous damage dealt.
-                bossQuery.damagedBy[userIndex].damageDealt += damageDealt;
-                bossQuery.damagedBy[userIndex].lastHitTimestamp = Math.floor(new Date().getTime() / 1000);
+                const damageDealtSoFar = bossQuery.damagedBy[userIndex].damageDealt;
+
+                // else, we will update the `damageDealt` and `lastHitTimestamp` of the user.
+                await BossNBMon.updateOne({ nbmonId: bossQuery.nbmonId, 'damagedBy.userId': userId }, { $set: { 'damagedBy.$.damageDealt': damageDealtSoFar + damageDealt, 'damagedBy.$.lastHitTimestamp': Math.floor(new Date().getTime() / 1000) } });
             }
 
             // we add userId to `defeatedBy` and set `hpLeft` to 0.
@@ -179,7 +190,7 @@ const attackBoss = async (userId, bossId, attackerId) => {
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt the final blow to the boss by dealing ${criticalHit ? 'a CRITICAL HIT with' : ''} ${damageDealt} damage. However, the boss retaliated with its remaining strength and knocked out ${attackerId} afterwards!`,
+                    message: `<@${userId}> has dealt the final blow to Boss #${bossQuery.nbmonId} by dealing ${criticalHit ? 'a CRITICAL HIT with ' : ''} ${damageDealt} damage. However, the boss retaliated with its remaining strength and knocked out NBMon #${attackerId} afterwards!`,
                 };
             } else {
                 await attackerQuery.save();
@@ -187,7 +198,7 @@ const attackBoss = async (userId, bossId, attackerId) => {
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt the final blow to the boss by dealing ${criticalHit ? 'a CRITICAL HIT with' : ''} ${damageDealt} damage.`,
+                    message: `<@${userId}> has dealt the final blow to Boss #${bossQuery.nbmonId} by dealing ${criticalHit ? 'a CRITICAL HIT with ' : ''} ${damageDealt} damage.`,
                 };
             }
         // if the boss still has hp left, we will update a few things.
@@ -209,8 +220,10 @@ const attackBoss = async (userId, bossId, attackerId) => {
                 bossQuery.damagedBy.push(data);
             // if user has attacked before, we add the damage dealt to the previous damage dealt.
             } else {
-                bossQuery.damagedBy[userIndex].damageDealt += damageDealt;
-                bossQuery.damagedBy[userIndex].lastHitTimestamp = Math.floor(new Date().getTime() / 1000);
+                const damageDealtSoFar = bossQuery.damagedBy[userIndex].damageDealt;
+
+                // else, we will update the `damageDealt` and `lastHitTimestamp` of the user.
+                await BossNBMon.updateOne({ nbmonId: bossQuery.nbmonId, 'damagedBy.userId': userId }, { $set: { 'damagedBy.$.damageDealt': damageDealtSoFar + damageDealt, 'damagedBy.$.lastHitTimestamp': Math.floor(new Date().getTime() / 1000) } });
             }
 
             // we give the attacker `damageDealt` XP.
@@ -218,6 +231,9 @@ const attackBoss = async (userId, bossId, attackerId) => {
 
             // now, we check if the attacker NBMon can level up its attack stat.
             const upgradeAttack = checkXPAndUpgrade(attackerQuery.stats.xp, xpToGive);
+
+            // we reduce the boss hp by `damageDealt`.
+            bossQuery.hpLeft -= damageDealt;
 
             // we now give the XP and level up the attack stat of the attacker NBMon. (we will do so anyway since if no upgrade, `upgradeAttack` will return 0.)
             attackerQuery.stats.xp += xpToGive;
@@ -235,7 +251,7 @@ const attackBoss = async (userId, bossId, attackerId) => {
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt ${criticalHit ? 'a CRITICAL HIT with' : ''} ${damageDealt} damage to the boss. However, the boss retaliated with its remaining strength and knocked out ${attackerId} afterwards!`,
+                    message: `<@${userId}> has dealt ${criticalHit ? 'a CRITICAL HIT with ' : ''} ${damageDealt} damage to Boss #${bossQuery.nbmonId}. However, the boss retaliated with its remaining strength and knocked out NBMon #${attackerId} afterwards!`,
                 };
             } else {
                 await attackerQuery.save();
@@ -243,7 +259,7 @@ const attackBoss = async (userId, bossId, attackerId) => {
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt ${criticalHit ? 'a CRITICAL HIT with' : ''} ${damageDealt} damage to the boss with NBMon #${attackerId}.`,
+                    message: `<@${userId}> has dealt ${criticalHit ? 'a CRITICAL HIT with ' : ''} ${damageDealt} damage to Boss #${bossQuery.nbmonId} with NBMon #${attackerId}.`,
                 };
             }
         }
@@ -318,6 +334,11 @@ const userLastHit = async (userId) => {
                     status: 'error',
                     message: 'You have already attacked the boss within the past 5 minutes. Please wait a while before attacking again.',
                 };
+            } else {
+                return {
+                    status: 'success',
+                    message: 'You have not attacked the boss within the past 5 minutes.',
+                }
             }
         }
     } catch (err) {
@@ -478,6 +499,59 @@ const bossAppears = async (client) => {
     }
 };
 
+/**
+ * Get owned NBMon IDs from `userId` and return it as a message.
+ */
+const getOwnedNBMonIds = async (userId) => {
+    try {
+        const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
+        const nbmonQuery = await NBMon.find({ capturedBy: userId });
+
+        let ownedIds = '';
+
+        if (!nbmonQuery) {
+            ownedIds = 'No NBMons owned. Capture or buy some from the shop.';
+        } else {
+            nbmonQuery.forEach((nbmon) => {
+                ownedIds += `${nbmon.nbmonId}, `;
+            });
+        }
+
+        return ownedIds;
+    } catch (err) {
+        console.log({
+            errorFrom: 'getOwnedNBMonIds',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
+ * When the user wants to attack with this NBMon Id, check if it's owned by the user.
+ * if not, throw an error.
+ */
+const checkIfOwned = async (userId, nbmonId) => {
+    try {
+        const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
+        const nbmonQuery = await NBMon.findOne({ nbmonId: nbmonId });
+
+        if (!nbmonQuery) {
+            return false;
+        }
+
+        if (nbmonQuery.capturedBy !== userId) {
+            return false;
+        }
+
+        return true;
+    } catch (err) {
+        console.log({
+            errorFrom: 'checkIfOwned',
+            errorMessage: err,
+        });
+    }
+};
+
 const bossFightButtons = (currentBossId) => {
     return [
         {
@@ -596,8 +670,11 @@ module.exports = {
     addBoss,
     attackBoss,
     checkBossDefeated,
+    getOwnedNBMonIds,
+    getLatestBossId,
     userLastHit,
     bossAppears,
     updateBossStatEmbed,
     bossAppearanceScheduler,
+    checkIfOwned,
 };

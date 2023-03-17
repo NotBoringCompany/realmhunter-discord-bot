@@ -50,7 +50,8 @@ const { nationPendingTagsDistribution } = require('./interactions/buttons/nation
 const { nbmonAppears, nbmonAppearanceScheduler } = require('./utils/genesisTrialsPt2/nbmonAppearance');
 const { captureNBMon } = require('./commands/genesisTrialsPt2/nbmonAppearance');
 const { delay } = require('./utils/delay');
-const { bossAppears, updateBossStatEmbed, bossAppearanceScheduler } = require('./utils/genesisTrialsPt2/nbmonDungeon');
+const { bossAppears, updateBossStatEmbed, bossAppearanceScheduler, attackBoss } = require('./utils/genesisTrialsPt2/nbmonDungeon');
+const { attackBossInteraction } = require('./interactions/buttons/genesisTrialsPt2/nbmonDungeon');
 
 const client = new Client({
     intents: [
@@ -339,7 +340,8 @@ client.on('messageCreate', async (message) => {
 
 // INTERACTION CREATE EVENT LISTENER
 client.on('interactionCreate', async (interaction) => {
-    // if (interaction.isButton()) {
+    if (interaction.isButton()) {
+        await attackBossInteraction(interaction);
     //     await nationPendingTagsDistribution(interaction);
     //     await nationTagStakingInteraction(interaction);
     //     await nationLeadVotesInteraction(interaction);
@@ -379,10 +381,21 @@ client.on('interactionCreate', async (interaction) => {
     //         const { message } = await giveRole(interaction, 'dailyTagsResetNotif');
     //         await interaction.reply({ content: message, ephemeral: true });
     //     }
-    // }
+    }
 
-    // // modal submit interactions
-    // if (interaction.type === InteractionType.ModalSubmit) {
+    // modal submit interactions
+    if (interaction.type === InteractionType.ModalSubmit) {
+        if (interaction.customId === 'attackBossModal') {
+            const attackerNBMonId = interaction.fields.getTextInputValue('attackerNBMonId');
+            const { status: attackStatus, message: attackMessage } = await attackBoss(interaction.user.id, attackerNBMonId);
+
+            await interaction.reply({ content: attackMessage, ephemeral: true });
+
+            if (attackStatus === 'success') {
+                // add the damage log to dungeon log channel. FOR NOW, IT IS THE TEST LEADERBOARD CHANNEL.
+                await client.channels.cache.get(process.env.TEST_LEADERBOARD_CHANNELID).send(attackMessage);
+            }
+        }
     //     if (interaction.customId === 'distributeNationPendingTagsModal') {
     //         const userId = interaction.fields.getTextInputValue('cookiesToDistributeUserId');
     //         const amountToGive = interaction.fields.getTextInputValue('cookiesToDistributeAmount');
@@ -436,7 +449,7 @@ client.on('interactionCreate', async (interaction) => {
 
     //         await interaction.reply({ content: voteMessage, ephemeral: true });
     //     }
-    // }
+    }
 });
 
 // BOT ON READY

@@ -221,7 +221,7 @@ const captureNBMonLogic = async (nbmonId, userId) => {
         }
 
         // we now check if the user has enough tags to capture the NBMon.
-        // requires 100 TAGS! (may change).
+        // requires 70 TAGS! (may change).
         const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
         const userQuery = await User.findOne({ userId: userId });
 
@@ -232,7 +232,7 @@ const captureNBMonLogic = async (nbmonId, userId) => {
             };
         }
 
-        if (userQuery.hunterTags < 100) {
+        if (userQuery.hunterTags < parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT)) {
             return {
                 status: 'error',
                 message: 'Not enough cookies to capture the NBMon.',
