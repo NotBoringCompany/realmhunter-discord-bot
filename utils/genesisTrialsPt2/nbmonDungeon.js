@@ -8,6 +8,8 @@ const { checkXPAndUpgrade } = require('./nbmonStatCalc');
 const { bossNBMonAppearanceEmbed, bossNBMonEmbed } = require('../../embeds/genesisTrialsPt2/nbmonAppearance');
 const cron = require('node-cron');
 
+mongoose.connect(process.env.MONGODB_URI);
+
 /**
  * Adds a boss to the database when it appears.
  */
@@ -666,6 +668,28 @@ const bossAppearanceScheduler = async (client) => {
     }
 };
 
+/**
+ * Revives ALL knocked out NBMons IF now - knocked out timestamp >= 20 minutes.
+ */
+const reviveKnockedOutNBMonScheduler = async () => {
+    try {
+        // runs every 5 minutes.
+        cron.schedule('*/5 * * * *', async () => {
+            const now = Math.floor(new Date().getTime() / 1000);
+            const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
+
+            // update all NBMons that fainted and (now - lastFaintedTimestamp >= 20 minutes) to not fainted (if any).
+            await NBMon.updateMany({ fainted: true, lastFaintedTimestamp: { $lte: now - 1200 } }, { $set: { fainted: false } });
+            console.log('revived knocked out NBMons.');
+        });
+    } catch (err) {
+        console.log({
+            errorFrom: 'reviveKnockedOutNBMonScheduler',
+            errorMessage: err,
+        });
+    }
+};
+
 module.exports = {
     addBoss,
     attackBoss,
@@ -677,4 +701,5 @@ module.exports = {
     updateBossStatEmbed,
     bossAppearanceScheduler,
     checkIfOwned,
+    reviveKnockedOutNBMonScheduler,
 };
