@@ -50,7 +50,7 @@ const { nationPendingTagsDistribution } = require('./interactions/buttons/nation
 const { nbmonAppears, nbmonAppearanceScheduler } = require('./utils/genesisTrialsPt2/nbmonAppearance');
 const { captureNBMon } = require('./commands/genesisTrialsPt2/nbmonAppearance');
 const { delay } = require('./utils/delay');
-const { bossAppears, updateBossStatEmbed, bossAppearanceScheduler, attackBoss, reviveKnockedOutNBMonScheduler } = require('./utils/genesisTrialsPt2/nbmonDungeon');
+const { bossAppears, updateBossStatEmbed, bossAppearanceScheduler, attackBoss, reviveKnockedOutNBMonScheduler, updateBossStatEmbedScheduler } = require('./utils/genesisTrialsPt2/nbmonDungeon');
 const { attackBossInteraction } = require('./interactions/buttons/genesisTrialsPt2/nbmonDungeon');
 
 const client = new Client({
@@ -469,6 +469,7 @@ client.on('ready', async c => {
     await nbmonAppearanceScheduler(client);
     await bossAppearanceScheduler(client);
     await reviveKnockedOutNBMonScheduler();
+    await updateBossStatEmbedScheduler(client);
 
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,

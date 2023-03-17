@@ -1,6 +1,6 @@
 require('dotenv').config();
 const permissions = require('../dbPermissions');
-const { BossNBMonSchema, NBMonSchema } = require('../schemas');
+const { BossNBMonSchema, NBMonSchema, DiscordUserSchema } = require('../schemas');
 const mongoose = require('mongoose');
 const { generateObjectId } = require('../cryptoUtils');
 const { bossHp } = require('./nbmonStatRandomizer');
@@ -180,8 +180,11 @@ const attackBoss = async (userId, attackerId) => {
             attackerQuery.stats.xp += xpToGive;
             attackerQuery.stats.atk += upgradeAttack;
 
-            // now, there's still a 30% chance that the boss retaliates. if so, the attacker gets knocked out.
-            const retaliation = Math.floor(Math.random() * 10) + 1 <= 3 ? true : false;
+            // now, there's still a 20% chance that the boss retaliates. if so, the attacker gets knocked out.
+            const retaliation = Math.floor(Math.random() * 10) + 1 <= 2 ? true : false;
+
+            // now, we give the realm points to the user based on the damage dealt.
+            await rewardRealmPoints(userId, damageDealt);
 
             if (retaliation) {
                 attackerQuery.lastFaintedTimestamp = Math.floor(new Date().getTime() / 1000);
@@ -241,12 +244,18 @@ const attackBoss = async (userId, attackerId) => {
             attackerQuery.stats.xp += xpToGive;
             attackerQuery.stats.atk += upgradeAttack;
 
-            // now, there's still a 30% chance that the boss retaliates. if so, the attacker gets knocked out.
-            const retaliation = Math.floor(Math.random() * 10) + 1 <= 3 ? true : false;
+            // now, we give the realm points to the user based on the damage dealt.
+            await rewardRealmPoints(userId, damageDealt);
+
+            // now, there's still a 20% chance that the boss retaliates. if so, the attacker gets knocked out.
+            const retaliation = Math.floor(Math.random() * 10) + 1 <= 2 ? true : false;
 
             if (retaliation) {
                 attackerQuery.lastFaintedTimestamp = Math.floor(new Date().getTime() / 1000);
                 attackerQuery.fainted = true;
+
+                attackerQuery._updated_at = Date.now();
+                bossQuery._updated_at = Date.now();
 
                 await attackerQuery.save();
                 await bossQuery.save();
@@ -256,6 +265,9 @@ const attackBoss = async (userId, attackerId) => {
                     message: `<@${userId}> has dealt ${criticalHit ? 'a CRITICAL HIT with ' : ''} ${damageDealt} damage to Boss #${bossQuery.nbmonId}. However, the boss retaliated with its remaining strength and knocked out NBMon #${attackerId} afterwards!`,
                 };
             } else {
+                attackerQuery._updated_at = Date.now();
+                bossQuery._updated_at = Date.now();
+
                 await attackerQuery.save();
                 await bossQuery.save();
 
@@ -296,6 +308,62 @@ const checkBossDefeated = async (nbmonId) => {
     } catch (err) {
         console.log({
             errorFrom: 'checkBossDefeated',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
+ * Rewards the user with Realm Points after successfully attacking a boss.
+ */
+const rewardRealmPoints = async (userId, realmPoints) => {
+    try {
+        const User = mongoose.model('User', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: userId });
+
+        const { _wperm, _rperm, _acl } = permissions(true, false);
+
+        // if query isn't found, (we will create a new user.). safety mechanism to prevent error.
+        // however, this shouldn't happen anyway since the user shouldve already been created when having an nbmon.
+        if (!userQuery) {
+            const NewUser = new User(
+                {
+                    _id: generateObjectId(),
+                    _created_at: Date.now(),
+                    _updated_at: Date.now(),
+                    _wperm: _wperm,
+                    _rperm: _rperm,
+                    _acl: _acl,
+                    userId: userId,
+                    realmPoints: realmPoints,
+                },
+            );
+
+            await NewUser.save();
+
+            return {
+                status: 'success',
+                message: `Successfully rewarded <@${userId}> with ${realmPoints} Gatekeeper's Favor Points.`,
+            };
+        } else {
+            // otherwise, if it exists, we will update the user's realm points.
+            if (userQuery.realmPoints) {
+                userQuery.realmPoints += realmPoints;
+            } else {
+                userQuery.realmPoints = realmPoints;
+            }
+
+            userQuery._updated_at = Date.now();
+            await userQuery.save();
+
+            return {
+                status: 'success',
+                message: `Successfully rewarded <@${userId}> with ${realmPoints} Gatekeeper's Favor Points.`,
+            };
+        };
+    } catch (err) {
+        console.log({
+            errorFrom: 'rewardRealmPoints',
             errorMessage: err,
         });
     }
@@ -690,6 +758,23 @@ const reviveKnockedOutNBMonScheduler = async () => {
     }
 };
 
+/**
+ * Updates the boss stat embed every 30 seconds.
+ */
+const updateBossStatEmbedScheduler = async (client) => {
+    try {
+        cron.schedule('*/30 * * * * *', async () => {
+            const { message } = await updateBossStatEmbed(client);
+            console.log(message);
+        });
+    } catch (err) {
+        console.log({
+            errorFrom: 'updateBossStatEmbedScheduler',
+            errorMessage: err,
+        });
+    }
+};
+
 module.exports = {
     addBoss,
     attackBoss,
@@ -702,4 +787,5 @@ module.exports = {
     bossAppearanceScheduler,
     checkIfOwned,
     reviveKnockedOutNBMonScheduler,
+    updateBossStatEmbedScheduler,
 };
