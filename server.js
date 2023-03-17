@@ -50,7 +50,7 @@ const { nationPendingTagsDistribution } = require('./interactions/buttons/nation
 const { nbmonAppears, nbmonAppearanceScheduler } = require('./utils/genesisTrialsPt2/nbmonAppearance');
 const { captureNBMon } = require('./commands/genesisTrialsPt2/nbmonAppearance');
 const { delay } = require('./utils/delay');
-const { bossAppears, updateBossStatEmbed } = require('./utils/genesisTrialsPt2/nbmonDungeon');
+const { bossAppears, updateBossStatEmbed, bossAppearanceScheduler } = require('./utils/genesisTrialsPt2/nbmonDungeon');
 
 const client = new Client({
     intents: [
@@ -454,6 +454,7 @@ client.on('ready', async c => {
     // await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
     // await cumulativeNationTagsStakedScheduler(process.env.CUMULATIVE_COOKIES_STAKED_EMBED_MESSAGEID, client);
     await nbmonAppearanceScheduler(client);
+    await bossAppearanceScheduler(client);
 
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,

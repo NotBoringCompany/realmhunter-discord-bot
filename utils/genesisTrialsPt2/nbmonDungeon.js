@@ -6,8 +6,7 @@ const { generateObjectId } = require('../cryptoUtils');
 const { bossHp } = require('./nbmonStatRandomizer');
 const { checkXPAndUpgrade } = require('./nbmonStatCalc');
 const { bossNBMonAppearanceEmbed, bossNBMonEmbed } = require('../../embeds/genesisTrialsPt2/nbmonAppearance');
-
-mongoose.connect(process.env.MONGODB_URI);
+const cron = require('node-cron');
 
 /**
  * Adds a boss to the database when it appears.
@@ -365,7 +364,8 @@ const allowNextBossAppearance = async () => {
         if (!bossDefeated) {
             return {
                 status: 'error',
-                message: `Previous boss not yet defeated. Defeat it in <#${process.env.TEST_GENERAL_CHAT_CHANNELID}> to allow the next boss to appear.`,
+                message: `A new boss wants to be challenged but the previous boss has not yet been defeated. \n
+                Defeat it in <#${process.env.FOUNDERS_BOT_COMMANDS_CHANNELID}> to allow the next boss to appear soon.`,
                 canAppear: false,
             };
         };
@@ -551,14 +551,46 @@ const updateBossStatEmbed = async (client) => {
 };
 
 
-// /**
-//  * A scheduler to run every minute that gives a 0.1% chance of a boss appearing.
-//  * If the chance hits but the previous boss is not yet defeated, throw a message saying to defeat the boss.
-//  * If the chance doesn't hit and the boss is defeated and the time between the current and previous boss is more than 8 hours, we let the boss appear.
-//  */
-// const bossAppearanceScheduler = async (client) => {
+/**
+ * A scheduler to run every minute that gives a 0.1% chance of a boss appearing.
+ * If the chance hits but the previous boss is not yet defeated, throw a message saying to defeat the boss.
+ * If the chance doesn't hit and the boss is defeated and the time between the current and previous boss is more than 8 hours, we let the boss appear.
+ */
+const bossAppearanceScheduler = async (client) => {
+    try {
+        cron.schedule('* * * * *', async () => {
+            // 0.1% chance of appearing each minute.
+            const rand = Math.floor(Math.random() * 1000) + 1;
 
-// }
+            console.log('boss appearance rand: ', rand);
+
+            const now = Math.floor(new Date().getTime() / 1000);
+            const prevAppearance = await prevBossAppearance();
+
+            const isOver8Hours = now - prevAppearance >= 28800;
+
+            // if rand = 1 or its already 8 hours since the previous boss appearance, run the bossAppears function.
+            // if the prev boss hasn't been defeated, `bossAppears` will return an error status.
+            if (rand === 1 || isOver8Hours) {
+                const { status, message } = await bossAppears(client);
+
+                if (status === 'error') {
+                    // we don't need to show this message in general chat.
+                    if (message !== 'Boss cannot appear yet.' || message !== 'Error while retrieving boss data.') {
+                        await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send(message);
+                    } else {
+                        console.log(message);
+                    }
+                }
+            }
+        });
+    } catch (err) {
+        console.log({
+            errorFrom: 'bossAppearanceScheduler',
+            errorMessage: err,
+        });
+    }
+};
 
 module.exports = {
     addBoss,
@@ -567,4 +599,5 @@ module.exports = {
     userLastHit,
     bossAppears,
     updateBossStatEmbed,
+    bossAppearanceScheduler,
 };

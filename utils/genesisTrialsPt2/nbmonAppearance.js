@@ -296,7 +296,7 @@ const nbmonAppearanceScheduler = async (client) => {
         cron.schedule('* * * * *', async () => {
             const rand = Math.floor(Math.random() * 100) + 1;
 
-            console.log(rand);
+            console.log('nbmon appearance rand: ', rand);
 
             const now = Math.floor(new Date().getTime() / 1000);
             const prevAppearance = await prevNBMonAppearance();
