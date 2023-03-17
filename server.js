@@ -50,6 +50,7 @@ const { nationPendingTagsDistribution } = require('./interactions/buttons/nation
 const { nbmonAppears, nbmonAppearanceScheduler } = require('./utils/genesisTrialsPt2/nbmonAppearance');
 const { captureNBMon } = require('./commands/genesisTrialsPt2/nbmonAppearance');
 const { delay } = require('./utils/delay');
+const { bossAppears, updateBossStatEmbed } = require('./utils/genesisTrialsPt2/nbmonDungeon');
 
 const client = new Client({
     intents: [
@@ -84,9 +85,19 @@ for (const file of commandFiles) {
 client.on('messageCreate', async (message) => {
     if (message.content.startsWith('!hunt captureNBMon')) {
         const { message: captureNBMonMessage } = await captureNBMon(message);
-        await message.channel.send(captureNBMonMessage);
+        await message.reply(captureNBMonMessage);
         // delay 2 seconds to prevent spamming.
         await delay(2000);
+    }
+
+    if (message.content.toLowerCase() === '!testboss') {
+        const { message: nbmonAppearsMessage } = await bossAppears(client);
+        console.log(nbmonAppearsMessage);
+    }
+
+    if (message.content.toLowerCase() === '!updatebossstats') {
+        const { message: updateMsg } = await updateBossStatEmbed(client);
+        console.log(updateMsg);
     }
     // if (message.content.toLowerCase().startsWith('!hunt rewardnation')) {
     //     if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.MODS_ROLEID)) {

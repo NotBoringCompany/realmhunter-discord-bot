@@ -210,6 +210,8 @@ const NBMonSchema = new mongoose.Schema(
         capturedTimestamp: Number,
         capturedBy: String,
         stats: Object,
+        lastFaintedTimestamp: Number,
+        fainted: Boolean,
     },
     {
         versionKey: false,
@@ -229,10 +231,13 @@ const BossNBMonSchema = new mongoose.Schema(
         _acl: Object,
         nbmonId: Number,
         appearanceTimestamp: Number,
+        totalHp: Number,
         hpLeft: Number,
         damagedBy: Array,
         defeatedBy: String,
         defeatedTimestamp: Number,
+        bossAppearanceMsgId: String,
+        bossStatsMsgId: String,
     },
     {
         versionKey: false,
