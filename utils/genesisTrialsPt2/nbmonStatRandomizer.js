@@ -27,13 +27,12 @@ const rarity = () => {
 };
 
 const stats = () => {
-    // all stats will start as 30 for each nbmon at level 1 for the sake of simplicity.
+    // all stats will start as follows:
     return {
         rarity: rarity(),
-        level: 1,
+        xp: 0,
         hp: 30,
         atk: 5,
-        def: 30,
     };
 };
 
@@ -60,9 +59,23 @@ const genusData = () => {
     return genera[genusRand];
 };
 
+const bossHp = () => {
+    // boss hp changes every day. starting from 18 march, it will return 3000 - 5000.
+    // 18 march: 3000 - 5000
+    // 19 march: 4000 - 6000
+    // 20 march: 5000 - 7000
+    // 21 march: 6000 - 8000
+    // 22 march: 7500 - 10000
+    // 23 march: 10000 - 12500
+    // 24 march: 12500 - 17500
+    // 25 march: 17500 - 25000
+    return Math.floor(Math.random() * 2000) + 3000;
+};
+
 module.exports = {
     rarity,
     stats,
     genusData,
+    bossHp,
 };
 

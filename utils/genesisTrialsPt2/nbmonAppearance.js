@@ -15,7 +15,6 @@ const addNBMon = async (nbmonId, genus, stats) => {
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
 
         // get the NBMon data from the database to check the latest ID.
-
         const { _wperm, _rperm, _acl } = permissions(false, false);
         const NewNBMon = new NBMon(
             {

@@ -216,6 +216,29 @@ const NBMonSchema = new mongoose.Schema(
     },
 );
 
+const BossNBMonSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        nbmonId: Number,
+        appearanceTimestamp: Number,
+        hpLeft: Number,
+        damagedBy: Array,
+        defeatedBy: String,
+        defeatedTimestamp: Number,
+    },
+    {
+        versionKey: false,
+    },
+);
+
 module.exports = {
     BenchmarkSchema,
     DiscordUserSchema,
@@ -227,4 +250,5 @@ module.exports = {
     NationLeadVoteSchema,
     QuestEntriesSchema,
     NBMonSchema,
+    BossNBMonSchema,
 };
