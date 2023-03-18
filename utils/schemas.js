@@ -244,6 +244,42 @@ const BossNBMonSchema = new mongoose.Schema(
     },
 );
 
+const HunterGamesParticipantsSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        userId: String,
+    }, {
+        versionKey: false,
+    },
+);
+
+const HunterGamesDataSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        gameId: Number,
+        participantsCount: Number,
+        isComplete: Boolean,
+    }, {
+        versionKey: false,
+    },
+);
+
 module.exports = {
     BenchmarkSchema,
     DiscordUserSchema,
@@ -256,4 +292,6 @@ module.exports = {
     QuestEntriesSchema,
     NBMonSchema,
     BossNBMonSchema,
+    HunterGamesParticipantsSchema,
+    HunterGamesDataSchema,
 };

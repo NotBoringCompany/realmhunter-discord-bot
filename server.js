@@ -52,6 +52,8 @@ const { captureNBMon } = require('./commands/genesisTrialsPt2/nbmonAppearance');
 const { delay } = require('./utils/delay');
 const { bossAppears, updateBossStatEmbed, bossAppearanceScheduler, attackBoss, reviveKnockedOutNBMonScheduler, updateBossStatEmbedScheduler } = require('./utils/genesisTrialsPt2/nbmonDungeon');
 const { attackBossInteraction } = require('./interactions/buttons/genesisTrialsPt2/nbmonDungeon');
+const { startHunterGames } = require('./utils/genesisTrialsPt2/hunterGames');
+const { hunterGamesInteraction } = require('./interactions/buttons/genesisTrialsPt2/hunterGames');
 
 const client = new Client({
     intents: [
@@ -99,6 +101,13 @@ client.on('messageCreate', async (message) => {
     if (message.content.toLowerCase() === '!updatebossstats') {
         const { message: updateMsg } = await updateBossStatEmbed(client);
         console.log(updateMsg);
+    }
+
+    if (message.content.toLowerCase() === '!hunt starthuntergames') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+
+        const { message: hunterGamesMsg } = await startHunterGames(client);
+        console.log(hunterGamesMsg);
     }
     // if (message.content.toLowerCase().startsWith('!hunt rewardnation')) {
     //     if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.MODS_ROLEID)) {
@@ -342,6 +351,7 @@ client.on('messageCreate', async (message) => {
 client.on('interactionCreate', async (interaction) => {
     if (interaction.isButton()) {
         await attackBossInteraction(interaction);
+        await hunterGamesInteraction(interaction);
     //     await nationPendingTagsDistribution(interaction);
     //     await nationTagStakingInteraction(interaction);
     //     await nationLeadVotesInteraction(interaction);
@@ -466,10 +476,11 @@ client.on('ready', async c => {
     // await restartDailyContributionTagsClaimedScheduler();
     // await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
     // await cumulativeNationTagsStakedScheduler(process.env.CUMULATIVE_COOKIES_STAKED_EMBED_MESSAGEID, client);
-    await nbmonAppearanceScheduler(client);
-    await bossAppearanceScheduler(client);
-    await reviveKnockedOutNBMonScheduler();
-    await updateBossStatEmbedScheduler(client);
+
+    // await nbmonAppearanceScheduler(client);
+    // await bossAppearanceScheduler(client);
+    // await reviveKnockedOutNBMonScheduler();
+    // await updateBossStatEmbedScheduler(client);
 
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,

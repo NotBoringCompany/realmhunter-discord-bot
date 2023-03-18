@@ -28,7 +28,7 @@ const bossNBMonEmbed = (id, image, hpLeft, maxHp, attackedByCount) => {
         .setFields(
             {
                 name: '__**HP Left**__',
-                value: `${hpLeft}/${maxHp}`,
+                value: `${hpLeft > 0 ? `${hpLeft}/${maxHp}` : `BOSS DEFEATED! Please wait for the next boss.`}`,
             },
             {
                 name: '__**Attacked By**__',
