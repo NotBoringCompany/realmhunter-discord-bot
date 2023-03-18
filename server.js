@@ -54,6 +54,8 @@ const { bossAppears, updateBossStatEmbed, bossAppearanceScheduler, attackBoss, r
 const { attackBossInteraction } = require('./interactions/buttons/genesisTrialsPt2/nbmonDungeon');
 const { startHunterGames } = require('./utils/genesisTrialsPt2/hunterGames');
 const { hunterGamesInteraction } = require('./interactions/buttons/genesisTrialsPt2/hunterGames');
+const { showCheckRealmPointsCollectedEmbed } = require('./commands/genesisTrialsPt2/realmPoints');
+const { realmPointsButtonInteraction } = require('./interactions/buttons/genesisTrialsPt2/realmPoints');
 
 const client = new Client({
     intents: [
@@ -108,6 +110,11 @@ client.on('messageCreate', async (message) => {
 
         const { message: hunterGamesMsg } = await startHunterGames(client);
         console.log(hunterGamesMsg);
+    }
+
+    if (message.content.toLowerCase() === '!showrealmpointscollectedembed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showCheckRealmPointsCollectedEmbed(message);
     }
     // if (message.content.toLowerCase().startsWith('!hunt rewardnation')) {
     //     if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.MODS_ROLEID)) {
@@ -352,6 +359,7 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.isButton()) {
         await attackBossInteraction(interaction);
         await hunterGamesInteraction(interaction);
+        await realmPointsButtonInteraction(interaction);
     //     await nationPendingTagsDistribution(interaction);
     //     await nationTagStakingInteraction(interaction);
     //     await nationLeadVotesInteraction(interaction);

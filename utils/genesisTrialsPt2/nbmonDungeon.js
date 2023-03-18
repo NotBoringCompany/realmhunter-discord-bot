@@ -397,16 +397,16 @@ const userLastHit = async (userId) => {
             const now = Math.floor(new Date().getTime() / 1000);
             const lastHitTimestamp = damagedBy[userIndex].lastHitTimestamp;
 
-            if (now - lastHitTimestamp <= 300) {
+            if (now - lastHitTimestamp <= 120) {
                 return {
                     status: 'error',
-                    message: 'You have already attacked the boss within the past 5 minutes. Please wait a while before attacking again.',
+                    message: 'You have already attacked the boss within the past 2 minutes. Please wait a while before attacking again.',
                 };
             } else {
                 return {
                     status: 'success',
-                    message: 'You have not attacked the boss within the past 5 minutes.',
-                }
+                    message: 'You have not attacked the boss within the past 2 minutes.',
+                };
             }
         }
     } catch (err) {
@@ -442,7 +442,7 @@ const prevBossAppearance = async () => {
  * Checks if the next boss can appear.
  * In order for the boss to appear:
  * 1. The previous boss must be defeated.
- * 2. The appearance between the previous boss and the current boss must be more than 8 hours.
+ * 2. The appearance between the previous boss and the current boss must be more than 5 hours.
  */
 const allowNextBossAppearance = async () => {
     try {
@@ -459,7 +459,7 @@ const allowNextBossAppearance = async () => {
             };
         };
 
-        if (bossDefeated && now - prevAppearance < 28800) {
+        if (bossDefeated && now - prevAppearance < 18000) {
             return {
                 status: 'error',
                 message: `Boss cannot appear yet.`,
@@ -467,7 +467,7 @@ const allowNextBossAppearance = async () => {
             };
         }
 
-        if (bossDefeated && now - prevAppearance >= 28800) {
+        if (bossDefeated && now - prevAppearance >= 18000) {
             return {
                 status: 'success',
                 message: 'Boss can appear.',
