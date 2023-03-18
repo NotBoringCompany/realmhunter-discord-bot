@@ -15,6 +15,8 @@ const addNBMon = async (nbmonId, genus) => {
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
 
         const { _wperm, _rperm, _acl } = permissions(false, false);
+
+        const getRarity = rarity();
         const NewNBMon = new NBMon(
             {
                 _id: generateObjectId(),
@@ -30,16 +32,16 @@ const addNBMon = async (nbmonId, genus) => {
                 maxHp: 30,
                 currentHp: 30,
                 atk: 5,
-                rarity: rarity(),
+                rarity: getRarity,
                 appearanceTimestamp: Math.floor(new Date().getTime() / 1000),
             },
         );
 
         await NewNBMon.save();
-
         return {
             status: 'success',
             message: 'NBMon added to database.',
+            rarity: getRarity,
         };
     } catch (err) {
         console.log({
@@ -132,20 +134,15 @@ const nbmonAppears = async (client) => {
         }
 
         const getGenus = genusData();
-        const getRarity = rarity();
-
-        if (!getRarity) {
-            return;
-        }
 
         const latestNBMonId = await getLatestNBMonId();
 
         const newId = latestNBMonId + 1;
 
         // adds the wild NBMon to the database and then sends the message to general chat.
-        await addNBMon(newId, getGenus.name);
+        const { rarity } = await addNBMon(newId, getGenus.name);
         // right now, it will be in test general chat. it will be changed later.
-        await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send({ embeds: [nbmonAppearanceEmbed(getRarity, newId, getGenus.name, getGenus.image)] });
+        await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send({ embeds: [nbmonAppearanceEmbed(rarity, newId, getGenus.name, getGenus.imageUrl)] });
 
         return {
             status: 'success',
@@ -173,7 +170,7 @@ const nbmonCaptured = async (nbmonId) => {
             // nbmon id query
             nbmonQuery = await NBMon.findOne({ nbmonId: nbmonId });
         } else {
-            nbmonQuery = await NBMon.findOne({}).sort({ nbmonId: -1 });
+            nbmonQuery = await NBMon.findOne({ bought: false }).sort({ nbmonId: -1 });
         }
 
         // if nbmon doesnt exist, then we just return 'captured'.
@@ -272,7 +269,7 @@ const captureNBMonLogic = async (nbmonId, userId) => {
         }
 
         // we now check if the user has enough tags to capture the NBMon.
-        // requires 70 TAGS! (may change).
+        // requires 50 TAGS! (may change).
         const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
         const userQuery = await User.findOne({ userId: userId });
 
@@ -308,12 +305,12 @@ const captureNBMonLogic = async (nbmonId, userId) => {
         if (nbmonUserQuery.length >= 5) {
             return {
                 status: 'error',
-                message: `<@${userId}, you have already captured 5 NBMons. You're not allowed to capture more.`,
+                message: `<@${userId}>, you have already captured 5 NBMons. You're not allowed to capture more.`,
             };
         }
 
         // once all checks are done, we will now capture the NBMon.
-        userQuery.hunterTags -= 70;
+        userQuery.hunterTags -= 50;
         userQuery._updated_at = Date.now();
 
         // if the nbmon has not been captured, we update the database.

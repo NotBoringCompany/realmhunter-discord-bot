@@ -1,5 +1,5 @@
-const { nbmonDataEmbed, checkNBMonsOwnedEmbed } = require("../../embeds/genesisTrialsPt2/nbmonData");
-const { ownedNBMonEmbedButtons } = require("../../utils/genesisTrialsPt2/nbmonData");
+const { nbmonDataEmbed, checkNBMonsOwnedEmbed } = require('../../embeds/genesisTrialsPt2/nbmonData');
+const { ownedNBMonEmbedButtons } = require('../../utils/genesisTrialsPt2/nbmonData');
 
 const showNBMonDataEmbed = async (message) => {
     try {

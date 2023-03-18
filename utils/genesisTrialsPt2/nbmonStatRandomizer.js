@@ -108,7 +108,7 @@ const bossHp = async () => {
     // rand between 500 - 1500
     const rand = Math.floor(Math.random() * 1001) + 500;
 
-    return bossHp * rand;
+    return Math.floor(bossHp * rand);
 };
 
 const imageUrl = (genus) => {

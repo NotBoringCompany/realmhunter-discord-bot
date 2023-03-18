@@ -297,7 +297,7 @@ const hunterGamesWinners = async (client, participantsArray, participantsCount) 
     try {
         /**
          * LOGIC FOR WINNER LEADERBOARD IS AS FOLLOWS:
-         * (EXTRA COOKIES ON TOP OF PARTICIPATION POINTS)
+         * (EXTRA RP ON TOP OF PARTICIPATION POINTS)
          * IF < 25 PARTICIPANTS, WINNER EARNS 90 RP.
          * IF 26 - 50 PARTICIPANTS, TOP 3 EARNS: 110, 95, 85 RP.
          * IF 51 - 100 PARTICIPANTS, TOP 5 EARNS: 125, 110, 95, 85, 80 RP.
@@ -311,7 +311,7 @@ const hunterGamesWinners = async (client, participantsArray, participantsCount) 
         // store winners data into array of objects to reward them with realm points.
         const winnersData = [];
 
-        if (participantsCount <= 1) {
+        if (participantsCount <= 25) {
             const winner = participantsArray.filter(p => p.diedAtPosition === 0)[0];
 
             // 1 winner. we store the data to the winnersData array.
@@ -323,7 +323,7 @@ const hunterGamesWinners = async (client, participantsArray, participantsCount) 
 
             // only 1 winner.
             leaderboardAsString += `🏆 | 1. <@${winner.userId}> - 90 Favor Points.`;
-        } else if (participantsCount >= 3 && participantsCount <= 50) {
+        } else if (participantsCount >= 26 && participantsCount <= 50) {
             // 3 winners.
             const points = [110, 95, 85];
             const top3 = participantsArray.filter(p => p.diedAtPosition <= 3);

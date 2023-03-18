@@ -436,7 +436,11 @@ client.on('interactionCreate', async (interaction) => {
 
         if (interaction.customId === 'checkNBMonStatsModal') {
             const nbmonId = interaction.fields.getTextInputValue('checkNBMonStatsNBMonId');
-            const { message: nbmonMessage, data } = await getNBMonData(interaction.user.id, nbmonId);
+            const { status, message: nbmonMessage, data } = await getNBMonData(interaction.user.id, nbmonId);
+
+            if (status === 'error') {
+                return await interaction.reply({ content: nbmonMessage, ephemeral: true });
+            }
 
             await interaction.reply({ embeds: [nbmonDataEmbed(data)], ephemeral: true });
         }
@@ -505,17 +509,17 @@ client.on('ready', async c => {
     mongoose.connect(process.env.MONGODB_URI);
 
     // CRON JOBS (SCHEDULERS)
-    nextTagDistributionScheduler.start();
-    await distributeTagScheduler(client);
-    await restartDailyTagsAllowance();
-    await removeExpiredInvitesScheduler();
-    await restartDailyContributionTagsClaimedScheduler();
-    await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
-    await cumulativeNationTagsStakedScheduler(process.env.CUMULATIVE_COOKIES_STAKED_EMBED_MESSAGEID, client);
+    // nextTagDistributionScheduler.start();
+    // await distributeTagScheduler(client);
+
+    // await restartDailyTagsAllowance();
+    // await removeExpiredInvitesScheduler();
+    // await restartDailyContributionTagsClaimedScheduler();
+    // await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
+    // await cumulativeNationTagsStakedScheduler(process.env.CUMULATIVE_COOKIES_STAKED_EMBED_MESSAGEID, client);
 
     await nbmonAppearanceScheduler(client);
     await bossAppearanceScheduler(client);
-    // await reviveKnockedOutNBMonScheduler();
     await updateBossStatEmbedScheduler(client);
 
     await Moralis.start({
