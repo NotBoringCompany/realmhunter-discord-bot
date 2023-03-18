@@ -3,7 +3,7 @@ const permissions = require('../dbPermissions');
 const { BossNBMonSchema, NBMonSchema, DiscordUserSchema } = require('../schemas');
 const mongoose = require('mongoose');
 const { generateObjectId } = require('../cryptoUtils');
-const { bossHp } = require('./nbmonStatRandomizer');
+const { bossHp, imageUrl } = require('./nbmonStatRandomizer');
 const { checkXPAndUpgrade, xpToGive } = require('./nbmonStatCalc');
 const { bossNBMonAppearanceEmbed, bossNBMonEmbed } = require('../../embeds/genesisTrialsPt2/nbmonAppearance');
 const cron = require('node-cron');
@@ -575,7 +575,7 @@ const bossAppears = async (client) => {
         // 2. add the boss embed to the dungeon channel
         // for TESTING, IT WILL BE IN FOUNDERS BOT COMMANDS!
         const statsMsg = await client.channels.cache.get(process.env.FOUNDERS_BOT_COMMANDS_CHANNELID).send({
-            embeds: [bossNBMonEmbed(newBossId, 'https://i.imgur.com/gCy7bFa.png', bossHp, bossHp, 0)],
+            embeds: [bossNBMonEmbed(newBossId, imageUrl('scorpio'), bossHp, bossHp, 0)],
             components: [
                 {
                     type: 1,
@@ -587,7 +587,7 @@ const bossAppears = async (client) => {
         // 3. add the boss appearance embed to the general chat.
         // for TESTING, IT WILL BE IN TEST GENERAL CHAT!
         const appearanceMsg = await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send({
-            embeds: [bossNBMonAppearanceEmbed(newBossId, 'https://i.imgur.com/gCy7bFa.png')],
+            embeds: [bossNBMonAppearanceEmbed(newBossId, imageUrl('scorpio'))],
         });
 
         // 4. update the msg IDs in the database.
@@ -722,7 +722,7 @@ const updateBossStatEmbed = async (client) => {
         }
 
         await statEmbed.edit({
-            embeds: [bossNBMonEmbed(currentId, 'https://i.imgur.com/gCy7bFa.png', currentHp.toString(), maxHp.toString(), attackedBy)],
+            embeds: [bossNBMonEmbed(currentId, imageUrl('scorpio'), currentHp.toString(), maxHp.toString(), attackedBy)],
             components: [
                 {
                     type: 1,

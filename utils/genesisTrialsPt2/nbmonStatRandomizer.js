@@ -32,22 +32,67 @@ const genusData = () => {
     // everyday, new genera will be available. but for now, these are the available ones:
     const genera = [
         {
+            name: 'Pfufu',
+            imageUrl: imageUrl('pfufu'),
+        },
+        {
             name: 'Roggo',
-            image: 'https://i.imgur.com/dknMetM.png',
+            imageUrl: imageUrl('roggo'),
         },
         {
             name: 'Birvo',
-            image: 'https://i.imgur.com/yn0edec.png',
+            imageUrl: imageUrl('birvo'),
+        },
+        {
+            name: 'Pongu',
+            imageUrl: imageUrl('pongu'),
         },
         {
             name: 'Dranexx',
-            image: 'https://i.imgur.com/R0TYgP1.png',
+            imageUrl: imageUrl('dranexx'),
+        },
+        {
+            name: 'Lamox',
+            imageUrl: imageUrl('lamox'),
+        },
+        {
+            name: 'Schoggi',
+            imageUrl: imageUrl('schoggi'),
+        },
+        {
+            name: 'Milnas',
+            imageUrl: imageUrl('milnas'),
+        },
+        {
+            name: 'Licorine',
+            imageUrl: imageUrl('licorine'),
+        },
+        {
+            name: 'Heree',
+            imageUrl: imageUrl('heree'),
         },
     ];
 
-    const genusRand = Math.floor(Math.random() * genera.length);
+    // from march 19, the first 4 will be available.
+    const march19 = 1679220000;
+    // march 20, add the next 3.
+    const march20 = 1679306400;
+    // march 21, add the last 3.
+    const march21 = 1679392800;
 
-    console.log(genera[genusRand]);
+    const now = Math.floor(new Date().getTime() / 1000);
+
+    let genusRand;
+
+    if (now < march20) {
+        // get the first 4 to randomize.
+        genusRand = Math.floor(Math.random() * 4);
+    } else if (now < march21) {
+        genusRand = Math.floor(Math.random() * 7);
+    } else {
+        // get the whole length of the array.
+        genusRand = Math.floor(Math.random() * genera.length);
+    }
     return genera[genusRand];
 };
 
@@ -66,9 +111,37 @@ const bossHp = async () => {
     return bossHp * rand;
 };
 
+const imageUrl = (genus) => {
+    switch (genus.toLowerCase()) {
+        case 'pfufu':
+            return 'https://i.imgur.com/FQD719p.png';
+        case 'roggo':
+            return 'https://i.imgur.com/dknMetM.png';
+        case 'birvo':
+            return 'https://i.imgur.com/up45Qyp.png';
+        case 'pongu':
+            return 'https://i.imgur.com/xtIRJpN.png';
+        case 'dranexx':
+            return 'https://i.imgur.com/DNv8m9y.png';
+        case 'lamox':
+            return 'https://i.imgur.com/flAEvZY.png';
+        case 'schoggi':
+            return 'https://i.imgur.com/i3uVyWe.png';
+        case 'milnas':
+            return 'https://i.imgur.com/IuNlEe2.png';
+        case 'licorine':
+            return 'https://i.imgur.com/E6nNsSh.png';
+        case 'heree':
+            return 'https://i.imgur.com/4UeFbP4.png';
+        case 'scorpio':
+            return 'https://i.imgur.com/fG3vTB3.png';
+    }
+};
+
 module.exports = {
     rarity,
     genusData,
     bossHp,
+    imageUrl,
 };
 

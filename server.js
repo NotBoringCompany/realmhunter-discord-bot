@@ -59,6 +59,10 @@ const { realmPointsButtonInteraction } = require('./interactions/buttons/genesis
 const { showTrialsShopEmbed } = require('./commands/genesisTrialsPt2/trialsShop');
 const { trialsShopModalInteraction } = require('./interactions/modals/genesisTrialsPt2/trialsShop');
 const { trialsShopInteraction } = require('./interactions/buttons/genesisTrialsPt2/trialsShop');
+const { showNBMonDataEmbed } = require('./commands/genesisTrialsPt2/nbmonData');
+const { nbmonDataButtonInteraction } = require('./interactions/buttons/genesisTrialsPt2/nbmonData');
+const { getNBMonData } = require('./utils/genesisTrialsPt2/nbmonData');
+const { nbmonDataEmbed } = require('./embeds/genesisTrialsPt2/nbmonData');
 
 const client = new Client({
     intents: [
@@ -123,6 +127,11 @@ client.on('messageCreate', async (message) => {
     if (message.content.toLowerCase() === '!showtrialsshopembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         await showTrialsShopEmbed(message);
+    }
+
+    if (message.content.toLowerCase() === '!shownbmondataembed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showNBMonDataEmbed(message);
     }
     // if (message.content.toLowerCase().startsWith('!hunt rewardnation')) {
     //     if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.MODS_ROLEID)) {
@@ -369,6 +378,7 @@ client.on('interactionCreate', async (interaction) => {
         await hunterGamesInteraction(interaction);
         await realmPointsButtonInteraction(interaction);
         await trialsShopInteraction(interaction);
+        await nbmonDataButtonInteraction(interaction);
     //     await nationPendingTagsDistribution(interaction);
     //     await nationTagStakingInteraction(interaction);
     //     await nationLeadVotesInteraction(interaction);
@@ -420,8 +430,15 @@ client.on('interactionCreate', async (interaction) => {
 
             if (attackStatus === 'success') {
                 // add the damage log to dungeon log channel. FOR NOW, IT IS THE TEST LEADERBOARD CHANNEL.
-                await client.channels.cache.get(process.env.TEST_LEADERBOARD_CHANNELID).send(attackMessage);
+                return await client.channels.cache.get(process.env.TEST_LEADERBOARD_CHANNELID).send(attackMessage);
             }
+        }
+
+        if (interaction.customId === 'checkNBMonStatsModal') {
+            const nbmonId = interaction.fields.getTextInputValue('checkNBMonStatsNBMonId');
+            const { message: nbmonMessage, data } = await getNBMonData(interaction.user.id, nbmonId);
+
+            await interaction.reply({ embeds: [nbmonDataEmbed(data)], ephemeral: true });
         }
 
         await trialsShopModalInteraction(interaction);
