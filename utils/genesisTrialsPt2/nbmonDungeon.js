@@ -8,8 +8,6 @@ const { checkXPAndUpgrade, xpToGive } = require('./nbmonStatCalc');
 const { bossNBMonAppearanceEmbed, bossNBMonEmbed } = require('../../embeds/genesisTrialsPt2/nbmonAppearance');
 const cron = require('node-cron');
 
-mongoose.connect(process.env.MONGODB_URI);
-
 /**
  * Adds a boss to the database when it appears.
  */
@@ -18,7 +16,7 @@ const addBoss = async (nbmonId) => {
         const BossNBMon = mongoose.model('NBMonBossData', BossNBMonSchema, 'RHDiscordBossNBMonData');
         const { _wperm, _rperm, _acl } = permissions(false, false);
 
-        const getBossHp = bossHp();
+        const getBossHp = await bossHp();
 
         const NewBoss = new BossNBMon(
             {

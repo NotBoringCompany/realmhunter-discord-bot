@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+const { NBMonSchema } = require('../schemas');
 /// All stats generated here are NOT the final calculations for the actual Realm Hunter game.
 /// These stats are only used for the Genesis Trials.
 
@@ -49,17 +51,19 @@ const genusData = () => {
     return genera[genusRand];
 };
 
-const bossHp = () => {
-    // boss hp changes every day. starting from 18 march, it will return 3000 - 5000.
-    // 18 march: 3000 - 5000
-    // 19 march: 4000 - 6000
-    // 20 march: 5000 - 7000
-    // 21 march: 6000 - 8000
-    // 22 march: 7500 - 10000
-    // 23 march: 10000 - 12500
-    // 24 march: 12500 - 17500
-    // 25 march: 17500 - 25000
-    return Math.floor(Math.random() * 2000) + 3000;
+const bossHp = async () => {
+    // boss hp is calculated so that it can be attacked 500 - 1500 times.
+    // for this, we will need to get the average damage of ALL NBMons and therefore will need to query the NBMon database.
+    const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
+
+    // get the attack of ALL NBMons and divide it by the length of the query.
+    const nbmonQuery = await NBMon.find({});
+    const bossHp = nbmonQuery.reduce((acc, nbmon) => acc + nbmon.atk, 0) / nbmonQuery.length;
+
+    // rand between 500 - 1500
+    const rand = Math.floor(Math.random() * 1001) + 500;
+
+    return bossHp * rand;
 };
 
 module.exports = {
