@@ -287,13 +287,13 @@ const captureNBMonLogic = async (nbmonId, userId) => {
 };
 
 /**
- * Rolls a random number between 1 to 100 every minute.
- * If the number rolled is a 1, then an NBMon will appear, given that it passes the checks already.
+ * Rolls a random number between 1 to 100 every 5 minutes.
+ * 5% chance an nbmon appears, then an NBMon will appear, given that it passes the checks already.
  */
 const nbmonAppearanceScheduler = async (client) => {
     try {
-        // gets run every 1 minute.
-        cron.schedule('* * * * *', async () => {
+        // gets run every 5 minutes.
+        cron.schedule('*/5 * * * *', async () => {
             const rand = Math.floor(Math.random() * 100) + 1;
 
             console.log('nbmon appearance rand: ', rand);
@@ -303,8 +303,8 @@ const nbmonAppearanceScheduler = async (client) => {
 
             const isOverAnHour = now - prevAppearance >= 3600;
 
-            // if rand is either 1 or the time passed between now and the previous NBMon is over an hour, we will show the nbmon.
-            if (rand === 1 || isOverAnHour) {
+            // if rand is either 1-5 or the time passed between now and the previous NBMon is over an hour, we will show the nbmon.
+            if (rand <= 5 || isOverAnHour) {
                 const { status, message } = await nbmonAppears(client);
                 if (status === 'error') {
                     // we don't need to show this message in the general chat.

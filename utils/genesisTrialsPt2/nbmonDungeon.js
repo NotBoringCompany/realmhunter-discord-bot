@@ -177,11 +177,10 @@ const attackBoss = async (userId, attackerId) => {
             const upgradeAttack = checkXPAndUpgrade(attackerQuery.stats.xp, xpToGive);
 
             // we now give the XP and level up the attack stat of the attacker NBMon. (we will do so anyway since if no upgrade, `upgradeAttack` will return 0.)
-            attackerQuery.stats.xp += xpToGive;
-            attackerQuery.stats.atk += upgradeAttack;
+            await NBMon.updateOne({ nbmonId: attackerId }, { $set: { 'stats.xp': attackerQuery.stats.xp + xpToGive, 'stats.atk': attackerQuery.stats.atk + upgradeAttack } });
 
-            // now, there's still a 20% chance that the boss retaliates. if so, the attacker gets knocked out.
-            const retaliation = Math.floor(Math.random() * 10) + 1 <= 2 ? true : false;
+            // now, there's still a 10% chance that the boss retaliates. if so, the attacker gets knocked out.
+            const retaliation = Math.floor(Math.random() * 10) === 0 ? true : false;
 
             // now, we give the realm points to the user based on the damage dealt.
             await rewardRealmPoints(userId, damageDealt);
@@ -241,14 +240,13 @@ const attackBoss = async (userId, attackerId) => {
             bossQuery.hpLeft -= damageDealt;
 
             // we now give the XP and level up the attack stat of the attacker NBMon. (we will do so anyway since if no upgrade, `upgradeAttack` will return 0.)
-            attackerQuery.stats.xp += xpToGive;
-            attackerQuery.stats.atk += upgradeAttack;
+            await NBMon.updateOne({ nbmonId: attackerId }, { $set: { 'stats.xp': attackerQuery.stats.xp + xpToGive, 'stats.atk': attackerQuery.stats.atk + upgradeAttack } });
 
             // now, we give the realm points to the user based on the damage dealt.
             await rewardRealmPoints(userId, damageDealt);
 
-            // now, there's still a 20% chance that the boss retaliates. if so, the attacker gets knocked out.
-            const retaliation = Math.floor(Math.random() * 10) + 1 <= 2 ? true : false;
+            // now, there's still a 10% chance that the boss retaliates. if so, the attacker gets knocked out.
+            const retaliation = Math.floor(Math.random() * 10) === 0 ? true : false;
 
             if (retaliation) {
                 attackerQuery.lastFaintedTimestamp = Math.floor(new Date().getTime() / 1000);
@@ -696,13 +694,14 @@ const updateBossStatEmbed = async (client) => {
 
 
 /**
- * A scheduler to run every minute that gives a 0.1% chance of a boss appearing.
+ * A scheduler to run every 10 minutes that gives a 1% chance of a boss appearing every 10 minutes.
  * If the chance hits but the previous boss is not yet defeated, throw a message saying to defeat the boss.
- * If the chance doesn't hit and the boss is defeated and the time between the current and previous boss is more than 8 hours, we let the boss appear.
+ * If the chance doesn't hit and the boss is defeated and the time between the current and previous boss is more than 5 hours, we let the boss appear.
  */
 const bossAppearanceScheduler = async (client) => {
     try {
-        cron.schedule('* * * * *', async () => {
+        // run every 10 minutes
+        cron.schedule('*/10 * * * *', async () => {
             // 0.1% chance of appearing each minute.
             const rand = Math.floor(Math.random() * 1000) + 1;
 
@@ -711,11 +710,11 @@ const bossAppearanceScheduler = async (client) => {
             const now = Math.floor(new Date().getTime() / 1000);
             const prevAppearance = await prevBossAppearance();
 
-            const isOver8Hours = now - prevAppearance >= 28800;
+            const isOver5Hours = now - prevAppearance >= 18000;
 
             // if rand = 1 or its already 8 hours since the previous boss appearance, run the bossAppears function.
             // if the prev boss hasn't been defeated, `bossAppears` will return an error status.
-            if (rand === 1 || isOver8Hours) {
+            if (rand === 1 || isOver5Hours) {
                 const { status, message } = await bossAppears(client);
 
                 if (status === 'error') {

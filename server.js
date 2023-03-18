@@ -468,19 +468,19 @@ client.on('ready', async c => {
 
     mongoose.connect(process.env.MONGODB_URI);
 
-    // // CRON JOBS (SCHEDULERS)
-    // nextTagDistributionScheduler.start();
-    // await distributeTagScheduler(client);
-    // await restartDailyTagsAllowance();
-    // await removeExpiredInvitesScheduler();
-    // await restartDailyContributionTagsClaimedScheduler();
-    // await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
-    // await cumulativeNationTagsStakedScheduler(process.env.CUMULATIVE_COOKIES_STAKED_EMBED_MESSAGEID, client);
+    // CRON JOBS (SCHEDULERS)
+    nextTagDistributionScheduler.start();
+    await distributeTagScheduler(client);
+    await restartDailyTagsAllowance();
+    await removeExpiredInvitesScheduler();
+    await restartDailyContributionTagsClaimedScheduler();
+    await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
+    await cumulativeNationTagsStakedScheduler(process.env.CUMULATIVE_COOKIES_STAKED_EMBED_MESSAGEID, client);
 
-    // await nbmonAppearanceScheduler(client);
-    // await bossAppearanceScheduler(client);
-    // await reviveKnockedOutNBMonScheduler();
-    // await updateBossStatEmbedScheduler(client);
+    await nbmonAppearanceScheduler(client);
+    await bossAppearanceScheduler(client);
+    await reviveKnockedOutNBMonScheduler();
+    await updateBossStatEmbedScheduler(client);
 
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,
