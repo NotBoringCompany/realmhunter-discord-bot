@@ -487,7 +487,7 @@ client.on('ready', async c => {
 
     await nbmonAppearanceScheduler(client);
     await bossAppearanceScheduler(client);
-    await reviveKnockedOutNBMonScheduler();
+    // await reviveKnockedOutNBMonScheduler();
     await updateBossStatEmbedScheduler(client);
 
     await Moralis.start({

@@ -4,7 +4,7 @@ const { BossNBMonSchema, NBMonSchema, DiscordUserSchema } = require('../schemas'
 const mongoose = require('mongoose');
 const { generateObjectId } = require('../cryptoUtils');
 const { bossHp } = require('./nbmonStatRandomizer');
-const { checkXPAndUpgrade } = require('./nbmonStatCalc');
+const { checkXPAndUpgrade, xpToGive } = require('./nbmonStatCalc');
 const { bossNBMonAppearanceEmbed, bossNBMonEmbed } = require('../../embeds/genesisTrialsPt2/nbmonAppearance');
 const cron = require('node-cron');
 
@@ -124,7 +124,7 @@ const attackBoss = async (userId, attackerId) => {
         }
 
         // first, we check if the attacker NBMon has 0 hp. if it does, we return an error.
-        if (attackerQuery.fainted) {
+        if (attackerQuery.currentHp === 0) {
             return {
                 status: 'error',
                 message: 'You cannot use a currently knocked out NBMon.',
@@ -132,7 +132,7 @@ const attackBoss = async (userId, attackerId) => {
         }
 
         // we get the attacker NBMon's attack stat and the boss's hp stat.
-        const attackStat = attackerQuery.stats.atk;
+        const attackStat = attackerQuery.atk;
         const bossHpStat = bossQuery.hpLeft;
 
         // we calculate for the critical hit chance. 10% chance of a critical hit.
@@ -143,7 +143,7 @@ const attackBoss = async (userId, attackerId) => {
 
         // if the damage dealt is greater than the boss's hp stat, then the boss dies after getting hit.
         // we will update a few things.
-        if (damageDealt > bossHpStat) {
+        if (damageDealt >= bossHpStat) {
             // we first add the data to `damagedBy`. we check if the user has already attacked the boss before.
             // if yes, we add the damage dealt to the previous damage dealt.
             // if no, we add the damage dealt to the array.
@@ -170,39 +170,62 @@ const attackBoss = async (userId, attackerId) => {
             bossQuery.defeatedBy = userId;
             bossQuery.hpLeft = 0;
 
-            // since this is the final blow, we give the attacker `damageDealt` + 50 XP.
-            const xpToGive = damageDealt + 50;
+            // since this is the final blow, we give the attacker the following xp (x4 damage dealt)
+            const getXp = xpToGive(attackerQuery.xp, damageDealt * 4);
 
-            // now, we check if the attacker NBMon can level up its attack stat.
-            const upgradeAttack = checkXPAndUpgrade(attackerQuery.stats.xp, xpToGive);
+            // now, we check if the attacker NBMon can level up its attack and hp stat
+            const { attackUpgrade, hpUpgrade } = checkXPAndUpgrade(attackerQuery.rarity, attackerQuery.xp, getXp);
 
             // we now give the XP and level up the attack stat of the attacker NBMon. (we will do so anyway since if no upgrade, `upgradeAttack` will return 0.)
-            await NBMon.updateOne({ nbmonId: attackerId }, { $set: { 'stats.xp': attackerQuery.stats.xp + xpToGive, 'stats.atk': attackerQuery.stats.atk + upgradeAttack } });
-
-            // now, there's still a 10% chance that the boss retaliates. if so, the attacker gets knocked out.
-            const retaliation = Math.floor(Math.random() * 10) === 0 ? true : false;
+            await NBMon.updateOne({ nbmonId: attackerId }, { $set: { xp: attackerQuery.xp + getXp, atk: attackerQuery.atk + attackUpgrade, maxHp: attackerQuery.maxHp + hpUpgrade } });
 
             // now, we give the realm points to the user based on the damage dealt.
             await rewardRealmPoints(userId, damageDealt);
 
-            if (retaliation) {
+            /// RETALIATION LOGIC:
+            // 55% chance to damage 1 - 10% of the attacker's MAX HP.
+            // 35% chance to damage 11 - 60% of the attacker's MAX HP.
+            // 10% chance to damage 61 - 100% of the attacker's MAX HP.
+            const retaliationChance = Math.floor(Math.random() * 100) + 1;
+            let retaliationDamage;
+            if (retaliationChance <= 55) {
+                const retaliationDmgMultiplier = Math.random() * 0.1 + 0.01;
+                retaliationDamage = Math.floor(attackerQuery.maxHp * retaliationDmgMultiplier);
+            } else if (retaliationChance <= 90) {
+                const retaliationDmgMultiplier = Math.random() * 0.5 + 0.11;
+                retaliationDamage = Math.floor(attackerQuery.maxHp * retaliationDmgMultiplier);
+            } else if (retaliationChance <= 100) {
+                const retaliationDmgMultiplier = Math.random() * 0.4 + 0.61;
+                retaliationDamage = Math.floor(attackerQuery.maxHp * retaliationDmgMultiplier);
+            }
+
+            if (retaliationDamage >= attackerQuery.currentHp) {
+                attackerQuery.currentHp = 0;
                 attackerQuery.lastFaintedTimestamp = Math.floor(new Date().getTime() / 1000);
-                attackerQuery.fainted = true;
+
+                attackerQuery._updated_at = Date.now();
+                bossQuery._updated_at = Date.now();
 
                 await attackerQuery.save();
                 await bossQuery.save();
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt the final blow to Boss #${bossQuery.nbmonId} by dealing ${criticalHit ? 'a CRITICAL HIT with ' : ''} ${damageDealt} damage. However, the boss retaliated with its remaining strength and knocked out NBMon #${attackerId} afterwards!`,
+                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to deliver the **FINAL BLOW** to Boss #${bossQuery.nbmonId}. However, the boss retaliated and __**knocked out**__ NBMon #${attackerId} with ${retaliationDamage} damage!`,
                 };
+            // if the damage dealt by the boss is less than the attacker's HP, we will just update the attacker's HP.
             } else {
+                attackerQuery.currentHp = attackerQuery.currentHp - retaliationDamage;
+
+                attackerQuery._updated_at = Date.now();
+                bossQuery._updated_at = Date.now();
+
                 await attackerQuery.save();
                 await bossQuery.save();
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt the final blow to Boss #${bossQuery.nbmonId} by dealing ${criticalHit ? 'a CRITICAL HIT with ' : ''} ${damageDealt} damage.`,
+                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to deliver the **FINAL BLOW** to Boss #${bossQuery.nbmonId}. The boss retaliated and dealt ${retaliationDamage} damage to NBMon #${attackerId}!`,
                 };
             }
         // if the boss still has hp left, we will update a few things.
@@ -230,27 +253,41 @@ const attackBoss = async (userId, attackerId) => {
                 await BossNBMon.updateOne({ nbmonId: bossQuery.nbmonId, 'damagedBy.userId': userId }, { $set: { 'damagedBy.$.damageDealt': damageDealtSoFar + damageDealt, 'damagedBy.$.lastHitTimestamp': Math.floor(new Date().getTime() / 1000) } });
             }
 
-            // we give the attacker `damageDealt` XP.
-            const xpToGive = damageDealt;
+            //  we give the attacker the following xp.
+            const getXp = xpToGive(attackerQuery.xp, damageDealt);
 
-            // now, we check if the attacker NBMon can level up its attack stat.
-            const upgradeAttack = checkXPAndUpgrade(attackerQuery.stats.xp, xpToGive);
+            // now, we check if the attacker NBMon can level up its attack and hp stat
+            const { attackUpgrade, hpUpgrade } = checkXPAndUpgrade(attackerQuery.rarity, attackerQuery.xp, getXp);
 
             // we reduce the boss hp by `damageDealt`.
             bossQuery.hpLeft -= damageDealt;
 
             // we now give the XP and level up the attack stat of the attacker NBMon. (we will do so anyway since if no upgrade, `upgradeAttack` will return 0.)
-            await NBMon.updateOne({ nbmonId: attackerId }, { $set: { 'stats.xp': attackerQuery.stats.xp + xpToGive, 'stats.atk': attackerQuery.stats.atk + upgradeAttack } });
+            await NBMon.updateOne({ nbmonId: attackerId }, { $set: { xp: attackerQuery.xp + getXp, atk: attackerQuery.atk + attackUpgrade, maxHp: attackerQuery.maxHp + hpUpgrade } });
 
             // now, we give the realm points to the user based on the damage dealt.
             await rewardRealmPoints(userId, damageDealt);
 
-            // now, there's still a 10% chance that the boss retaliates. if so, the attacker gets knocked out.
-            const retaliation = Math.floor(Math.random() * 10) === 0 ? true : false;
+            /// RETALIATION LOGIC:
+            // 55% chance to damage 1 - 10% of the attacker's MAX HP.
+            // 35% chance to damage 11 - 60% of the attacker's MAX HP.
+            // 10% chance to damage 61 - 100% of the attacker's MAX HP.
+            const retaliationChance = Math.floor(Math.random() * 100) + 1;
+            let retaliationDamage;
+            if (retaliationChance <= 55) {
+                const retaliationDmgMultiplier = Math.random() * 0.1 + 0.01;
+                retaliationDamage = Math.floor(attackerQuery.maxHp * retaliationDmgMultiplier);
+            } else if (retaliationChance <= 90) {
+                const retaliationDmgMultiplier = Math.random() * 0.5 + 0.11;
+                retaliationDamage = Math.floor(attackerQuery.maxHp * retaliationDmgMultiplier);
+            } else if (retaliationChance <= 100) {
+                const retaliationDmgMultiplier = Math.random() * 0.4 + 0.61;
+                retaliationDamage = Math.floor(attackerQuery.maxHp * retaliationDmgMultiplier);
+            }
 
-            if (retaliation) {
+            if (retaliationDamage >= attackerQuery.currentHp) {
+                attackerQuery.currentHp = 0;
                 attackerQuery.lastFaintedTimestamp = Math.floor(new Date().getTime() / 1000);
-                attackerQuery.fainted = true;
 
                 attackerQuery._updated_at = Date.now();
                 bossQuery._updated_at = Date.now();
@@ -260,9 +297,12 @@ const attackBoss = async (userId, attackerId) => {
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt ${criticalHit ? 'a CRITICAL HIT with ' : ''} ${damageDealt} damage to Boss #${bossQuery.nbmonId}. However, the boss retaliated with its remaining strength and knocked out NBMon #${attackerId} afterwards!`,
+                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to Boss #${bossQuery.nbmonId}. However, the boss retaliated and __**knocked out**__ NBMon #${attackerId} with ${retaliationDamage} damage!`,
                 };
+            // if the damage dealt by the boss is less than the attacker's HP, we will just update the attacker's HP.
             } else {
+                attackerQuery.currentHp = attackerQuery.currentHp - retaliationDamage;
+
                 attackerQuery._updated_at = Date.now();
                 bossQuery._updated_at = Date.now();
 
@@ -271,7 +311,7 @@ const attackBoss = async (userId, attackerId) => {
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt ${criticalHit ? 'a CRITICAL HIT with ' : ''} ${damageDealt} damage to Boss #${bossQuery.nbmonId} with NBMon #${attackerId}.`,
+                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to Boss #${bossQuery.nbmonId}. The boss retaliated and dealt ${retaliationDamage} damage to NBMon #${attackerId}!`,
                 };
             }
         }
@@ -631,8 +671,14 @@ const bossFightButtons = (currentBossId) => {
         {
             type: 2,
             style: 1,
-            label: 'Check owned NBMon IDs',
+            label: 'Check your owned NBMon IDs',
             custom_id: 'checkNBMonsOwnedButton',
+        },
+        {
+            type: 2,
+            style: 1,
+            label: 'Revive knocked out NBMons',
+            custom_id: 'reviveNBMonsButton',
         },
     ];
 };
@@ -692,6 +738,63 @@ const updateBossStatEmbed = async (client) => {
     }
 };
 
+/**
+ * Users can call this function to revive their knocked out NBMons.
+ * Revives only work if the time difference between now and the last fainted timestamp is >= 20 mins.
+ */
+const reviveUserKnockedOutNBMons = async (userId) => {
+    try {
+        const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
+        const nbmonQuery = await NBMon.find({ capturedBy: userId, currentHp: 0 });
+
+        if (!nbmonQuery) {
+            return {
+                status: 'error',
+                message: 'You don\'t have any knocked out NBMons or you don\'t own any NBMons.',
+            };
+        }
+
+        const nbmonsRevived = [];
+
+        const now = Math.floor(new Date().getTime() / 1000);
+        for (let i = 0; i < nbmonQuery.length; i++) {
+            const nbmon = nbmonQuery[i];
+
+            const lastFainted = nbmon.lastFaintedTimestamp;
+
+            if (now - lastFainted > 1200) {
+                const maxHp = nbmon.maxHp;
+
+                // revive the nbmons to 50% of their max HP.
+                const reviveHp = Math.floor(maxHp * 0.5);
+                nbmon.currentHp = reviveHp;
+                nbmon._updated_at = Date.now();
+
+                nbmonsRevived.push(nbmon.nbmonId);
+
+                await nbmon.save();
+            }
+        }
+
+        if (nbmonsRevived.length === 0) {
+            return {
+                status: 'error',
+                message: 'Please wait 20 minutes before reviving any of your knocked out NBMons.',
+            };
+        }
+
+        return {
+            status: 'success',
+            message: `Revived NBMons: ${nbmonsRevived.join(', ')}. 50% of their max HP has been restored.`,
+        };
+    } catch (err) {
+        console.log({
+            errorFrom: 'reviveUserKnockedOutNBMons',
+            errorMessage: err,
+        });
+    }
+};
+
 
 /**
  * A scheduler to run every 10 minutes that gives a 1% chance of a boss appearing every 10 minutes.
@@ -702,8 +805,8 @@ const bossAppearanceScheduler = async (client) => {
     try {
         // run every 10 minutes
         cron.schedule('*/10 * * * *', async () => {
-            // 0.1% chance of appearing each minute.
-            const rand = Math.floor(Math.random() * 1000) + 1;
+            // 1% chance of boss appearing each 10 minutes.
+            const rand = Math.floor(Math.random() * 100) + 1;
 
             console.log('boss appearance rand: ', rand);
 
@@ -712,7 +815,7 @@ const bossAppearanceScheduler = async (client) => {
 
             const isOver5Hours = now - prevAppearance >= 18000;
 
-            // if rand = 1 or its already 8 hours since the previous boss appearance, run the bossAppears function.
+            // if rand = 1 or its already 5 hours since the previous boss appearance, run the bossAppears function.
             // if the prev boss hasn't been defeated, `bossAppears` will return an error status.
             if (rand === 1 || isOver5Hours) {
                 const { status, message } = await bossAppears(client);
@@ -735,27 +838,27 @@ const bossAppearanceScheduler = async (client) => {
     }
 };
 
-/**
- * Revives ALL knocked out NBMons IF now - knocked out timestamp >= 20 minutes.
- */
-const reviveKnockedOutNBMonScheduler = async () => {
-    try {
-        // runs every 5 minutes.
-        cron.schedule('*/5 * * * *', async () => {
-            const now = Math.floor(new Date().getTime() / 1000);
-            const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
+// /**
+//  * Revives ALL knocked out NBMons IF now - knocked out timestamp >= 20 minutes.
+//  */
+// const reviveKnockedOutNBMonScheduler = async () => {
+//     try {
+//         // runs every 5 minutes.
+//         cron.schedule('*/5 * * * * *', async () => {
+//             const now = Math.floor(new Date().getTime() / 1000);
+//             const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
 
-            // update all NBMons that fainted and (now - lastFaintedTimestamp >= 20 minutes) to not fainted (if any).
-            await NBMon.updateMany({ fainted: true, lastFaintedTimestamp: { $lte: now - 1200 } }, { $set: { fainted: false } });
-            console.log('revived knocked out NBMons.');
-        });
-    } catch (err) {
-        console.log({
-            errorFrom: 'reviveKnockedOutNBMonScheduler',
-            errorMessage: err,
-        });
-    }
-};
+//             // update all NBMons that fainted and (now - lastFaintedTimestamp >= 20 minutes) to not fainted (if any) and bring each of the fainted NBMon's current HP to full (which is their stats.hp)
+//             await NBMon.updateMany({ currentHp: 0, lastFaintedTimestamp: { $lte: now - 1200 } }, { $set: { currentHp: } });
+//             console.log('revived knocked out NBMons.');
+//         });
+//     } catch (err) {
+//         console.log({
+//             errorFrom: 'reviveKnockedOutNBMonScheduler',
+//             errorMessage: err,
+//         });
+//     }
+// };
 
 /**
  * Updates the boss stat embed every 30 seconds.
@@ -785,6 +888,6 @@ module.exports = {
     updateBossStatEmbed,
     bossAppearanceScheduler,
     checkIfOwned,
-    reviveKnockedOutNBMonScheduler,
+    reviveUserKnockedOutNBMons,
     updateBossStatEmbedScheduler,
 };

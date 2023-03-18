@@ -4,13 +4,13 @@ const { nbmonAppearanceEmbed } = require('../../embeds/genesisTrialsPt2/nbmonApp
 const { generateObjectId } = require('../cryptoUtils');
 const permissions = require('../dbPermissions');
 const { NBMonSchema, DiscordUserSchema } = require('../schemas');
-const { stats, genusData } = require('./nbmonStatRandomizer');
+const { genusData, rarity } = require('./nbmonStatRandomizer');
 const cron = require('node-cron');
 
 /**
  * Adds an NBMon to the database once it appears.
  */
-const addNBMon = async (nbmonId, genus, stats) => {
+const addNBMon = async (nbmonId, genus) => {
     try {
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
 
@@ -26,8 +26,12 @@ const addNBMon = async (nbmonId, genus, stats) => {
                 _acl: _acl,
                 nbmonId: nbmonId,
                 genus: genus,
+                xp: 0,
+                maxHp: 30,
+                currentHp: 30,
+                atk: 5,
+                rarity: rarity(),
                 appearanceTimestamp: Math.floor(new Date().getTime() / 1000),
-                stats: stats,
             },
         );
 
@@ -81,9 +85,9 @@ const nbmonAppears = async (client) => {
         }
 
         const getGenus = genusData();
-        const getStats = stats();
+        const getRarity = rarity();
 
-        if (!getStats.rarity) {
+        if (!getRarity) {
             return;
         }
 
@@ -92,9 +96,9 @@ const nbmonAppears = async (client) => {
         const newId = latestWildNBMonId + 1;
 
         // adds the wild NBMon to the database and then sends the message to general chat.
-        await addNBMon(newId, getGenus.name, getStats);
+        await addNBMon(newId, getGenus.name);
         // right now, it will be in test general chat. it will be changed later.
-        await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send({ embeds: [nbmonAppearanceEmbed(getStats.rarity, newId, getGenus.name, getGenus.image)] });
+        await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send({ embeds: [nbmonAppearanceEmbed(getRarity, newId, getGenus.name, getGenus.image)] });
 
         return {
             status: 'success',

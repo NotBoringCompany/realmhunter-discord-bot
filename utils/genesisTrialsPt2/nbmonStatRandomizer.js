@@ -26,16 +26,6 @@ const rarity = () => {
     }
 };
 
-const stats = () => {
-    // all stats will start as follows:
-    return {
-        rarity: rarity(),
-        xp: 0,
-        hp: 30,
-        atk: 5,
-    };
-};
-
 const genusData = () => {
     // everyday, new genera will be available. but for now, these are the available ones:
     const genera = [
@@ -74,7 +64,6 @@ const bossHp = () => {
 
 module.exports = {
     rarity,
-    stats,
     genusData,
     bossHp,
 };

@@ -1,5 +1,5 @@
 const { attackBossModal } = require('../../../modals/genesisTrialsPt2/nbmonDungeon');
-const { getLatestBossId, getOwnedNBMonIds, userLastHit } = require('../../../utils/genesisTrialsPt2/nbmonDungeon');
+const { getLatestBossId, getOwnedNBMonIds, userLastHit, reviveUserKnockedOutNBMons } = require('../../../utils/genesisTrialsPt2/nbmonDungeon');
 
 const attackBossInteraction = async (interaction) => {
     try {
@@ -23,6 +23,9 @@ const attackBossInteraction = async (interaction) => {
             case 'checkNBMonsOwnedButton':
                 const nbmonsOwned = await getOwnedNBMonIds(interaction.user.id);
                 return await interaction.reply({ content: `You own the following NBMon IDs: ${nbmonsOwned}`, ephemeral: true });
+            case 'reviveNBMonsButton':
+                const { message: reviveMsg } = await reviveUserKnockedOutNBMons(interaction.user.id);
+                return await interaction.reply({ content: reviveMsg, ephemeral: true });
         }
     } catch (err) {
         console.log({
