@@ -204,6 +204,7 @@ const NBMonSchema = new mongoose.Schema(
         _wperm: Array,
         _rperm: Array,
         _acl: Object,
+        bought: Boolean,
         nbmonId: Number,
         genus: String,
         xp: Number,
@@ -283,6 +284,25 @@ const HunterGamesDataSchema = new mongoose.Schema(
     },
 );
 
+const TrialsShopSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        itemName: String,
+        stock: Number,
+        tagCost: Number,
+    }, {
+        versionKey: false,
+    },
+);
+
 module.exports = {
     BenchmarkSchema,
     DiscordUserSchema,
@@ -297,4 +317,5 @@ module.exports = {
     BossNBMonSchema,
     HunterGamesParticipantsSchema,
     HunterGamesDataSchema,
+    TrialsShopSchema,
 };

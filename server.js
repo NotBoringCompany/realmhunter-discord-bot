@@ -56,6 +56,9 @@ const { startHunterGames } = require('./utils/genesisTrialsPt2/hunterGames');
 const { hunterGamesInteraction } = require('./interactions/buttons/genesisTrialsPt2/hunterGames');
 const { showCheckRealmPointsCollectedEmbed } = require('./commands/genesisTrialsPt2/realmPoints');
 const { realmPointsButtonInteraction } = require('./interactions/buttons/genesisTrialsPt2/realmPoints');
+const { showTrialsShopEmbed } = require('./commands/genesisTrialsPt2/trialsShop');
+const { trialsShopModalInteraction } = require('./interactions/modals/genesisTrialsPt2/trialsShop');
+const { trialsShopInteraction } = require('./interactions/buttons/genesisTrialsPt2/trialsShop');
 
 const client = new Client({
     intents: [
@@ -115,6 +118,11 @@ client.on('messageCreate', async (message) => {
     if (message.content.toLowerCase() === '!showrealmpointscollectedembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         await showCheckRealmPointsCollectedEmbed(message);
+    }
+
+    if (message.content.toLowerCase() === '!showtrialsshopembed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showTrialsShopEmbed(message);
     }
     // if (message.content.toLowerCase().startsWith('!hunt rewardnation')) {
     //     if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.MODS_ROLEID)) {
@@ -360,6 +368,7 @@ client.on('interactionCreate', async (interaction) => {
         await attackBossInteraction(interaction);
         await hunterGamesInteraction(interaction);
         await realmPointsButtonInteraction(interaction);
+        await trialsShopInteraction(interaction);
     //     await nationPendingTagsDistribution(interaction);
     //     await nationTagStakingInteraction(interaction);
     //     await nationLeadVotesInteraction(interaction);
@@ -414,6 +423,8 @@ client.on('interactionCreate', async (interaction) => {
                 await client.channels.cache.get(process.env.TEST_LEADERBOARD_CHANNELID).send(attackMessage);
             }
         }
+
+        await trialsShopModalInteraction(interaction);
     //     if (interaction.customId === 'distributeNationPendingTagsModal') {
     //         const userId = interaction.fields.getTextInputValue('cookiesToDistributeUserId');
     //         const amountToGive = interaction.fields.getTextInputValue('cookiesToDistributeAmount');

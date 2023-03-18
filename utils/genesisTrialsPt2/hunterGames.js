@@ -7,8 +7,6 @@ const { hunterGamesEmbed, hunterGamesNoParticipantsEmbed, hunterGamesStartMessag
 const { delay } = require('../delay');
 const cron = require('node-cron');
 
-mongoose.connect(process.env.MONGODB_URI);
-
 /**
  * Gets the most recent hunter games ID.
  */

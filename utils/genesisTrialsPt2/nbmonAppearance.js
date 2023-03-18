@@ -14,7 +14,6 @@ const addNBMon = async (nbmonId, genus) => {
     try {
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
 
-        // get the NBMon data from the database to check the latest ID.
         const { _wperm, _rperm, _acl } = permissions(false, false);
         const NewNBMon = new NBMon(
             {
@@ -24,6 +23,7 @@ const addNBMon = async (nbmonId, genus) => {
                 _wperm: _wperm,
                 _rperm: _rperm,
                 _acl: _acl,
+                bought: false,
                 nbmonId: nbmonId,
                 genus: genus,
                 xp: 0,
@@ -50,9 +50,56 @@ const addNBMon = async (nbmonId, genus) => {
 };
 
 /**
+ * Adds a purchased NBMon and assigns it directly to the user.
+ */
+const addPurchasedNBMon = async (rarity, userId) => {
+    try {
+        const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
+        const { _wperm, _rperm, _acl } = permissions(false, false);
+
+        // get latest NBMon ID
+        const latestId = await getLatestNBMonId();
+
+        const NewNBMon = new NBMon(
+            {
+                _id: generateObjectId(),
+                _created_at: Date.now(),
+                _updated_at: Date.now(),
+                _wperm: _wperm,
+                _rperm: _rperm,
+                _acl: _acl,
+                bought: true,
+                nbmonId: latestId + 1,
+                genus: genusData().name,
+                xp: 0,
+                maxHp: 30,
+                currentHp: 30,
+                atk: 5,
+                rarity: rarity,
+                appearanceTimestamp: Math.floor(new Date().getTime() / 1000),
+                capturedTimestamp: Math.floor(new Date().getTime() / 1000),
+                capturedBy: userId,
+            },
+        );
+
+        await NewNBMon.save();
+
+        return {
+            status: 'success',
+            message: 'Purchased NBMon added to database.',
+        };
+    } catch (err) {
+        console.log({
+            errorFrom: 'addPurchasedNBMon',
+            errorMessage: err,
+        });
+    }
+};
+
+/**
  * Gets the ID of the latest NBMon that appeared.
  */
-const getLatestWildNBMonId = async () => {
+const getLatestNBMonId = async () => {
     try {
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
         const latestWildNBMon = await NBMon.findOne({}).sort({ nbmonId: -1 });
@@ -91,9 +138,9 @@ const nbmonAppears = async (client) => {
             return;
         }
 
-        const latestWildNBMonId = await getLatestWildNBMonId();
+        const latestNBMonId = await getLatestNBMonId();
 
-        const newId = latestWildNBMonId + 1;
+        const newId = latestNBMonId + 1;
 
         // adds the wild NBMon to the database and then sends the message to general chat.
         await addNBMon(newId, getGenus.name);
@@ -144,12 +191,12 @@ const nbmonCaptured = async (nbmonId) => {
 };
 
 /**
- * Gets the timestamp of the previous NBMon that appeared.
+ * Gets the timestamp of the most recent NBMon (not bought) that appeared.
  */
 const prevNBMonAppearance = async () => {
     try {
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
-        const nbmonQuery = await NBMon.findOne({}).sort({ nbmonId: -1 });
+        const nbmonQuery = await NBMon.findOne({ bought: false }).sort({ nbmonId: -1 });
 
         if (!nbmonQuery) {
             return 0;
@@ -167,40 +214,40 @@ const prevNBMonAppearance = async () => {
 /**
  * Checks if the next NBMon can appear.
  * In order for the next NBMon to appear:
- * // 1. the time passed between now and the previous NBMon's appearance must be greater than 10 minutes.
+ * // 1. the time passed between now and the previous non bought NBMon's appearance must be greater than 10 minutes.
  * // 2. the previous NBMon must have been captured.
  */
 const allowNextNBMonAppearance = async () => {
     try {
-         const prevNBMonCaptured = await nbmonCaptured();
-         const prevAppearance = await prevNBMonAppearance();
-         const now = Math.floor(new Date().getTime() / 1000);
+        const prevNBMonCaptured = await nbmonCaptured();
+        const prevAppearance = await prevNBMonAppearance();
+        const now = Math.floor(new Date().getTime() / 1000);
 
-         const timeDiff = now - prevAppearance;
+        const timeDiff = now - prevAppearance;
 
-         if (!prevNBMonCaptured) {
+        if (!prevNBMonCaptured) {
             return {
                 status: 'error',
                 message: 'A new NBMon wants to appear but the previous NBMon was not captured yet. Scroll up in this chat to find the NBMon\'s ID and capture it first to allow the new one to appear later!',
                 canAppear: false,
             };
-         }
+        }
 
-         if (prevNBMonCaptured && timeDiff < 600) {
+        if (prevNBMonCaptured && timeDiff < 600) {
             return {
                 status: 'error',
                 message: 'Next NBMon can\'t appear yet.',
                 canAppear: false,
             };
-         }
+        }
 
-         if (prevNBMonCaptured && timeDiff >= 600) {
+        if (prevNBMonCaptured && timeDiff >= 600) {
             return {
                 status: 'success',
                 message: 'Next NBMon can appear.',
                 canAppear: true,
             };
-         }
+        }
     } catch (err) {
         console.log({
             errorFrom: 'allowNextNBMonAppearance',
@@ -266,7 +313,7 @@ const captureNBMonLogic = async (nbmonId, userId) => {
         }
 
         // once all checks are done, we will now capture the NBMon.
-        userQuery.hunterTags -= 100;
+        userQuery.hunterTags -= 70;
         userQuery._updated_at = Date.now();
 
         // if the nbmon has not been captured, we update the database.
@@ -330,7 +377,8 @@ const nbmonAppearanceScheduler = async (client) => {
 
 module.exports = {
     addNBMon,
-    getLatestWildNBMonId,
+    addPurchasedNBMon,
+    getLatestNBMonId,
     nbmonAppears,
     nbmonCaptured,
     captureNBMonLogic,

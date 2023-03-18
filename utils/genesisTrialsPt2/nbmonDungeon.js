@@ -129,6 +129,13 @@ const attackBoss = async (userId, attackerId) => {
             };
         }
 
+        if (bossQuery.hpLeft === 0) {
+            return {
+                status: 'error',
+                message: 'The boss has already been defeated. Please wait for the next boss.',
+            };
+        }
+
         // we get the attacker NBMon's attack stat and the boss's hp stat.
         const attackStat = attackerQuery.atk;
         const bossHpStat = bossQuery.hpLeft;
@@ -568,7 +575,7 @@ const bossAppears = async (client) => {
         // 2. add the boss embed to the dungeon channel
         // for TESTING, IT WILL BE IN FOUNDERS BOT COMMANDS!
         const statsMsg = await client.channels.cache.get(process.env.FOUNDERS_BOT_COMMANDS_CHANNELID).send({
-            embeds: [bossNBMonEmbed(newBossId, 'https://i.imgur.com/ICTeV6L.jpg', bossHp, bossHp, 0)],
+            embeds: [bossNBMonEmbed(newBossId, 'https://i.imgur.com/gCy7bFa.png', bossHp, bossHp, 0)],
             components: [
                 {
                     type: 1,
@@ -580,7 +587,7 @@ const bossAppears = async (client) => {
         // 3. add the boss appearance embed to the general chat.
         // for TESTING, IT WILL BE IN TEST GENERAL CHAT!
         const appearanceMsg = await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send({
-            embeds: [bossNBMonAppearanceEmbed(newBossId, 'https://i.imgur.com/ICTeV6L.jpg')],
+            embeds: [bossNBMonAppearanceEmbed(newBossId, 'https://i.imgur.com/gCy7bFa.png')],
         });
 
         // 4. update the msg IDs in the database.
@@ -688,7 +695,7 @@ const updateBossStatEmbed = async (client) => {
     try {
         // get current stats of the boss.
         const BossNBMon = mongoose.model('NBMonBossData', BossNBMonSchema, 'RHDiscordBossNBMonData');
-        const bossQuery = await BossNBMon.findOne().sort({ nbmonId: -1 });
+        const bossQuery = await BossNBMon.findOne({}).sort({ nbmonId: -1 });
 
         if (!bossQuery) {
             return {
@@ -715,7 +722,7 @@ const updateBossStatEmbed = async (client) => {
         }
 
         await statEmbed.edit({
-            embeds: [bossNBMonEmbed(currentId, 'https://i.imgur.com/ICTeV6L.jpg', currentHp.toString(), maxHp.toString(), attackedBy)],
+            embeds: [bossNBMonEmbed(currentId, 'https://i.imgur.com/gCy7bFa.png', currentHp.toString(), maxHp.toString(), attackedBy)],
             components: [
                 {
                     type: 1,
@@ -835,28 +842,6 @@ const bossAppearanceScheduler = async (client) => {
         });
     }
 };
-
-// /**
-//  * Revives ALL knocked out NBMons IF now - knocked out timestamp >= 20 minutes.
-//  */
-// const reviveKnockedOutNBMonScheduler = async () => {
-//     try {
-//         // runs every 5 minutes.
-//         cron.schedule('*/5 * * * * *', async () => {
-//             const now = Math.floor(new Date().getTime() / 1000);
-//             const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
-
-//             // update all NBMons that fainted and (now - lastFaintedTimestamp >= 20 minutes) to not fainted (if any) and bring each of the fainted NBMon's current HP to full (which is their stats.hp)
-//             await NBMon.updateMany({ currentHp: 0, lastFaintedTimestamp: { $lte: now - 1200 } }, { $set: { currentHp: } });
-//             console.log('revived knocked out NBMons.');
-//         });
-//     } catch (err) {
-//         console.log({
-//             errorFrom: 'reviveKnockedOutNBMonScheduler',
-//             errorMessage: err,
-//         });
-//     }
-// };
 
 /**
  * Updates the boss stat embed every 30 seconds.
