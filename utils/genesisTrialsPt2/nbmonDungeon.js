@@ -786,7 +786,7 @@ const reviveUserKnockedOutNBMons = async (userId) => {
         if (nbmonsRevived.length === 0) {
             return {
                 status: 'error',
-                message: 'Please wait 20 minutes before reviving any of your knocked out NBMons.',
+                message: 'None of your NBMons are knocked out or you haven\'t waited 20 minutes since they were knocked out.',
             };
         }
 
