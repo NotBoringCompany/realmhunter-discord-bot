@@ -620,7 +620,7 @@ const bossAppears = async (client) => {
 const getOwnedNBMonIds = async (userId) => {
     try {
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
-        const nbmonQuery = await NBMon.find({ capturedBy: userId });
+        const nbmonQuery = await NBMon.find({ capturedBy: userId, disowned: false });
 
         let ownedIds = '';
 

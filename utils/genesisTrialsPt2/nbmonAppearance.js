@@ -301,7 +301,7 @@ const captureNBMonLogic = async (nbmonId, userId) => {
 
         // we will now check if the user has captured more than 5 nbmons already.
         // if they have, we will not allow them to capture more.
-        const nbmonUserQuery = await NBMon.find({ capturedBy: userId });
+        const nbmonUserQuery = await NBMon.find({ capturedBy: userId, disowned: false });
         if (nbmonUserQuery.length >= 5) {
             return {
                 status: 'error',

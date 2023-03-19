@@ -61,7 +61,7 @@ const { trialsShopModalInteraction } = require('./interactions/modals/genesisTri
 const { trialsShopInteraction } = require('./interactions/buttons/genesisTrialsPt2/trialsShop');
 const { showNBMonDataEmbed } = require('./commands/genesisTrialsPt2/nbmonData');
 const { nbmonDataButtonInteraction } = require('./interactions/buttons/genesisTrialsPt2/nbmonData');
-const { getNBMonData, changeNBMonName } = require('./utils/genesisTrialsPt2/nbmonData');
+const { getNBMonData, changeNBMonName, disownNBMon } = require('./utils/genesisTrialsPt2/nbmonData');
 const { nbmonDataEmbed } = require('./embeds/genesisTrialsPt2/nbmonData');
 const { updateNBMonNameModal } = require('./modals/genesisTrialsPt2/nbmonData');
 
@@ -452,6 +452,13 @@ client.on('interactionCreate', async (interaction) => {
 
             const { status, message: nbmonMessage } = await changeNBMonName(interaction.user.id, nbmonId, customName);
             return await interaction.reply({ content: nbmonMessage, ephemeral: true });
+        }
+
+        if (interaction.customId === 'disownNBMonModal') {
+            const nbmonId = interaction.fields.getTextInputValue('disownNBMonNBMonId');
+
+            const { status, message: disownMessage } = await disownNBMon(interaction.user.id, nbmonId);
+            return await interaction.reply({ content: disownMessage, ephemeral: true });
         }
 
         await trialsShopModalInteraction(interaction);

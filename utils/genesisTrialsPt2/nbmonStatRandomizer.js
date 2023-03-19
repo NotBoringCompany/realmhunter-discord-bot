@@ -73,26 +73,20 @@ const genusData = () => {
         },
     ];
 
-    // from march 19, the first 4 will be available.
-    const march19 = 1679220000;
-    // march 20, add the next 3.
-    const march20 = 1679306400;
-    // march 21, add the last 3.
-    const march21 = 1679392800;
+    const firstRelease = process.env.FIRST_NBMONS_RELEASE_TIMESTAMP;
+    const secondRelease = process.env.SECOND_NBMONS_RELEASE_TIMESTAMP;
+    const thirdRelease = process.env.THIRD_NBMONS_RELEASE_TIMESTAMP;
 
     const now = Math.floor(new Date().getTime() / 1000);
 
     let genusRand;
 
-    if (now < march20) {
+    if (now < secondRelease) {
         // get the first 4 to randomize.
-        console.log('now is before march 20 12:00 GMT');
         genusRand = Math.floor(Math.random() * 4);
-    } else if (now < march21) {
-        console.log('now is before march 21 12:00 GMT');
+    } else if (now < thirdRelease) {
         genusRand = Math.floor(Math.random() * 7);
-    } else {
-        console.log('now is after march 21 12:00 GMT');
+    } else if (now > thirdRelease) {
         // get the whole length of the array.
         genusRand = Math.floor(Math.random() * genera.length);
     }

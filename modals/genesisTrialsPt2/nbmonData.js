@@ -36,7 +36,22 @@ const updateNBMonNameModal = new ModalBuilder()
         ),
     ]);
 
+const disownNBMonModal = new ModalBuilder()
+    .setCustomId('disownNBMonModal')
+    .setTitle('Disown NBMon')
+    .addComponents([
+        new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+                .setCustomId('disownNBMonNBMonId')
+                .setLabel('Enter ID to disown')
+                .setPlaceholder('e.g. 1')
+                .setStyle(TextInputStyle.Short)
+                .setMinLength(1),
+        ),
+    ]);
+
 module.exports = {
     checkNBMonStatsModal,
     updateNBMonNameModal,
+    disownNBMonModal,
 };

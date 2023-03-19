@@ -5,7 +5,7 @@ const hunterGamesEmbed = (id, image) => {
         .setColor(0x42ca9f)
         .setTitle(`Hunter Games #${id}`)
         .setImage(image)
-        .setDescription('The Hunter Games has just started. Take part, fight other citizens and win loads of Favor Points! __**30 COOKIES REQUIRED TO PARTICIPATE!**__');
+        .setDescription(`The Hunter Games has just started. Take part, fight other citizens and win loads of Favor Points! __**${process.env.HUNTER_GAMES_ENTRANCE_FEE} COOKIES REQUIRED TO PARTICIPATE!**__`);
 };
 
 const updateHunterGamesEmbed = (time, additionalMsg) => {
