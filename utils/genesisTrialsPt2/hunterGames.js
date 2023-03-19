@@ -128,7 +128,7 @@ const addParticipant = async (userId) => {
         // otherwise, we get their `hunterTags`.
         const hunterTags = userQuery.hunterTags;
 
-        if (!hunterTags || hunterTags < 30) {
+        if (!hunterTags || hunterTags < parseInt(process.env.HUNTER_GAMES_ENTRANCE_FEE)) {
             return {
                 status: 'error',
                 message: 'Not enough cookies to join the Hunter Games.',
@@ -136,7 +136,7 @@ const addParticipant = async (userId) => {
         }
 
         // otherwise, we will deduct their cookies and add them to the database.
-        userQuery.hunterTags -= 30;
+        userQuery.hunterTags -= parseInt(process.env.HUNTER_GAMES_ENTRANCE_FEE);
         userQuery._updated_at = Date.now();
 
         const { _wperm, _rperm, _acl } = permissions(true, false);
@@ -230,7 +230,7 @@ const refundEntranceFee = async () => {
                 continue;
             }
 
-            userQuery.hunterTags += 30;
+            userQuery.hunterTags += parseInt(process.env.HUNTER_GAMES_ENTRANCE_FEE);
 
             await userQuery.save();
         }

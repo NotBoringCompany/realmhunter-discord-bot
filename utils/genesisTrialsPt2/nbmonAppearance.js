@@ -310,7 +310,7 @@ const captureNBMonLogic = async (nbmonId, userId) => {
         }
 
         // once all checks are done, we will now capture the NBMon.
-        userQuery.hunterTags -= 50;
+        userQuery.hunterTags -= parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT);
         userQuery._updated_at = Date.now();
 
         // if the nbmon has not been captured, we update the database.

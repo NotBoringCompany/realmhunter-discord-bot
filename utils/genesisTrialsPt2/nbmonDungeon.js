@@ -191,15 +191,15 @@ const attackBoss = async (userId, attackerId) => {
             await rewardRealmPoints(userId, damageDealt);
 
             /// RETALIATION LOGIC:
-            // 55% chance to damage 1 - 10% of the attacker's MAX HP.
-            // 35% chance to damage 11 - 60% of the attacker's MAX HP.
-            // 10% chance to damage 61 - 100% of the attacker's MAX HP.
+            // 45% chance to damage 1 - 10% of the attacker's MAX HP.
+            // 40% chance to damage 11 - 60% of the attacker's MAX HP.
+            // 15% chance to damage 61 - 100% of the attacker's MAX HP.
             const retaliationChance = Math.floor(Math.random() * 100) + 1;
             let retaliationDamage;
-            if (retaliationChance <= 55) {
+            if (retaliationChance <= 45) {
                 const retaliationDmgMultiplier = Math.random() * 0.1 + 0.01;
                 retaliationDamage = Math.floor(attackerQuery.maxHp * retaliationDmgMultiplier);
-            } else if (retaliationChance <= 90) {
+            } else if (retaliationChance <= 85) {
                 const retaliationDmgMultiplier = Math.random() * 0.5 + 0.11;
                 retaliationDamage = Math.floor(attackerQuery.maxHp * retaliationDmgMultiplier);
             } else if (retaliationChance <= 100) {
@@ -277,15 +277,15 @@ const attackBoss = async (userId, attackerId) => {
             await rewardRealmPoints(userId, damageDealt);
 
             /// RETALIATION LOGIC:
-            // 55% chance to damage 1 - 10% of the attacker's MAX HP.
-            // 35% chance to damage 11 - 60% of the attacker's MAX HP.
-            // 10% chance to damage 61 - 100% of the attacker's MAX HP.
+            // 45% chance to damage 1 - 10% of the attacker's MAX HP.
+            // 40% chance to damage 11 - 60% of the attacker's MAX HP.
+            // 15% chance to damage 61 - 100% of the attacker's MAX HP.
             const retaliationChance = Math.floor(Math.random() * 100) + 1;
             let retaliationDamage;
-            if (retaliationChance <= 55) {
+            if (retaliationChance <= 45) {
                 const retaliationDmgMultiplier = Math.random() * 0.1 + 0.01;
                 retaliationDamage = Math.floor(attackerQuery.maxHp * retaliationDmgMultiplier);
-            } else if (retaliationChance <= 90) {
+            } else if (retaliationChance <= 85) {
                 const retaliationDmgMultiplier = Math.random() * 0.5 + 0.11;
                 retaliationDamage = Math.floor(attackerQuery.maxHp * retaliationDmgMultiplier);
             } else if (retaliationChance <= 100) {
@@ -416,7 +416,7 @@ const rewardRealmPoints = async (userId, realmPoints) => {
 };
 
 /**
- * Checks whether the user has already hit the most recent boss within the past 5 minutes.
+ * Checks whether the user has already hit the most recent boss within the past 2 minutes.
  */
 const userLastHit = async (userId) => {
     try {
@@ -440,7 +440,7 @@ const userLastHit = async (userId) => {
                 status: 'success',
                 message: 'You have not attacked the boss before.',
             };
-        // otherwise, we get the last hit timestamp and check if it's within the past 5 minutes.
+        // otherwise, we get the last hit timestamp and check if it's within the past 2 minutes.
         } else {
             const now = Math.floor(new Date().getTime() / 1000);
             const lastHitTimestamp = damagedBy[userIndex].lastHitTimestamp;
@@ -773,7 +773,7 @@ const reviveUserKnockedOutNBMons = async (userId) => {
                 const maxHp = nbmon.maxHp;
 
                 // revive the nbmons to 50% of their max HP.
-                const reviveHp = Math.floor(maxHp * 0.5);
+                const reviveHp = Math.floor(maxHp * 0.333);
                 nbmon.currentHp = reviveHp;
                 nbmon._updated_at = Date.now();
 
@@ -792,7 +792,7 @@ const reviveUserKnockedOutNBMons = async (userId) => {
 
         return {
             status: 'success',
-            message: `Revived NBMons: ${nbmonsRevived.join(', ')}. 50% of their max HP has been restored.`,
+            message: `Revived NBMons: ${nbmonsRevived.join(', ')}. 33.3% of their max HP has been restored.`,
         };
     } catch (err) {
         console.log({

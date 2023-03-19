@@ -112,7 +112,7 @@ const changeNBMonName = async (userId, nbmonId, customName) => {
             const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
             const userQuery = await User.findOne({ userId: userId });
 
-            if (!userQuery || userQuery.hunterTags < 20) {
+            if (!userQuery || userQuery.hunterTags < parseInt(process.env.CHANGE_NBMON_NAME_TAG_REQUIREMENT)) {
                 return {
                     status: 'error',
                     message: 'You do not have enough cookies to change the name of this NBMon.',
@@ -120,7 +120,7 @@ const changeNBMonName = async (userId, nbmonId, customName) => {
             }
 
             // deduct 20 tags from the user.
-            userQuery.hunterTags -= 20;
+            userQuery.hunterTags -= parseInt(process.env.CHANGE_NBMON_NAME_TAG_REQUIREMENT);
             userQuery._updated_at = Date.now();
 
             // change the name of the NBMon.
@@ -132,7 +132,7 @@ const changeNBMonName = async (userId, nbmonId, customName) => {
 
             return {
                 status: 'success',
-                message: `Spent 20 cookies to change the name of NBMon #${nbmonId} to **${customName}**.`,
+                message: `Spent ${process.env.CHANGE_NBMON_NAME_TAG_REQUIREMENT} cookies to change the name of NBMon #${nbmonId} to **${customName}**.`,
             };
         // if the name does not exist, we will just change the name of the NBMon.
         } else {

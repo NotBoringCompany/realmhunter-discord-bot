@@ -86,10 +86,13 @@ const genusData = () => {
 
     if (now < march20) {
         // get the first 4 to randomize.
+        console.log('now is before march 20 12:00 GMT');
         genusRand = Math.floor(Math.random() * 4);
     } else if (now < march21) {
+        console.log('now is before march 21 12:00 GMT');
         genusRand = Math.floor(Math.random() * 7);
     } else {
+        console.log('now is after march 21 12:00 GMT');
         // get the whole length of the array.
         genusRand = Math.floor(Math.random() * genera.length);
     }
