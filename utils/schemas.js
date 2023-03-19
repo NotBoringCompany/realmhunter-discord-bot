@@ -207,6 +207,7 @@ const NBMonSchema = new mongoose.Schema(
         bought: Boolean,
         nbmonId: Number,
         genus: String,
+        customName: String,
         xp: Number,
         maxHp: Number,
         currentHp: Number,

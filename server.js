@@ -61,8 +61,9 @@ const { trialsShopModalInteraction } = require('./interactions/modals/genesisTri
 const { trialsShopInteraction } = require('./interactions/buttons/genesisTrialsPt2/trialsShop');
 const { showNBMonDataEmbed } = require('./commands/genesisTrialsPt2/nbmonData');
 const { nbmonDataButtonInteraction } = require('./interactions/buttons/genesisTrialsPt2/nbmonData');
-const { getNBMonData } = require('./utils/genesisTrialsPt2/nbmonData');
+const { getNBMonData, changeNBMonName } = require('./utils/genesisTrialsPt2/nbmonData');
 const { nbmonDataEmbed } = require('./embeds/genesisTrialsPt2/nbmonData');
+const { updateNBMonNameModal } = require('./modals/genesisTrialsPt2/nbmonData');
 
 const client = new Client({
     intents: [
@@ -443,6 +444,14 @@ client.on('interactionCreate', async (interaction) => {
             }
 
             await interaction.reply({ embeds: [nbmonDataEmbed(data)], ephemeral: true });
+        }
+
+        if (interaction.customId === 'updateNBMonNameModal') {
+            const nbmonId = interaction.fields.getTextInputValue('updateNBMonNameNBMonId');
+            const customName = interaction.fields.getTextInputValue('updateNBMonNameCustomName');
+
+            const { status, message: nbmonMessage } = await changeNBMonName(interaction.user.id, nbmonId, customName);
+            return await interaction.reply({ content: nbmonMessage, ephemeral: true });
         }
 
         await trialsShopModalInteraction(interaction);

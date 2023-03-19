@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { NBMonSchema } = require('../schemas');
+const { NBMonSchema, DiscordUserSchema } = require('../schemas');
 
 /**
  * Gets the NBMon data of `nbmonId` owned by `userId`.
@@ -33,6 +33,7 @@ const getNBMonData = async (userId, nbmonId) => {
             currentHp: nbmonQuery.currentHp,
             atk: nbmonQuery.atk,
             rarity: nbmonQuery.rarity,
+            customName: nbmonQuery.customName,
         };
 
         return {
@@ -77,6 +78,82 @@ const getNBMonIdsOwned = async (userId) => {
     }
 };
 
+/**
+ * Changes the name of the NBMon. Only the owner of the NBMon can change its name.
+ * Costs 20 tags IF name already exists. Free otherwise.
+ */
+const changeNBMonName = async (userId, nbmonId, customName) => {
+    try {
+        const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
+        const nbmonQuery = await NBMon.findOne({ nbmonId: nbmonId });
+
+        if (!nbmonQuery) {
+            return {
+                status: 'error',
+                message: 'NBMon not found.',
+            };
+        }
+
+        if (nbmonQuery.capturedBy !== userId) {
+            return {
+                status: 'error',
+                message: 'You do not own this NBMon.',
+            };
+        }
+
+        // check if the name already exists.
+        const customNameExists = nbmonQuery.customName;
+
+        // if it exists, we:
+        // 1. check if the user has 20 tags to pay.
+        // 2. if yes, deduct 20 tags from the user. if no, return an error.
+        // 3. change the name of the NBMon.
+        if (customNameExists) {
+            const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+            const userQuery = await User.findOne({ userId: userId });
+
+            if (!userQuery || userQuery.hunterTags < 20) {
+                return {
+                    status: 'error',
+                    message: 'You do not have enough cookies to change the name of this NBMon.',
+                };
+            }
+
+            // deduct 20 tags from the user.
+            userQuery.hunterTags -= 20;
+            userQuery._updated_at = Date.now();
+
+            // change the name of the NBMon.
+            nbmonQuery.customName = customName;
+            nbmonQuery._updated_at = Date.now();
+
+            await userQuery.save();
+            await nbmonQuery.save();
+
+            return {
+                status: 'success',
+                message: `Spent 20 cookies to change the name of NBMon #${nbmonId} to **${customName}**.`,
+            };
+        // if the name does not exist, we will just change the name of the NBMon.
+        } else {
+            nbmonQuery.customName = customName;
+            nbmonQuery._updated_at = Date.now();
+
+            await nbmonQuery.save();
+
+            return {
+                status: 'success',
+                message: `Changed the name of NBMon #${nbmonId} to **${customName}**.`,
+            };
+        }
+    } catch (err) {
+        console.log({
+            errorFrom: 'changeNBMonName',
+            errorMessage: err,
+        });
+    }
+};
+
 const ownedNBMonEmbedButtons = () => {
     return [
         {
@@ -91,6 +168,12 @@ const ownedNBMonEmbedButtons = () => {
             label: 'Check owned NBMon IDs',
             custom_id: 'checkOwnedNBMonIdsButton',
         },
+        {
+            type: 2,
+            style: 1,
+            label: 'Change NBMon name',
+            custom_id: 'changeNBMonNameButton',
+        },
     ];
 };
 
@@ -98,4 +181,5 @@ module.exports = {
     getNBMonData,
     getNBMonIdsOwned,
     ownedNBMonEmbedButtons,
+    changeNBMonName,
 };

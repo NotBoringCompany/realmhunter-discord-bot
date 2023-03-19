@@ -7,9 +7,10 @@ const checkNBMonsOwnedEmbed = new EmbedBuilder()
     .setDescription(`Click on the 'Check NBMon IDs owned' button to get the list of NBMons you own via their IDs. Then, you can get the data for one NBMon at a time by using its ID.`);
 
 const nbmonDataEmbed = (nbmonData) => {
+    const name = nbmonData.customName ? nbmonData.customName : `NBMon #${nbmonData.nbmonId}`;
     return new EmbedBuilder()
         .setColor(0x42ca9f)
-        .setTitle(`NBMon #${nbmonData.nbmonId}`)
+        .setTitle(`${name}`)
         .setImage(imageUrl(nbmonData.genus.toLowerCase()))
         .setFields(
             { name: '__**Genus**__', value: `${nbmonData.genus}` },

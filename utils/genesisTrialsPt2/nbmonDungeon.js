@@ -140,6 +140,9 @@ const attackBoss = async (userId, attackerId) => {
         const attackStat = attackerQuery.atk;
         const bossHpStat = bossQuery.hpLeft;
 
+        // get the attacker's custom name (if any)
+        const attackerName = attackerQuery.customName ? attackerQuery.customName : `NBMon #${attackerId}`;
+
         // we calculate for the critical hit chance. 10% chance of a critical hit.
         const criticalHit = Math.floor(Math.random() * 10) + 1 === 1 ? true : false;
 
@@ -216,7 +219,7 @@ const attackBoss = async (userId, attackerId) => {
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to deliver the **FINAL BLOW** to Boss #${bossQuery.nbmonId}. However, the boss retaliated and __**knocked out**__ NBMon #${attackerId} with ${retaliationDamage} damage!`,
+                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to deliver the **FINAL BLOW** to Boss #${bossQuery.nbmonId}. However, the boss retaliated and __**knocked out**__ their NBMon, **${attackerName}**, with ${retaliationDamage} damage!`,
                 };
             // if the damage dealt by the boss is less than the attacker's HP, we will just update the attacker's HP.
             } else {
@@ -230,7 +233,7 @@ const attackBoss = async (userId, attackerId) => {
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to deliver the **FINAL BLOW** to Boss #${bossQuery.nbmonId}. The boss retaliated and dealt ${retaliationDamage} damage to NBMon #${attackerId}!`,
+                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to deliver the **FINAL BLOW** to Boss #${bossQuery.nbmonId}. The boss retaliated and dealt ${retaliationDamage} damage to to their NBMon, **${attackerName}**!`,
                 };
             }
         // if the boss still has hp left, we will update a few things.
@@ -302,7 +305,7 @@ const attackBoss = async (userId, attackerId) => {
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to Boss #${bossQuery.nbmonId}. However, the boss retaliated and __**knocked out**__ NBMon #${attackerId} with ${retaliationDamage} damage!`,
+                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to Boss #${bossQuery.nbmonId}. However, the boss retaliated and __**knocked out**__ their NBMon, **${attackerName}**, with ${retaliationDamage} damage!`,
                 };
             // if the damage dealt by the boss is less than the attacker's HP, we will just update the attacker's HP.
             } else {
@@ -316,7 +319,7 @@ const attackBoss = async (userId, attackerId) => {
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to Boss #${bossQuery.nbmonId}. The boss retaliated and dealt ${retaliationDamage} damage to NBMon #${attackerId}!`,
+                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to Boss #${bossQuery.nbmonId}. The boss retaliated and dealt ${retaliationDamage} damage to their NBMon, **${attackerName}**!`,
                 };
             }
         }
@@ -498,8 +501,7 @@ const allowNextBossAppearance = async () => {
         if (!bossDefeated) {
             return {
                 status: 'error',
-                message: `A new boss wants to be challenged but the previous boss has not yet been defeated. \n
-                Defeat it in <#${process.env.FOUNDERS_BOT_COMMANDS_CHANNELID}> to allow the next boss to appear soon.`,
+                message: `A new boss wants to be challenged but the previous boss has not yet been defeated. Defeat it in <#${process.env.FOUNDERS_BOT_COMMANDS_CHANNELID}> to allow the next boss to appear soon.`,
                 canAppear: false,
             };
         };
