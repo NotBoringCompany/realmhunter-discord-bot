@@ -425,9 +425,11 @@ client.on('ready', async c => {
 
     mongoose.connect(process.env.MONGODB_URI);
 
-    // CRON JOBS (SCHEDULERS)
-    nextTagDistributionScheduler.start();
-    await distributeTagScheduler(client);
+    // CRON JOBS (SCHEDULERS) //
+    /// DEPRECATED AS OF THE END OF TRIAL PART 1 (19 MARCH).
+    // nextTagDistributionScheduler.start();
+    // await distributeTagScheduler(client);
+
     await restartDailyTagsAllowance();
     await removeExpiredInvitesScheduler();
     await restartDailyContributionTagsClaimedScheduler();
