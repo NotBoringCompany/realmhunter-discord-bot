@@ -219,11 +219,12 @@ client.on('messageCreate', async (message) => {
         await showPartOneInfoEmbed(message).catch((err) => console.log(err));
     }
 
-    if (message.content.toLowerCase() === '!hunt collectcookies') {
-        if (message.channelId !== process.env.GENERAL_CHAT_CHANNELID) return;
-        const { message: claimMessage } = await updateTagsClaimed(message).catch((err) => console.log(err));
-        await message.channel.send(claimMessage);
-    }
+    /// DEPRECATED AS OF END OF TRIALS PART 1 (19 MARCH)
+    // if (message.content.toLowerCase() === '!hunt collectcookies') {
+    //     if (message.channelId !== process.env.GENERAL_CHAT_CHANNELID) return;
+    //     const { message: claimMessage } = await updateTagsClaimed(message).catch((err) => console.log(err));
+    //     await message.channel.send(claimMessage);
+    // }
 
     if (message.content.toLowerCase().startsWith('!hunt createalliance')) {
         if (message.channelId !== process.env.ALLIANCE_BUILDING_CHANNELID) return;
