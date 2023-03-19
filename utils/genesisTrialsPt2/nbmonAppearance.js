@@ -26,6 +26,7 @@ const addNBMon = async (nbmonId, genus) => {
                 _rperm: _rperm,
                 _acl: _acl,
                 bought: false,
+                disowned: false,
                 nbmonId: nbmonId,
                 genus: genus,
                 xp: 0,
@@ -71,6 +72,7 @@ const addPurchasedNBMon = async (rarity, userId) => {
                 _rperm: _rperm,
                 _acl: _acl,
                 bought: true,
+                disowned: false,
                 nbmonId: latestId + 1,
                 genus: genusData().name,
                 xp: 0,
@@ -211,7 +213,7 @@ const prevNBMonAppearance = async () => {
 /**
  * Checks if the next NBMon can appear.
  * In order for the next NBMon to appear:
- * // 1. the time passed between now and the previous non bought NBMon's appearance must be greater than 10 minutes.
+ * // 1. the time passed between now and the previous non bought NBMon's appearance must be greater than 3 minutes.
  * // 2. the previous NBMon must have been captured.
  */
 const allowNextNBMonAppearance = async () => {
@@ -230,7 +232,7 @@ const allowNextNBMonAppearance = async () => {
             };
         }
 
-        if (prevNBMonCaptured && timeDiff < 600) {
+        if (prevNBMonCaptured && timeDiff < 180) {
             return {
                 status: 'error',
                 message: 'Next NBMon can\'t appear yet.',
@@ -238,7 +240,7 @@ const allowNextNBMonAppearance = async () => {
             };
         }
 
-        if (prevNBMonCaptured && timeDiff >= 600) {
+        if (prevNBMonCaptured && timeDiff >= 180) {
             return {
                 status: 'success',
                 message: 'Next NBMon can appear.',
@@ -335,8 +337,8 @@ const captureNBMonLogic = async (nbmonId, userId) => {
 };
 
 /**
- * Rolls a random number between 1 to 100 every 5 minutes.
- * 5% chance an nbmon appears, then an NBMon will appear, given that it passes the checks already.
+ * Rolls a random number between 1 to 100 every 3 minutes.
+ * 20% chance an nbmon appears, then an NBMon will appear, given that it passes the checks already.
  */
 const nbmonAppearanceScheduler = async (client) => {
     try {
@@ -349,10 +351,10 @@ const nbmonAppearanceScheduler = async (client) => {
             const now = Math.floor(new Date().getTime() / 1000);
             const prevAppearance = await prevNBMonAppearance();
 
-            const isOverAnHour = now - prevAppearance >= 3600;
+            const isOver15Minutes = now - prevAppearance >= 900;
 
             // if rand is either 1-5 or the time passed between now and the previous NBMon is over an hour, we will show the nbmon.
-            if (rand <= 5 || isOverAnHour) {
+            if (rand <= 20 || isOver15Minutes) {
                 const { status, message } = await nbmonAppears(client);
                 if (status === 'error') {
                     // we don't need to show this message in the general chat.

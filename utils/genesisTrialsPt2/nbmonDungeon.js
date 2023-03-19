@@ -667,6 +667,32 @@ const checkIfOwned = async (userId, nbmonId) => {
     }
 };
 
+/**
+ * Gets how much damage the user has dealt to the current boss.
+ */
+const damageDealt = async (userId) => {
+    try {
+        const BossNBMon = mongoose.model('NBMonBossData', BossNBMonSchema, 'RHDiscordBossNBMonData');
+        const bossQuery = await BossNBMon.findOne().sort({ nbmonId: -1 });
+
+        if (!bossQuery) {
+            return `You have dealt 0 damage.`;
+        }
+
+        const damagedBy = bossQuery.damagedBy;
+
+        // find the user data in the damagedBy array.
+        const userDamageData = damagedBy.find((data) => data.userId === userId);
+
+        return `You have dealt ${userDamageData.damageDealt ? userDamageData.damageDealt : 0} damage to Boss #${bossQuery.nbmonId}.`;
+    } catch (err) {
+        console.log({
+            errorFrom: 'damageDealt',
+            errorMessage: err,
+        });
+    }
+};
+
 const bossFightButtons = (currentBossId) => {
     return [
         {
@@ -686,6 +712,12 @@ const bossFightButtons = (currentBossId) => {
             style: 1,
             label: 'Revive knocked out NBMons',
             custom_id: 'reviveNBMonsButton',
+        },
+        {
+            type: 2,
+            style: 1,
+            label: 'Check your damage dealt',
+            custom_id: 'checkDamageDealtButton',
         },
     ];
 };
@@ -875,4 +907,5 @@ module.exports = {
     checkIfOwned,
     reviveUserKnockedOutNBMons,
     updateBossStatEmbedScheduler,
+    damageDealt,
 };
