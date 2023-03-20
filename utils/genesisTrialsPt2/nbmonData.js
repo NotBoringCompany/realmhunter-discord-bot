@@ -113,7 +113,7 @@ const changeNBMonName = async (userId, nbmonId, customName) => {
 
         // if it exists, we:
         // 1. check if the user has 20 tags to pay.
-        // 2. if yes, deduct 20 tags from the user. if no, return an error.
+        // 2. if yes, then deduct 20 tags from the user. if no, return an error.
         // 3. change the name of the NBMon.
         if (customNameExists) {
             const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
