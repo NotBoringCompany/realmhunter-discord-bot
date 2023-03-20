@@ -278,7 +278,7 @@ client.on('messageCreate', async (message) => {
         await showPartOneInfoEmbed(message).catch((err) => console.log(err));
     }
 
-    /// DEPRECATED.
+    /// DEPRECATED AS OF END OF TRIALS PART 1 (19 MARCH)
     // if (message.content.toLowerCase() === '!hunt collectcookies') {
     //     if (message.channelId !== process.env.GENERAL_CHAT_CHANNELID) return;
     //     const { message: claimMessage } = await updateTagsClaimed(message).catch((err) => console.log(err));
