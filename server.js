@@ -101,7 +101,7 @@ client.on('messageCreate', async (message) => {
         const { message: captureNBMonMessage } = await captureNBMon(message);
         await message.reply(captureNBMonMessage);
         // delay 5 seconds to prevent spamming.
-        await delay(5000);
+        return await delay(5000);
     }
 
     /// UNLOCK WHEN TIME COMES.
@@ -146,9 +146,9 @@ client.on('messageCreate', async (message) => {
 
             const { status, message: rewardNationMessage, winMessage } = await sendPendingNationTags(message);
             console.log('sent');
-            await message.channel.send(rewardNationMessage);
+            return await message.channel.send(rewardNationMessage);
             if (winMessage) {
-                await client.channels.cache.get(process.env.NATION_CHALLENGES_LOG_CHANNELID).send(winMessage);
+                return await client.channels.cache.get(process.env.NATION_CHALLENGES_LOG_CHANNELID).send(winMessage);
             }
 
             return;
@@ -157,7 +157,7 @@ client.on('messageCreate', async (message) => {
 
     if (message.content.toLowerCase() === '!showdistributenationpendingtagsembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showDistributeNationPendingTagsEmbed(message);
+        return await showDistributeNationPendingTagsEmbed(message);
     }
 
     if (message.content.toLowerCase() === '!showcumulativenationtagsstaked') {
@@ -172,17 +172,17 @@ client.on('messageCreate', async (message) => {
     }
     if (message.content.toLowerCase() === '!showstaketagsembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showStakeTagsEmbed(message);
+        return await showStakeTagsEmbed(message);
     }
 
     if (message.content.toLowerCase() === '!showrepresentativevotingembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showRepresentativeVotingEmbed(message);
+        return await showRepresentativeVotingEmbed(message);
     }
 
     if (message.content.toLowerCase() === '!showquestcollectcookiebuttons') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showFirstQuestWinnerButtons(message);
+        return await showFirstQuestWinnerButtons(message);
     }
     if (message.content.toLowerCase().startsWith('!hunt manuallyrewardtags')) {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
@@ -190,38 +190,38 @@ client.on('messageCreate', async (message) => {
 
         // if error, send the message in the channel where the command was sent
         if (status === 'error') {
-            await message.channel.send(rewardMessage);
+            return await message.channel.send(rewardMessage);
         // otherwise, send it to #general-chat.
         } else {
-            await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send(rewardMessage);
+            return await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send(rewardMessage);
         }
     }
 
     if (message.content.toLowerCase() === '!resetdailytagsallowance') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         const { message: resetMessage } = await manuallyResetDailyTagsAllowance().catch((err) => console.log(err));
-        await message.channel.send(resetMessage);
+        return await message.channel.send(resetMessage);
     }
 
     if (message.content.toLowerCase() === '!hunt unrewardedcontributions') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         const { status, message: contributionsMessage } = await retrieveUnrewardedContributions(message).catch((err) => console.log(err));
 
-        await message.channel.send(contributionsMessage);
+        return await message.channel.send(contributionsMessage);
     }
 
     if (message.content.toLowerCase() === '!hunt manuallyresetdailycontributiontagsclaimed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
 
         const { message: resetMessage } = await restartDailyContributionTagsClaimed().catch((err) => console.log(err));
-        await message.channel.send(resetMessage);
+        return await message.channel.send(resetMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt invalidatecontribution')) {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
 
         const { message: invalidateMessage } = await invalidateContribution(message).catch((err) => console.log(err));
-        await message.channel.send(invalidateMessage);
+        return await message.channel.send(invalidateMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt rewardcontribution')) {
@@ -230,53 +230,53 @@ client.on('messageCreate', async (message) => {
 
         // if there's an error status, send the message in the channel where the command was sent
         if (status === 'error') {
-            await message.channel.send(contributionsMessage);
+            return await message.channel.send(contributionsMessage);
         // otherwise, send it to the #rewarded-contributions channel
         } else {
-            await client.channels.cache.get(process.env.REWARDED_CONTRIBUTIONS_CHANNELID).send(contributionsMessage);
+            return await client.channels.cache.get(process.env.REWARDED_CONTRIBUTIONS_CHANNELID).send(contributionsMessage);
         }
     }
 
     if (message.content.toLowerCase() === '!shownationsroleembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showNationRoleEmbed(message).catch((err) => console.log(err));
+        return await showNationRoleEmbed(message).catch((err) => console.log(err));
     }
 
     if (message.content.toLowerCase().startsWith('!createrole')) {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         const { status, message: roleMessage } = await createRole(message).catch((err) => console.log(err));
-        await message.channel.send(roleMessage);
+        return await message.channel.send(roleMessage);
     }
 
     if (message.content.toLowerCase() === '!showdailytagclaim') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showClaimDailyTagsEmbed(message).catch((err) => console.log(err));
+        return await showClaimDailyTagsEmbed(message).catch((err) => console.log(err));
     }
 
     if (message.content.toLowerCase() === '!showcontributionembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showSubmitContributionEmbed(message).catch((err) => console.log(err));
+        return await showSubmitContributionEmbed(message).catch((err) => console.log(err));
     }
 
     if (message.content.toLowerCase() === '!showchecktagscollected') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showCheckTagsCollectedEmbed(message).catch((err) => console.log(err));
+        return await showCheckTagsCollectedEmbed(message).catch((err) => console.log(err));
     }
 
     if (message.content.toLowerCase() === '!showtagsleaderboard') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         const { embed } = await showTagsLeaderboard(client).catch((err) => console.log(err));
-        await message.channel.send({ embeds: [embed] });
+        return await message.channel.send({ embeds: [embed] });
     }
 
     if (message.content.toLowerCase() === '!showrolenotifembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showRoleNotifEmbed(message).catch((err) => console.log(err));
+        return await showRoleNotifEmbed(message).catch((err) => console.log(err));
     }
 
     if (message.content.toLowerCase() === '!showgenesistrialspartoneembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        await showPartOneInfoEmbed(message).catch((err) => console.log(err));
+        return await showPartOneInfoEmbed(message).catch((err) => console.log(err));
     }
 
     /// DEPRECATED AS OF END OF TRIALS PART 1 (19 MARCH)
@@ -289,22 +289,22 @@ client.on('messageCreate', async (message) => {
     if (message.content.toLowerCase().startsWith('!hunt createalliance')) {
         if (message.channelId !== process.env.ALLIANCE_BUILDING_CHANNELID) return;
         const { message: allianceMessage } = await createAlliance(message).catch((err) => console.log(err));
-        await message.channel.send(allianceMessage);
+        return await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt invitetoalliance')) {
         if (message.channelId !== process.env.ALLIANCE_INVITES_CHANNELID) return;
         const { message: allianceMessage } = await pendingAllianceInvite(message).catch((err) => console.log(err));
-        await message.channel.send(allianceMessage);
+        return await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt showsentallianceinvites')) {
         if (message.channelId !== process.env.ALLIANCE_INVITES_CHANNELID) return;
         const { embed, message: allianceMessage } = await showInviterPendingInvites(client, message).catch((err) => console.log(err));
         if (embed !== 'none') {
-            await message.channel.send({ embeds: [embed] });
+            return await message.channel.send({ embeds: [embed] });
         } else {
-            await message.channel.send(allianceMessage);
+            return await message.channel.send(allianceMessage);
         }
     }
 
@@ -312,52 +312,52 @@ client.on('messageCreate', async (message) => {
         if (message.channelId !== process.env.ALLIANCE_INVITES_CHANNELID) return;
         const { embed } = await showInviteePendingInvites(client, message).catch((err) => console.log(err));
 
-        await message.channel.send({ embeds: [embed] });
+        return await message.channel.send({ embeds: [embed] });
     }
 
     if (message.content.toLowerCase().startsWith('!hunt rescindallianceinvite')) {
         if (message.channelId !== process.env.ALLIANCE_INVITES_CHANNELID) return;
         const { message: allianceMessage } = await rescindAllianceInvite(message).catch((err) => console.log(err));
-        await message.channel.send(allianceMessage);
+        return await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt acceptallianceinvite')) {
         if (message.channelId !== process.env.ALLIANCE_INVITES_CHANNELID) return;
         const { message: allianceMessage } = await acceptAllianceInvite(message).catch((err) => console.log(err));
-        await message.channel.send(allianceMessage);
+        return await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt declineallianceinvite')) {
         if (message.channelId !== process.env.ALLIANCE_INVITES_CHANNELID) return;
         const { message: allianceMessage } = await declineAllianceInvite(message).catch((err) => console.log(err));
-        await message.channel.send(allianceMessage);
+        return await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt disbandalliance')) {
         if (message.channelId !== process.env.ALLIANCE_BUILDING_CHANNELID) return;
         const { message: allianceMessage } = await disbandAlliance(message).catch((err) => console.log(err));
-        await message.channel.send(allianceMessage);
+        return await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt leavealliance')) {
         if (message.channelId !== process.env.ALLIANCE_BUILDING_CHANNELID) return;
         const { message: allianceMessage } = await leaveAlliance(message).catch((err) => console.log(err));
-        await message.channel.send(allianceMessage);
+        return await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt delegatechiefrole')) {
         if (message.channelId !== process.env.ALLIANCE_BUILDING_CHANNELID) return;
         const { message: allianceMessage } = await delegateChiefRole(message).catch((err) => console.log(err));
-        await message.channel.send(allianceMessage);
+        return await message.channel.send(allianceMessage);
     }
 
     if (message.content.toLowerCase().startsWith('!hunt showalliance')) {
         if (message.channelId !== process.env.ALLIANCE_INFO_CHANNELID) return;
         const { embed, status, message: allianceMessage } = await showAlliance(client, message).catch((err) => console.log(err));
         if (embed !== 'none') {
-            await message.channel.send({ embeds: [embed] });
+            return await message.channel.send({ embeds: [embed] });
         } else {
-            await message.channel.send(allianceMessage);
+            return await message.channel.send(allianceMessage);
         }
     }
 
@@ -365,16 +365,16 @@ client.on('messageCreate', async (message) => {
         if (message.channelId !== process.env.ALLIANCE_INFO_CHANNELID) return;
         const { embed, status, message: allianceMessage } = await showOwnAlliance(client, message).catch((err) => console.log(err));
         if (embed !== 'none') {
-            await message.channel.send({ embeds: [embed] });
+            return await message.channel.send({ embeds: [embed] });
         } else {
-            await message.channel.send(allianceMessage);
+            return await message.channel.send(allianceMessage);
         }
     }
 
     if (message.content.toLowerCase().startsWith('!hunt kickfromalliance')) {
         if (message.channelId !== process.env.ALLIANCE_BUILDING_CHANNELID) return;
         const { message: allianceMessage } = await kickFromAlliance(message).catch((err) => console.log(err));
-        await message.channel.send(allianceMessage);
+        return await message.channel.send(allianceMessage);
     }
 });
 
@@ -394,7 +394,7 @@ client.on('interactionCreate', async (interaction) => {
 
         if (interaction.customId === 'questCollectCookies') {
             const { message: questMessage } = await claimFirstQuestTags(interaction.user.id);
-            await interaction.reply({ content: questMessage, ephemeral: true });
+            return await interaction.reply({ content: questMessage, ephemeral: true });
         }
 
         // if nation button is clicked. will run the `nationButtonInteraction` function to check if the user can get a nation.
@@ -403,29 +403,29 @@ client.on('interactionCreate', async (interaction) => {
         // when claim daily tags button is clicked. will run the `claimDailyTags` function to check if the user can claim their daily tags.
         if (interaction.customId === 'claimDailyTagsButton') {
             const { message } = await claimDailyTags(interaction);
-            await interaction.reply({ content: message, ephemeral: true });
+            return await interaction.reply({ content: message, ephemeral: true });
         }
 
         // when submit contribution button is clicked. will show the modal for submitting a contribution.
         if (interaction.customId === 'submitContributionButton') {
-            await interaction.showModal(submitContributionModal);
+            return await interaction.showModal(submitContributionModal);
         }
 
         // when check tags collected button is clicked. will show the user how many tags they have collected.
         if (interaction.customId === 'checkTagsCollectedButton') {
             const { message } = await checkTagsCollected(interaction.user.id);
-            await interaction.reply({ content: message, ephemeral: true });
+            return await interaction.reply({ content: message, ephemeral: true });
         }
 
         // when founder tweet notif gang button is clicked. will give them the founder tweet notif gang role.
         if (interaction.customId === 'founderTweetNotifGangButton') {
             const { message } = await giveRole(interaction, 'founderTweetNotifGang');
-            await interaction.reply({ content: message, ephemeral: true });
+            return await interaction.reply({ content: message, ephemeral: true });
         }
 
         if (interaction.customId === 'dailyTagsResetNotifButton') {
             const { message } = await giveRole(interaction, 'dailyTagsResetNotif');
-            await interaction.reply({ content: message, ephemeral: true });
+            return await interaction.reply({ content: message, ephemeral: true });
         }
     }
 
@@ -476,7 +476,7 @@ client.on('interactionCreate', async (interaction) => {
             const amountToGive = interaction.fields.getTextInputValue('cookiesToDistributeAmount');
 
             const { message: distributeMessage } = await distributePendingTagsToMember(interaction, userId, amountToGive);
-            await interaction.reply({ content: distributeMessage, ephemeral: true });
+            return await interaction.reply({ content: distributeMessage, ephemeral: true });
         }
 
         if (interaction.customId === 'stakeNationTagsModal') {
@@ -485,11 +485,11 @@ client.on('interactionCreate', async (interaction) => {
 
             // if its already 15 March 14:00 GMT, then the user cannot stake anymore.
             if (now > process.env.UNSTAKE_LOSE_ELIGIBILITY_TIMESTAMP) {
-                await interaction.reply({ content: 'Staking period is over.', ephemeral: true });
+                return await interaction.reply({ content: 'Staking period is over.', ephemeral: true });
             } else {
                 const { message: stakeMessage } = await stakeTags(interaction.user.id, parseInt(cookiesToStake));
 
-                await interaction.reply({ content: stakeMessage, ephemeral: true });
+                return await interaction.reply({ content: stakeMessage, ephemeral: true });
             }
         }
 
@@ -497,7 +497,7 @@ client.on('interactionCreate', async (interaction) => {
             const cookiesToUnstake = interaction.fields.getTextInputValue('cookiesToUnstakeAmount');
             const { message: unstakeMessage } = await unstakeTags(interaction.user.id, parseInt(cookiesToUnstake));
 
-            await interaction.reply({ content: unstakeMessage, ephemeral: true });
+            return await interaction.reply({ content: unstakeMessage, ephemeral: true });
         }
         // if a user submits a contribution, we run the `submitContributionToDB` function to upload the contribution to the database.
         if (interaction.customId === 'submitContributionModal') {
@@ -508,21 +508,21 @@ client.on('interactionCreate', async (interaction) => {
             // we try to upload the contribution to the database. if it fails, we send an error message to the user.
             const { message } = await submitContributionToDB(userId, url);
 
-            await interaction.reply({ content: message, ephemeral: true });
+            return await interaction.reply({ content: message, ephemeral: true });
         }
 
         if (interaction.customId === 'representativeVotingModal') {
             const nomineeId = interaction.fields.getTextInputValue('nomineeId');
             // const { message: voteMessage } = await submitVote(interaction, nomineeId);
 
-            await interaction.reply({ content: 'Voting has ended.', ephemeral: true });
+            return await interaction.reply({ content: 'Voting has ended.', ephemeral: true });
         }
 
         if (interaction.customId === 'rescindRepresentativeVoteModal') {
             const nomineeId = interaction.fields.getTextInputValue('nomineeToRescindId');
             // const { message: voteMessage } = await rescindVote(interaction, nomineeId);
 
-            await interaction.reply({ content: 'Voting has ended.', ephemeral: true });
+            return await interaction.reply({ content: 'Voting has ended.', ephemeral: true });
         }
     }
 });

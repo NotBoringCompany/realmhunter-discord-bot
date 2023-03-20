@@ -25,7 +25,7 @@ const nationLeadVotesInteraction = async (interaction) => {
                 //     return;
                 // }
             case 'nationRepresentativeRescindVoteButton':
-                await interaction.reply({ content: 'Voting closed.', ephemeral: true });
+                return await interaction.reply({ content: 'Voting closed.', ephemeral: true });
                 // await interaction.showModal(rescindRepresentativeVoteModal);
                 // return;
             case 'nationRepresentativeCheckVotesLeftButton':
