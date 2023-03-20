@@ -367,8 +367,8 @@ const captureNBMonLogic = async (nbmonId, userId) => {
  */
 const nbmonAppearanceScheduler = async (client) => {
     try {
-        // gets run every 5 minutes.
-        cron.schedule('*/5 * * * *', async () => {
+        // gets run every 3 minutes.
+        cron.schedule('*/3 * * * *', async () => {
             const rand = Math.floor(Math.random() * 100) + 1;
 
             console.log('nbmon appearance rand: ', rand);
