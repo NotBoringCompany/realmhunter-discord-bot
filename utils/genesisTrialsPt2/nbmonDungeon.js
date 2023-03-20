@@ -840,59 +840,59 @@ const reviveUserKnockedOutNBMons = async (userId) => {
  * If the chance hits but the previous boss is not yet defeated, throw a message saying to defeat the boss.
  * If the chance doesn't hit and the boss is defeated and the time between the current and previous boss is more than 5 hours, we let the boss appear.
  */
-const bossAppearanceScheduler = async (client) => {
-    try {
-        // run every 10 minutes
-        cron.schedule('*/10 * * * *', async () => {
-            // 1% chance of boss appearing each 10 minutes.
-            const rand = Math.floor(Math.random() * 100) + 1;
+// const bossAppearanceScheduler = async (client) => {
+//     try {
+//         // run every 10 minutes
+//         cron.schedule('*/10 * * * *', async () => {
+//             // 1% chance of boss appearing each 10 minutes.
+//             const rand = Math.floor(Math.random() * 100) + 1;
 
-            console.log('boss appearance rand: ', rand);
+//             console.log('boss appearance rand: ', rand);
 
-            const now = Math.floor(new Date().getTime() / 1000);
-            const prevAppearance = await prevBossAppearance();
+//             const now = Math.floor(new Date().getTime() / 1000);
+//             const prevAppearance = await prevBossAppearance();
 
-            const isOver5Hours = now - prevAppearance >= 18000;
+//             const isOver5Hours = now - prevAppearance >= 18000;
 
-            // if rand = 1 or its already 5 hours since the previous boss appearance, run the bossAppears function.
-            // if the prev boss hasn't been defeated, `bossAppears` will return an error status.
-            if (rand === 1 || isOver5Hours) {
-                const { status, message } = await bossAppears(client);
+//             // if rand = 1 or its already 5 hours since the previous boss appearance, run the bossAppears function.
+//             // if the prev boss hasn't been defeated, `bossAppears` will return an error status.
+//             if (rand === 1 || isOver5Hours) {
+//                 const { status, message } = await bossAppears(client);
 
-                if (status === 'error') {
-                    // we don't need to show this message in general chat.
-                    if (message !== 'Boss cannot appear yet.' || message !== 'Error while retrieving boss data.') {
-                        await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send(message);
-                    } else {
-                        console.log(message);
-                    }
-                }
-            }
-        });
-    } catch (err) {
-        console.log({
-            errorFrom: 'bossAppearanceScheduler',
-            errorMessage: err,
-        });
-    }
-};
+//                 if (status === 'error') {
+//                     // we don't need to show this message in general chat.
+//                     if (message !== 'Boss cannot appear yet.' || message !== 'Error while retrieving boss data.') {
+//                         await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send(message);
+//                     } else {
+//                         console.log(message);
+//                     }
+//                 }
+//             }
+//         });
+//     } catch (err) {
+//         console.log({
+//             errorFrom: 'bossAppearanceScheduler',
+//             errorMessage: err,
+//         });
+//     }
+// };
 
 /**
  * Updates the boss stat embed every 30 seconds.
  */
-const updateBossStatEmbedScheduler = async (client) => {
-    try {
-        cron.schedule('*/30 * * * * *', async () => {
-            const { message } = await updateBossStatEmbed(client);
-            console.log(message);
-        });
-    } catch (err) {
-        console.log({
-            errorFrom: 'updateBossStatEmbedScheduler',
-            errorMessage: err,
-        });
-    }
-};
+// const updateBossStatEmbedScheduler = async (client) => {
+//     try {
+//         cron.schedule('*/30 * * * * *', async () => {
+//             const { message } = await updateBossStatEmbed(client);
+//             console.log(message);
+//         });
+//     } catch (err) {
+//         console.log({
+//             errorFrom: 'updateBossStatEmbedScheduler',
+//             errorMessage: err,
+//         });
+//     }
+// };
 
 module.exports = {
     addBoss,
@@ -903,9 +903,9 @@ module.exports = {
     userLastHit,
     bossAppears,
     updateBossStatEmbed,
-    bossAppearanceScheduler,
+    // bossAppearanceScheduler,
     checkIfOwned,
     reviveUserKnockedOutNBMons,
-    updateBossStatEmbedScheduler,
+    // updateBossStatEmbedScheduler,
     damageDealt,
 };

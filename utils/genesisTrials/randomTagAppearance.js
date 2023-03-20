@@ -269,55 +269,55 @@ const nextTagDistribution = async () => {
 /**
  * A cron scheduler that runs every hour on the 59th minute. It randomizes the next tag distribution's timestamp for the next hour.
  */
-const nextTagDistributionScheduler = cron.schedule('0 59 * * * *', async () => {
-    // calls `nextTagDistribution` to create the timestamp to distribute the tags for the next hour.
-    await nextTagDistribution();
+// const nextTagDistributionScheduler = cron.schedule('0 59 * * * *', async () => {
+//     // calls `nextTagDistribution` to create the timestamp to distribute the tags for the next hour.
+//     await nextTagDistribution();
 
-    console.log('updated next tag distribution timestamp');
-});
+//     console.log('updated next tag distribution timestamp');
+// });
 
 /**
  * A cron scheduler that runs every minute. It checks if the current timestamp matches the next tag distribution's timestamp. If it does, it distributes the tags.
  * If yes, it calls `distributeTags` to distribute the tags.
  */
-const distributeTagScheduler = async (client) => {
-    try {
-        cron.schedule('* * * * *', async () => {
-            // calls `nextTagDistributionTimestamp` to get the next tag distribution's timestamp.
-            const nextDistributionTimestamp = await nextTagDistributionTimestamp();
+// const distributeTagScheduler = async (client) => {
+//     try {
+//         cron.schedule('* * * * *', async () => {
+//             // calls `nextTagDistributionTimestamp` to get the next tag distribution's timestamp.
+//             const nextDistributionTimestamp = await nextTagDistributionTimestamp();
 
-            // if the next distribution timestamp is 0, we need to set the next distribution timestamp.
-            // this means that this hour will be voided.
-            if (nextDistributionTimestamp === 0) {
-                await nextTagDistribution();
-            } else {
-                // because of the small delay that occurs when this function gets called, we want to check if
-                // the current timestamp's minute matches the nextDistributionTimestamp.
-                // for this, we will set the seconds to 0.
-                // if it matches, we distribute the tags.
-                const currentTime = new Date();
-                currentTime.setSeconds(0, 0);
-                const currentTimestamp = Math.floor(currentTime.getTime() / 1000);
+//             // if the next distribution timestamp is 0, we need to set the next distribution timestamp.
+//             // this means that this hour will be voided.
+//             if (nextDistributionTimestamp === 0) {
+//                 await nextTagDistribution();
+//             } else {
+//                 // because of the small delay that occurs when this function gets called, we want to check if
+//                 // the current timestamp's minute matches the nextDistributionTimestamp.
+//                 // for this, we will set the seconds to 0.
+//                 // if it matches, we distribute the tags.
+//                 const currentTime = new Date();
+//                 currentTime.setSeconds(0, 0);
+//                 const currentTimestamp = Math.floor(currentTime.getTime() / 1000);
 
-                // if the `nextDistributionTimestamp` is behind the current timestamp (which means there is something wrong that the fn didn't get called),
-                // we need to set the next distribution timestamp.
-                if (currentTimestamp > nextDistributionTimestamp) {
-                    await nextTagDistribution();
-                } else {
-                    if (currentTimestamp === nextDistributionTimestamp) {
-                        // calls `distributeTags` to distribute the tags.
-                        await distributeTags(client);
-                    }
-                }
-            }
-        });
-    } catch (err) {
-        console.log({
-            errorFrom: 'distributeTagScheduler',
-            errorMessage: err,
-        });
-    }
-};
+//                 // if the `nextDistributionTimestamp` is behind the current timestamp (which means there is something wrong that the fn didn't get called),
+//                 // we need to set the next distribution timestamp.
+//                 if (currentTimestamp > nextDistributionTimestamp) {
+//                     await nextTagDistribution();
+//                 } else {
+//                     if (currentTimestamp === nextDistributionTimestamp) {
+//                         // calls `distributeTags` to distribute the tags.
+//                         await distributeTags(client);
+//                     }
+//                 }
+//             }
+//         });
+//     } catch (err) {
+//         console.log({
+//             errorFrom: 'distributeTagScheduler',
+//             errorMessage: err,
+//         });
+//     }
+// };
 
 module.exports = {
     claimRandomTags,
@@ -327,6 +327,6 @@ module.exports = {
     distributeTags,
     checkTagDistributionClaimable,
     nextTagDistributionTimestamp,
-    nextTagDistributionScheduler,
-    distributeTagScheduler,
+    // nextTagDistributionScheduler,
+    // distributeTagScheduler,
 };

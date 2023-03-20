@@ -141,10 +141,20 @@ const nbmonAppears = async (client) => {
 
         const newId = latestNBMonId + 1;
 
+        const now = Math.floor(new Date().getTime() / 1000);
+
+        let costToCapture;
+
+        if (now < 1679342400) {
+            costToCapture = process.env.CAPTURE_NBMON_TAG_REQUIREMENT;
+        } else {
+            costToCapture = (parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT) * 2).toString();
+        }
+
         // adds the wild NBMon to the database and then sends the message to general chat.
         const { rarity } = await addNBMon(newId, getGenus.name);
         // right now, it will be in test general chat. it will be changed later.
-        await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send({ embeds: [nbmonAppearanceEmbed(rarity, newId, getGenus.name, getGenus.imageUrl)] });
+        await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send({ embeds: [nbmonAppearanceEmbed(costToCapture, rarity, newId, getGenus.name, getGenus.imageUrl)] });
 
         return {
             status: 'success',
@@ -271,7 +281,7 @@ const captureNBMonLogic = async (nbmonId, userId) => {
         }
 
         // we now check if the user has enough tags to capture the NBMon.
-        // requires 50 TAGS! (may change).
+        // requires 40 TAGS! (may change).
         const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
         const userQuery = await User.findOne({ userId: userId });
 
@@ -282,13 +292,23 @@ const captureNBMonLogic = async (nbmonId, userId) => {
             };
         }
 
-        if (userQuery.hunterTags < parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT)) {
-            return {
-                status: 'error',
-                message: 'Not enough cookies to capture the NBMon.',
-            };
+        const now = Math.floor(new Date().getTime() / 1000);
+        // if its already above 20 March 20:00 GMT, the price to capture is doubled.
+        if (now < 1679342400) {
+            if (userQuery.hunterTags < parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT)) {
+                return {
+                    status: 'error',
+                    message: 'Not enough cookies to capture the NBMon.',
+                };
+            }
+        } else {
+            if (userQuery.hunterTags < parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT) * 2) {
+                return {
+                    status: 'error',
+                    message: 'Not enough cookies to capture the NBMon.',
+                };
+            }
         }
-
 
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
         const nbmonQuery = await NBMon.findOne({ nbmonId: nbmonId });
@@ -311,8 +331,13 @@ const captureNBMonLogic = async (nbmonId, userId) => {
             };
         }
 
-        // once all checks are done, we will now capture the NBMon.
-        userQuery.hunterTags -= parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT);
+        // if time is already after 20 march 20:00 GMT, price is doubled.
+        if (now < 1679342400) {
+            userQuery.hunterTags -= parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT);
+        } else {
+            userQuery.hunterTags -= parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT) * 2;
+        }
+
         userQuery._updated_at = Date.now();
 
         // if the nbmon has not been captured, we update the database.
@@ -338,7 +363,7 @@ const captureNBMonLogic = async (nbmonId, userId) => {
 
 /**
  * Rolls a random number between 1 to 100 every 3 minutes.
- * 20% chance an nbmon appears, then an NBMon will appear, given that it passes the checks already.
+ * 15% chance an nbmon appears, then an NBMon will appear, given that it passes the checks already.
  */
 const nbmonAppearanceScheduler = async (client) => {
     try {
@@ -354,12 +379,12 @@ const nbmonAppearanceScheduler = async (client) => {
             const isOver15Minutes = now - prevAppearance >= 900;
 
             // if rand is either 1-5 or the time passed between now and the previous NBMon is over an hour, we will show the nbmon.
-            if (rand <= 20 || isOver15Minutes) {
+            if (rand <= 15 || isOver15Minutes) {
                 const { status, message } = await nbmonAppears(client);
                 if (status === 'error') {
                     // we don't need to show this message in the general chat.
                     if (message !== 'Next NBMon can\'t appear yet.') {
-                        await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send(message);
+                        await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send(message);
                     } else {
                         console.log(message);
                     }
