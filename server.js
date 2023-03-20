@@ -97,10 +97,11 @@ for (const file of commandFiles) {
 // MESSAGE CREATE EVENT LISTENER
 client.on('messageCreate', async (message) => {
     if (message.content.startsWith('!hunt captureNBMon')) {
+        if (message.channelId !== process.env.GENERAL_CHAT_CHANNELID) return;
         const { message: captureNBMonMessage } = await captureNBMon(message);
         await message.reply(captureNBMonMessage);
-        // delay 2 seconds to prevent spamming.
-        await delay(2000);
+        // delay 5 seconds to prevent spamming.
+        await delay(5000);
     }
 
     /// UNLOCK WHEN TIME COMES.

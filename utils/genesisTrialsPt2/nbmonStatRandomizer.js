@@ -71,6 +71,10 @@ const genusData = () => {
             name: 'Heree',
             imageUrl: imageUrl('heree'),
         },
+        {
+            name: 'Todillo',
+            imageUrl: imageUrl('todillo'),
+        }
     ];
 
     const firstRelease = process.env.FIRST_NBMONS_RELEASE_TIMESTAMP;
@@ -113,7 +117,7 @@ const imageUrl = (genus) => {
         case 'pfufu':
             return 'https://i.imgur.com/FQD719p.png';
         case 'roggo':
-            return 'https://i.imgur.com/dknMetM.png';
+            return 'https://i.imgur.com/4OTvffy.png';
         case 'birvo':
             return 'https://i.imgur.com/up45Qyp.png';
         case 'pongu':
@@ -132,6 +136,8 @@ const imageUrl = (genus) => {
             return 'https://i.imgur.com/4UeFbP4.png';
         case 'scorpio':
             return 'https://i.imgur.com/fG3vTB3.png';
+        case 'todillo':
+            return 'https://i.imgur.com/C8Mi3OL.png';
     }
 };
 
