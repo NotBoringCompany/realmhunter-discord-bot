@@ -532,8 +532,8 @@ client.on('ready', async c => {
 
     mongoose.connect(process.env.MONGODB_URI);
 
-    /// CRON JOBS (SCHEDULERS)
-    /// DEPRECATED
+    // CRON JOBS (SCHEDULERS) //
+    /// DEPRECATED AS OF THE END OF TRIAL PART 1 (19 MARCH).
     // nextTagDistributionScheduler.start();
     // await distributeTagScheduler(client);
 
