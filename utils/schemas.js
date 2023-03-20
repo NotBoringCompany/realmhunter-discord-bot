@@ -193,6 +193,118 @@ const QuestEntriesSchema = new mongoose.Schema(
     },
 );
 
+const NBMonSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        bought: Boolean,
+        disowned: Boolean,
+        nbmonId: Number,
+        genus: String,
+        customName: String,
+        xp: Number,
+        maxHp: Number,
+        currentHp: Number,
+        atk: Number,
+        rarity: String,
+        appearanceTimestamp: Number,
+        capturedTimestamp: Number,
+        capturedBy: String,
+        lastFaintedTimestamp: Number,
+    },
+    {
+        versionKey: false,
+    },
+);
+
+const BossNBMonSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        nbmonId: Number,
+        appearanceTimestamp: Number,
+        totalHp: Number,
+        hpLeft: Number,
+        damagedBy: Array,
+        defeatedBy: String,
+        defeatedTimestamp: Number,
+        bossAppearanceMsgId: String,
+        bossStatsMsgId: String,
+    },
+    {
+        versionKey: false,
+    },
+);
+
+const HunterGamesParticipantsSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        userId: String,
+    }, {
+        versionKey: false,
+    },
+);
+
+const HunterGamesDataSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        gameId: Number,
+        participantsCount: Number,
+        isComplete: Boolean,
+    }, {
+        versionKey: false,
+    },
+);
+
+const TrialsShopSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: mongoose.Types.ObjectId(),
+        },
+        _created_at: Date,
+        _updated_at: Date,
+        _wperm: Array,
+        _rperm: Array,
+        _acl: Object,
+        itemName: String,
+        stock: Number,
+        tagCost: Number,
+    }, {
+        versionKey: false,
+    },
+);
+
 module.exports = {
     BenchmarkSchema,
     DiscordUserSchema,
@@ -203,4 +315,9 @@ module.exports = {
     NationsSchema,
     NationLeadVoteSchema,
     QuestEntriesSchema,
+    NBMonSchema,
+    BossNBMonSchema,
+    HunterGamesParticipantsSchema,
+    HunterGamesDataSchema,
+    TrialsShopSchema,
 };

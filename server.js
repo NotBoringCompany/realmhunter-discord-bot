@@ -47,6 +47,23 @@ const { showFirstQuestWinnerButtons } = require('./commands/genesisTrials/questW
 const { nationLeadVotesInteraction } = require('./interactions/buttons/nationLeadVotes');
 const { nationTagStakingInteraction } = require('./interactions/buttons/nationTagStaking');
 const { nationPendingTagsDistribution } = require('./interactions/buttons/nationPendingTags');
+const { nbmonAppears, nbmonAppearanceScheduler } = require('./utils/genesisTrialsPt2/nbmonAppearance');
+const { captureNBMon } = require('./commands/genesisTrialsPt2/nbmonAppearance');
+const { delay } = require('./utils/delay');
+const { bossAppears, updateBossStatEmbed, bossAppearanceScheduler, attackBoss, reviveKnockedOutNBMonScheduler, updateBossStatEmbedScheduler } = require('./utils/genesisTrialsPt2/nbmonDungeon');
+const { attackBossInteraction } = require('./interactions/buttons/genesisTrialsPt2/nbmonDungeon');
+const { startHunterGames } = require('./utils/genesisTrialsPt2/hunterGames');
+const { hunterGamesInteraction } = require('./interactions/buttons/genesisTrialsPt2/hunterGames');
+const { showCheckRealmPointsCollectedEmbed } = require('./commands/genesisTrialsPt2/realmPoints');
+const { realmPointsButtonInteraction } = require('./interactions/buttons/genesisTrialsPt2/realmPoints');
+const { showTrialsShopEmbed } = require('./commands/genesisTrialsPt2/trialsShop');
+const { trialsShopModalInteraction } = require('./interactions/modals/genesisTrialsPt2/trialsShop');
+const { trialsShopInteraction } = require('./interactions/buttons/genesisTrialsPt2/trialsShop');
+const { showNBMonDataEmbed } = require('./commands/genesisTrialsPt2/nbmonData');
+const { nbmonDataButtonInteraction } = require('./interactions/buttons/genesisTrialsPt2/nbmonData');
+const { getNBMonData, changeNBMonName, disownNBMon } = require('./utils/genesisTrialsPt2/nbmonData');
+const { nbmonDataEmbed } = require('./embeds/genesisTrialsPt2/nbmonData');
+const { updateNBMonNameModal } = require('./modals/genesisTrialsPt2/nbmonData');
 
 const client = new Client({
     intents: [
@@ -79,6 +96,48 @@ for (const file of commandFiles) {
 
 // MESSAGE CREATE EVENT LISTENER
 client.on('messageCreate', async (message) => {
+    if (message.content.startsWith('!hunt captureNBMon')) {
+        const { message: captureNBMonMessage } = await captureNBMon(message);
+        await message.reply(captureNBMonMessage);
+        // delay 2 seconds to prevent spamming.
+        await delay(2000);
+    }
+
+    /// UNLOCK WHEN TIME COMES.
+    // if (message.content.toLowerCase() === '!testboss') {
+    //     if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+    //     const { message: nbmonAppearsMessage } = await bossAppears(client);
+    //     console.log(nbmonAppearsMessage);
+    // }
+
+    // if (message.content.toLowerCase() === '!updatebossstats') {
+    //     if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+    //     const { message: updateMsg } = await updateBossStatEmbed(client);
+    //     console.log(updateMsg);
+    // }
+
+    // if (message.content.toLowerCase() === '!hunt starthuntergames') {
+    //     if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+
+    //     const { message: hunterGamesMsg } = await startHunterGames(client);
+    //     console.log(hunterGamesMsg);
+    // }
+
+    // if (message.content.toLowerCase() === '!showrealmpointscollectedembed') {
+    //     if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+    //     await showCheckRealmPointsCollectedEmbed(message);
+    // }
+
+    // if (message.content.toLowerCase() === '!showtrialsshopembed') {
+    //     if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+    //     await showTrialsShopEmbed(message);
+    // }
+
+    // if (message.content.toLowerCase() === '!shownbmondataembed') {
+    //     if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+    //     await showNBMonDataEmbed(message);
+    // }
+
     if (message.content.toLowerCase().startsWith('!hunt rewardnation')) {
         if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.MODS_ROLEID)) {
             console.log('rewarded from', message.author.id);
@@ -166,7 +225,7 @@ client.on('messageCreate', async (message) => {
 
     if (message.content.toLowerCase().startsWith('!hunt rewardcontribution')) {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        const { status, message: contributionsMessage, winning } = await rewardContribution(message).catch((err) => console.log(err));
+        const { status, message: contributionsMessage } = await rewardContribution(message).catch((err) => console.log(err));
 
         // if there's an error status, send the message in the channel where the command was sent
         if (status === 'error') {
@@ -321,6 +380,13 @@ client.on('messageCreate', async (message) => {
 // INTERACTION CREATE EVENT LISTENER
 client.on('interactionCreate', async (interaction) => {
     if (interaction.isButton()) {
+        /// UNLOCK WHEN TIME COMES.
+        // await attackBossInteraction(interaction);
+        // await hunterGamesInteraction(interaction);
+        // await realmPointsButtonInteraction(interaction);
+        // await trialsShopInteraction(interaction);
+        // await nbmonDataButtonInteraction(interaction);
+
         await nationPendingTagsDistribution(interaction);
         await nationTagStakingInteraction(interaction);
         await nationLeadVotesInteraction(interaction);
@@ -364,6 +430,46 @@ client.on('interactionCreate', async (interaction) => {
 
     // modal submit interactions
     if (interaction.type === InteractionType.ModalSubmit) {
+        // if (interaction.customId === 'attackBossModal') {
+        //     const attackerNBMonId = interaction.fields.getTextInputValue('attackerNBMonId');
+        //     const { status: attackStatus, message: attackMessage } = await attackBoss(interaction.user.id, attackerNBMonId);
+
+        //     await interaction.reply({ content: attackMessage, ephemeral: true });
+
+        //     if (attackStatus === 'success') {
+        //         // add the damage log to dungeon log channel. FOR NOW, IT IS THE TEST LEADERBOARD CHANNEL.
+        //         return await client.channels.cache.get(process.env.TEST_LEADERBOARD_CHANNELID).send(attackMessage);
+        //     }
+        // }
+
+        // if (interaction.customId === 'checkNBMonStatsModal') {
+        //     const nbmonId = interaction.fields.getTextInputValue('checkNBMonStatsNBMonId');
+        //     const { status, message: nbmonMessage, data } = await getNBMonData(interaction.user.id, nbmonId);
+
+        //     if (status === 'error') {
+        //         return await interaction.reply({ content: nbmonMessage, ephemeral: true });
+        //     }
+
+        //     await interaction.reply({ embeds: [nbmonDataEmbed(data)], ephemeral: true });
+        // }
+
+        // if (interaction.customId === 'updateNBMonNameModal') {
+        //     const nbmonId = interaction.fields.getTextInputValue('updateNBMonNameNBMonId');
+        //     const customName = interaction.fields.getTextInputValue('updateNBMonNameCustomName');
+
+        //     const { status, message: nbmonMessage } = await changeNBMonName(interaction.user.id, nbmonId, customName);
+        //     return await interaction.reply({ content: nbmonMessage, ephemeral: true });
+        // }
+
+        // if (interaction.customId === 'disownNBMonModal') {
+        //     const nbmonId = interaction.fields.getTextInputValue('disownNBMonNBMonId');
+
+        //     const { status, message: disownMessage } = await disownNBMon(interaction.user.id, nbmonId);
+        //     return await interaction.reply({ content: disownMessage, ephemeral: true });
+        // }
+
+        // await trialsShopModalInteraction(interaction);
+
         if (interaction.customId === 'distributeNationPendingTagsModal') {
             const userId = interaction.fields.getTextInputValue('cookiesToDistributeUserId');
             const amountToGive = interaction.fields.getTextInputValue('cookiesToDistributeAmount');
@@ -406,16 +512,16 @@ client.on('interactionCreate', async (interaction) => {
 
         if (interaction.customId === 'representativeVotingModal') {
             const nomineeId = interaction.fields.getTextInputValue('nomineeId');
-            const { message: voteMessage } = await submitVote(interaction, nomineeId);
+            // const { message: voteMessage } = await submitVote(interaction, nomineeId);
 
-            await interaction.reply({ content: voteMessage, ephemeral: true });
+            await interaction.reply({ content: 'Voting has ended.', ephemeral: true });
         }
 
         if (interaction.customId === 'rescindRepresentativeVoteModal') {
             const nomineeId = interaction.fields.getTextInputValue('nomineeToRescindId');
-            const { message: voteMessage } = await rescindVote(interaction, nomineeId);
+            // const { message: voteMessage } = await rescindVote(interaction, nomineeId);
 
-            await interaction.reply({ content: voteMessage, ephemeral: true });
+            await interaction.reply({ content: 'Voting has ended.', ephemeral: true });
         }
     }
 });
@@ -436,6 +542,11 @@ client.on('ready', async c => {
     await restartDailyContributionTagsClaimedScheduler();
     await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
     await cumulativeNationTagsStakedScheduler(process.env.CUMULATIVE_COOKIES_STAKED_EMBED_MESSAGEID, client);
+
+    /// UNLOCK WHEN TIME COMES.
+    await nbmonAppearanceScheduler(client);
+    // await bossAppearanceScheduler(client);
+    // await updateBossStatEmbedScheduler(client);
 
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,
