@@ -84,6 +84,13 @@ const getNBMonIdsOwned = async (userId) => {
  */
 const changeNBMonName = async (userId, nbmonId, customName) => {
     try {
+        if (customName.length > 16) {
+            return {
+                status: 'error',
+                message: 'Custom name can only be up to 16 characters.',
+            };
+        }
+
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
         const nbmonQuery = await NBMon.findOne({ nbmonId: nbmonId });
 
