@@ -57,7 +57,7 @@ const getNBMonIdsOwned = async (userId) => {
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
         const nbmonQuery = await NBMon.find({ capturedBy: userId, disowned: false });
 
-        if (!nbmonQuery) {
+        if (!nbmonQuery || nbmonQuery.length === 0) {
             return {
                 status: 'error',
                 message: `You do not own any NBMons.`,
