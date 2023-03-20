@@ -333,8 +333,10 @@ const captureNBMonLogic = async (nbmonId, userId) => {
 
         // if time is already after 20 march 20:00 GMT, price is doubled.
         if (now < 1679342400) {
+            console.log('before 20 march 20:00 GMT nbmon appearance');
             userQuery.hunterTags -= parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT);
         } else {
+            console.log('after 20 march 20:00 GMT nbmon appearance');
             userQuery.hunterTags -= parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT) * 2;
         }
 
