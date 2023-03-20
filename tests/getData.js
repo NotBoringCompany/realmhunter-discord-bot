@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 
 require('dotenv').config();
 
+mongoose.connect(process.env.MONGODB_URI);
+
 /**
  * Gets all eligible stakers with `doubleTagEligiblity` as true.
  */
@@ -92,3 +94,11 @@ const rewardDoubleEligibleStakers = async () => {
         });
     }
 };
+
+
+const testQueryNoAsync = () => {
+    const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+    const userQuery = User.findOne({ doubleTagEligibility: true });
+
+    console.log(userQuery.schema.tree._wperm);
+}

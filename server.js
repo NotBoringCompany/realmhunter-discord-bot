@@ -185,7 +185,7 @@ client.on('messageCreate', async (message) => {
         return await showFirstQuestWinnerButtons(message);
     }
     if (message.content.toLowerCase().startsWith('!hunt manuallyrewardtags')) {
-        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID) || !(message.member._roles.includes(process.env.GATEKEEPER_INTERN_ROLEID))) return;
         const { status, message: rewardMessage } = await manuallyRewardTags(message).catch((err) => console.log(err));
 
         // if error, send the message in the channel where the command was sent
