@@ -386,7 +386,7 @@ client.on('interactionCreate', async (interaction) => {
         // await hunterGamesInteraction(interaction);
         // await realmPointsButtonInteraction(interaction);
         // await trialsShopInteraction(interaction);
-        // await nbmonDataButtonInteraction(interaction);
+        await nbmonDataButtonInteraction(interaction);
 
         await nationPendingTagsDistribution(interaction);
         await nationTagStakingInteraction(interaction);
