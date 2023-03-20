@@ -134,10 +134,10 @@ client.on('messageCreate', async (message) => {
     //     await showTrialsShopEmbed(message);
     // }
 
-    // if (message.content.toLowerCase() === '!shownbmondataembed') {
-    //     if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-    //     await showNBMonDataEmbed(message);
-    // }
+    if (message.content.toLowerCase() === '!shownbmondataembed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showNBMonDataEmbed(message);
+    }
 
     if (message.content.toLowerCase().startsWith('!hunt rewardnation')) {
         if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.MODS_ROLEID)) {
@@ -146,7 +146,7 @@ client.on('messageCreate', async (message) => {
 
             const { status, message: rewardNationMessage, winMessage } = await sendPendingNationTags(message);
             console.log('sent');
-            return await message.channel.send(rewardNationMessage);
+            await message.channel.send(rewardNationMessage);
             if (winMessage) {
                 return await client.channels.cache.get(process.env.NATION_CHALLENGES_LOG_CHANNELID).send(winMessage);
             }
@@ -443,31 +443,31 @@ client.on('interactionCreate', async (interaction) => {
         //     }
         // }
 
-        // if (interaction.customId === 'checkNBMonStatsModal') {
-        //     const nbmonId = interaction.fields.getTextInputValue('checkNBMonStatsNBMonId');
-        //     const { status, message: nbmonMessage, data } = await getNBMonData(interaction.user.id, nbmonId);
+        if (interaction.customId === 'checkNBMonStatsModal') {
+            const nbmonId = interaction.fields.getTextInputValue('checkNBMonStatsNBMonId');
+            const { status, message: nbmonMessage, data } = await getNBMonData(interaction.user.id, nbmonId);
 
-        //     if (status === 'error') {
-        //         return await interaction.reply({ content: nbmonMessage, ephemeral: true });
-        //     }
+            if (status === 'error') {
+                return await interaction.reply({ content: nbmonMessage, ephemeral: true });
+            }
 
-        //     await interaction.reply({ embeds: [nbmonDataEmbed(data)], ephemeral: true });
-        // }
+            await interaction.reply({ embeds: [nbmonDataEmbed(data)], ephemeral: true });
+        }
 
-        // if (interaction.customId === 'updateNBMonNameModal') {
-        //     const nbmonId = interaction.fields.getTextInputValue('updateNBMonNameNBMonId');
-        //     const customName = interaction.fields.getTextInputValue('updateNBMonNameCustomName');
+        if (interaction.customId === 'updateNBMonNameModal') {
+            const nbmonId = interaction.fields.getTextInputValue('updateNBMonNameNBMonId');
+            const customName = interaction.fields.getTextInputValue('updateNBMonNameCustomName');
 
-        //     const { status, message: nbmonMessage } = await changeNBMonName(interaction.user.id, nbmonId, customName);
-        //     return await interaction.reply({ content: nbmonMessage, ephemeral: true });
-        // }
+            const { status, message: nbmonMessage } = await changeNBMonName(interaction.user.id, nbmonId, customName);
+            return await interaction.reply({ content: nbmonMessage, ephemeral: true });
+        }
 
-        // if (interaction.customId === 'disownNBMonModal') {
-        //     const nbmonId = interaction.fields.getTextInputValue('disownNBMonNBMonId');
+        if (interaction.customId === 'disownNBMonModal') {
+            const nbmonId = interaction.fields.getTextInputValue('disownNBMonNBMonId');
 
-        //     const { status, message: disownMessage } = await disownNBMon(interaction.user.id, nbmonId);
-        //     return await interaction.reply({ content: disownMessage, ephemeral: true });
-        // }
+            const { status, message: disownMessage } = await disownNBMon(interaction.user.id, nbmonId);
+            return await interaction.reply({ content: disownMessage, ephemeral: true });
+        }
 
         // await trialsShopModalInteraction(interaction);
 
