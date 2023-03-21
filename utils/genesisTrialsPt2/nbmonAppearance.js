@@ -406,7 +406,6 @@ const nbmonAppearanceScheduler = async (client) => {
 module.exports = {
     addNBMon,
     addPurchasedNBMon,
-    getLatestNBMonId,
     nbmonAppears,
     nbmonCaptured,
     captureNBMonLogic,
