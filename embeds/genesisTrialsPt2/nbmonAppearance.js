@@ -11,7 +11,7 @@ const nbmonAppearanceEmbed = (costToCapture, rarity, id, nbmon, image) => {
 const bossNBMonAppearanceEmbed = (id, image) => {
     return new EmbedBuilder()
         .setColor(0x42ca9f)
-        .setTitle(`A mighty Boss NBMon (ID: ${id}) has just appeared. Hunt it down in <#${process.env.FOUNDERS_BOT_COMMANDS_CHANNELID}> with other fellow citizens!`)
+        .setTitle(`A mighty Boss NBMon (ID: ${id}) has just appeared. Hunt it down in <#${process.env.REALM_DUNGEON_PVE_CHANNELID}> with other fellow citizens!`)
         .setImage(image);
 };
 
