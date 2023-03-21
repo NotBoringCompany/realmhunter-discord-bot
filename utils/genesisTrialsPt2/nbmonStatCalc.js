@@ -14,39 +14,39 @@ const checkXPAndUpgrade = (rarity, currentXp, xpToGive) => {
         switch (rarity.toLowerCase()) {
             case 'common':
                 // 1 - 2
-                attackUpgrade = Math.floor(Math.random() * 3) + 1;
+                attackUpgrade = Math.floor(Math.random() * 1) + 1;
                 // 1 - 3
-                hpUpgrade = Math.floor(Math.random() * 5) + 1;
+                hpUpgrade = Math.floor(Math.random() * 2) + 1;
                 break;
             case 'uncommon':
                 // 1 - 3
-                attackUpgrade = Math.floor(Math.random() * 5) + 1;
+                attackUpgrade = Math.floor(Math.random() * 2) + 1;
                 // 1 - 5
-                hpUpgrade = Math.floor(Math.random() * 5) + 2;
+                hpUpgrade = Math.floor(Math.random() * 4) + 1;
                 break;
             case 'rare':
                 // 2 - 4
-                attackUpgrade = Math.floor(Math.random() * 6) + 2;
+                attackUpgrade = Math.floor(Math.random() * 2) + 2;
                 // 2 - 6
-                hpUpgrade = Math.floor(Math.random() * 6) + 3;
+                hpUpgrade = Math.floor(Math.random() * 4) + 2;
                 break;
             case 'epic':
                 // 2 - 6
-                attackUpgrade = Math.floor(Math.random() * 7) + 4;
+                attackUpgrade = Math.floor(Math.random() * 4) + 2;
                 // 3 - 7
-                hpUpgrade = Math.floor(Math.random() * 8) + 5;
+                hpUpgrade = Math.floor(Math.random() * 4) + 3;
                 break;
             case 'legendary':
                 // 3 - 7
-                attackUpgrade = Math.floor(Math.random() * 8) + 5;
+                attackUpgrade = Math.floor(Math.random() * 4) + 3;
                 // 4 - 8
-                hpUpgrade = Math.floor(Math.random() * 10) + 6;
+                hpUpgrade = Math.floor(Math.random() * 4) + 4;
                 break;
             case 'mythic':
                 // 4 - 9
-                attackUpgrade = Math.floor(Math.random() * 10) + 6;
+                attackUpgrade = Math.floor(Math.random() * 5) + 4;
                 // 5 - 10
-                hpUpgrade = Math.floor(Math.random() * 11) + 8;
+                hpUpgrade = Math.floor(Math.random() * 5) + 5;
                 break;
         }
 
