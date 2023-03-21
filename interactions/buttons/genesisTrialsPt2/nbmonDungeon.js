@@ -27,8 +27,8 @@ const attackBossInteraction = async (interaction) => {
                 const { message: reviveMsg } = await reviveUserKnockedOutNBMons(interaction.user.id);
                 return await interaction.reply({ content: reviveMsg, ephemeral: true });
             case 'checkDamageDealtButton':
-                const { message: damageDealtMsg } = await damageDealt(interaction.user.id);
-                return await interaction.reply({ content: damageDealtMsg, ephemeral: true });
+                const dmgDealt = await damageDealt(interaction.user.id);
+                return await interaction.reply({ content: dmgDealt, ephemeral: true });
         }
     } catch (err) {
         console.log({
