@@ -48,12 +48,12 @@ const genusData = () => {
             imageUrl: imageUrl('pongu'),
         },
         {
-            name: 'Dranexx',
-            imageUrl: imageUrl('dranexx'),
+            name: 'Heree',
+            imageUrl: imageUrl('heree'),
         },
         {
-            name: 'Lamox',
-            imageUrl: imageUrl('lamox'),
+            name: 'Todillo',
+            imageUrl: imageUrl('todillo'),
         },
         {
             name: 'Schoggi',
@@ -68,13 +68,13 @@ const genusData = () => {
             imageUrl: imageUrl('licorine'),
         },
         {
-            name: 'Heree',
-            imageUrl: imageUrl('heree'),
+            name: 'Dranexx',
+            imageUrl: imageUrl('dranexx'),
         },
         {
-            name: 'Todillo',
-            imageUrl: imageUrl('todillo'),
-        }
+            name: 'Lamox',
+            imageUrl: imageUrl('lamox'),
+        },
     ];
 
     const firstRelease = process.env.FIRST_NBMONS_RELEASE_TIMESTAMP;
@@ -98,7 +98,7 @@ const genusData = () => {
 };
 
 const bossHp = async () => {
-    // boss hp is calculated so that it can be attacked 500 - 1500 times.
+    // boss hp is calculated so that it can be attacked 1000 - 4000 times.
     // for this, we will need to get the average damage of ALL NBMons and therefore will need to query the NBMon database.
     const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
 
@@ -106,8 +106,8 @@ const bossHp = async () => {
     const nbmonQuery = await NBMon.find({});
     const bossHp = nbmonQuery.reduce((acc, nbmon) => acc + nbmon.atk, 0) / nbmonQuery.length;
 
-    // rand between 500 - 1500
-    const rand = Math.floor(Math.random() * 1001) + 500;
+    // rand between 1000 - 4000
+    const rand = Math.floor(Math.random() * 3001) + 1000;
 
     return Math.floor(bossHp * rand);
 };
