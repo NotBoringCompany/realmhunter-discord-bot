@@ -7,6 +7,13 @@ const { addPurchasedNBMon } = require('./nbmonAppearance');
  */
 const purchaseSHP = async (userId, nbmonId) => {
     try {
+        if (isNaN(nbmonId)) {
+            return {
+                status: 'error',
+                message: 'Invalid NBMon ID.',
+            };
+        }
+
         const TrialsShop = mongoose.model('TrialsShop', TrialsShopSchema, 'RHDiscordTrialsShop');
         const trialsShopQuery = await TrialsShop.findOne({ itemName: 'Simple Healing Potion' });
 
@@ -93,6 +100,12 @@ const purchaseSHP = async (userId, nbmonId) => {
  */
 const purchaseXPBooster = async (userId, nbmonId) => {
     try {
+        if (isNaN(nbmonId)) {
+            return {
+                status: 'error',
+                message: 'Invalid NBMon ID.',
+            };
+        }
         const TrialsShop = mongoose.model('TrialsShop', TrialsShopSchema, 'RHDiscordTrialsShop');
         const trialsShopQuery = await TrialsShop.findOne({ itemName: 'XP Booster' });
 
