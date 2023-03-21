@@ -60,13 +60,14 @@ const addPurchasedNBMon = async (rarity, userId) => {
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
         const { _wperm, _rperm, _acl } = permissions(false, false);
 
-        // generate random ID from 10000 to 1000000000 and check if it exists in the database.
+        // generate random ID from 1000000 to 10000000000 and check if it exists in the database.
         // if it does, generate a new ID and check again.
         // if it doesn't, add the NBMon to the database.
         let id;
         let idExists = true;
         while (idExists) {
-            const randomId = Math.floor(Math.random() * 1000000000) + 10000;
+            // from 10000000 to 10000000000
+            const randomId = Math.floor(Math.random() * 10000000000) + 10000000;
             const nbmonQuery = await NBMon.findOne({ nbmonId: randomId });
 
             if (!nbmonQuery) {
@@ -128,13 +129,14 @@ const nbmonAppears = async (client) => {
 
         const getGenus = genusData();
 
-        // get a random number between 10000 to 1000000000.
+        // get a random number between 10000000 to 10000000000.
         let newId;
         let idExists = true;
         // check the NBMon ID if it already exists in the database.
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
         while (idExists) {
-            const randomId = Math.floor(Math.random() * 1000000000) + 10000;
+            // from 10000000 to 10000000000
+            const randomId = Math.floor(Math.random() * 10000000000) + 10000000;
             const nbmonQuery = await NBMon.findOne({ nbmonId: randomId });
 
             if (!nbmonQuery) {
