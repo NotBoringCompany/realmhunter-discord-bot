@@ -60,13 +60,13 @@ const addPurchasedNBMon = async (rarity, userId) => {
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
         const { _wperm, _rperm, _acl } = permissions(false, false);
 
-        // generate random ID from 60 to 10000 and check if it exists in the database.
+        // generate random ID from 10000 to 1000000000 and check if it exists in the database.
         // if it does, generate a new ID and check again.
         // if it doesn't, add the NBMon to the database.
         let id;
         let idExists = true;
         while (idExists) {
-            const randomId = Math.floor(Math.random() * 10000) + 60;
+            const randomId = Math.floor(Math.random() * 1000000000) + 10000;
             const nbmonQuery = await NBMon.findOne({ nbmonId: randomId });
 
             if (!nbmonQuery) {
@@ -128,13 +128,13 @@ const nbmonAppears = async (client) => {
 
         const getGenus = genusData();
 
-        // get a random number between 60 to 10000.
+        // get a random number between 10000 to 1000000000.
         let newId;
         let idExists = true;
         // check the NBMon ID if it already exists in the database.
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
         while (idExists) {
-            const randomId = Math.floor(Math.random() * 10000) + 60;
+            const randomId = Math.floor(Math.random() * 1000000000) + 10000;
             const nbmonQuery = await NBMon.findOne({ nbmonId: randomId });
 
             if (!nbmonQuery) {
@@ -143,15 +143,8 @@ const nbmonAppears = async (client) => {
             }
         }
 
-        const now = Math.floor(new Date().getTime() / 1000);
-
-        let costToCapture;
-
-        if (now < 1679342400) {
-            costToCapture = process.env.CAPTURE_NBMON_TAG_REQUIREMENT;
-        } else {
-            costToCapture = (parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT) * 2).toString();
-        }
+        // after 20 march 12:00 GMT, the cost to capture will be 2x the requirement.
+        const costToCapture = (parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT) * 2).toString();
 
         // adds the wild NBMon to the database and then sends the message to general chat.
         const { rarity } = await addNBMon(newId, getGenus.name);
@@ -272,6 +265,19 @@ const allowNextNBMonAppearance = async () => {
  */
 const captureNBMonLogic = async (nbmonId, userId) => {
     try {
+        // we now check if the user has enough tags to capture the NBMon.
+        // requires 40 TAGS! (may change).
+        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: userId });
+
+        // if its already above 20 March 20:00 GMT, the price to capture is doubled.
+        if (!userQuery || userQuery.hunterTags < parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT) * 2) {
+            return {
+                status: 'error',
+                message: 'Not enough cookies to capture the NBMon.',
+            };
+        }
+
         // we check if the nbmon has already been captured.
         const captured = await nbmonCaptured(nbmonId);
 
@@ -282,46 +288,8 @@ const captureNBMonLogic = async (nbmonId, userId) => {
             };
         }
 
-        // we now check if the user has enough tags to capture the NBMon.
-        // requires 40 TAGS! (may change).
-        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
-        const userQuery = await User.findOne({ userId: userId });
-
-        if (!userQuery) {
-            return {
-                status: 'error',
-                message: 'Not enough cookies to capture the NBMon.',
-            };
-        }
-
-        const now = Math.floor(new Date().getTime() / 1000);
-        // if its already above 20 March 20:00 GMT, the price to capture is doubled.
-        if (now < 1679342400) {
-            if (userQuery.hunterTags < parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT)) {
-                return {
-                    status: 'error',
-                    message: 'Not enough cookies to capture the NBMon.',
-                };
-            }
-        } else {
-            if (userQuery.hunterTags < parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT) * 2) {
-                return {
-                    status: 'error',
-                    message: 'Not enough cookies to capture the NBMon.',
-                };
-            }
-        }
-
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
         const nbmonQuery = await NBMon.findOne({ nbmonId: nbmonId });
-
-        // if nbmon doesnt exist, we return an error.
-        if (!nbmonQuery) {
-            return {
-                status: 'error',
-                message: 'Error. NBMon not found.',
-            };
-        }
 
         // we will now check if the user has captured more than 5 nbmons already.
         // if they have, we will not allow them to capture more.
@@ -333,25 +301,19 @@ const captureNBMonLogic = async (nbmonId, userId) => {
             };
         }
 
-        // if time is already after 20 march 20:00 GMT, price is doubled.
-        if (now < 1679342400) {
-            console.log('before 20 march 20:00 GMT nbmon appearance');
-            userQuery.hunterTags -= parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT);
-        } else {
-            console.log('after 20 march 20:00 GMT nbmon appearance');
-            userQuery.hunterTags -= parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT) * 2;
-        }
-
-        userQuery._updated_at = Date.now();
-
         // if the nbmon has not been captured, we update the database.
         // we update the `capturedTimestamp` and the `capturedBy` fields.
         nbmonQuery.capturedBy = userId;
         nbmonQuery.capturedTimestamp = Math.floor(new Date().getTime() / 1000);
         nbmonQuery._updated_at = Date.now();
 
-        await userQuery.save();
         await nbmonQuery.save();
+
+        // if time is already after 20 march 20:00 GMT, price is doubled.
+        userQuery.hunterTags -= parseInt(process.env.CAPTURE_NBMON_TAG_REQUIREMENT) * 2;
+        userQuery._updated_at = Date.now();
+
+        await userQuery.save();
 
         return {
             status: 'success',
