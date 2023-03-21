@@ -129,10 +129,10 @@ client.on('messageCreate', async (message) => {
     //     await showCheckRealmPointsCollectedEmbed(message);
     // }
 
-    // if (message.content.toLowerCase() === '!showtrialsshopembed') {
-    //     if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-    //     await showTrialsShopEmbed(message);
-    // }
+    if (message.content.toLowerCase() === '!showtrialsshopembed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showTrialsShopEmbed(message);
+    }
 
     if (message.content.toLowerCase() === '!shownbmondataembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
