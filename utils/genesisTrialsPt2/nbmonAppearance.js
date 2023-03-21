@@ -60,8 +60,20 @@ const addPurchasedNBMon = async (rarity, userId) => {
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
         const { _wperm, _rperm, _acl } = permissions(false, false);
 
-        // get latest NBMon ID
-        const latestId = await getLatestNBMonId();
+        // generate random ID from 60 to 10000 and check if it exists in the database.
+        // if it does, generate a new ID and check again.
+        // if it doesn't, add the NBMon to the database.
+        let id;
+        let idExists = true;
+        while (idExists) {
+            const randomId = Math.floor(Math.random() * 10000) + 60;
+            const nbmonQuery = await NBMon.findOne({ nbmonId: randomId });
+
+            if (!nbmonQuery) {
+                id = randomId;
+                idExists = false;
+            }
+        }
 
         const NewNBMon = new NBMon(
             {
@@ -73,7 +85,7 @@ const addPurchasedNBMon = async (rarity, userId) => {
                 _acl: _acl,
                 bought: true,
                 disowned: false,
-                nbmonId: latestId + 1,
+                nbmonId: id,
                 genus: genusData().name,
                 xp: 0,
                 maxHp: 30,
@@ -101,27 +113,6 @@ const addPurchasedNBMon = async (rarity, userId) => {
 };
 
 /**
- * Gets the ID of the latest NBMon that appeared.
- */
-const getLatestNBMonId = async () => {
-    try {
-        const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
-        const latestWildNBMon = await NBMon.findOne({}).sort({ nbmonId: -1 });
-
-        if (!latestWildNBMon) {
-            return 0;
-        }
-
-        return latestWildNBMon.nbmonId;
-    } catch (err) {
-        console.log({
-            errorFrom: 'getLatestWildNBMonId',
-            errorMessage: err,
-        });
-    }
-};
-
-/**
  * Randomizes from a list of available NBMons and allows it to appear in general chat (given that the check passes).
  */
 const nbmonAppears = async (client) => {
@@ -137,9 +128,20 @@ const nbmonAppears = async (client) => {
 
         const getGenus = genusData();
 
-        const latestNBMonId = await getLatestNBMonId();
+        // get a random number between 60 to 10000.
+        let newId;
+        let idExists = true;
+        // check the NBMon ID if it already exists in the database.
+        const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
+        while (idExists) {
+            const randomId = Math.floor(Math.random() * 10000) + 60;
+            const nbmonQuery = await NBMon.findOne({ nbmonId: randomId });
 
-        const newId = latestNBMonId + 1;
+            if (!nbmonQuery) {
+                newId = randomId;
+                idExists = false;
+            }
+        }
 
         const now = Math.floor(new Date().getTime() / 1000);
 
@@ -182,7 +184,7 @@ const nbmonCaptured = async (nbmonId) => {
             // nbmon id query
             nbmonQuery = await NBMon.findOne({ nbmonId: nbmonId });
         } else {
-            nbmonQuery = await NBMon.findOne({ bought: false }).sort({ nbmonId: -1 });
+            nbmonQuery = await NBMon.findOne({ bought: false }).sort({ _created_at: -1 });
         }
 
         // if nbmon doesnt exist, then we just return 'captured'.
@@ -205,7 +207,7 @@ const nbmonCaptured = async (nbmonId) => {
 const prevNBMonAppearance = async () => {
     try {
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
-        const nbmonQuery = await NBMon.findOne({ bought: false }).sort({ nbmonId: -1 });
+        const nbmonQuery = await NBMon.findOne({ bought: false }).sort({ _created_at: -1 });
 
         if (!nbmonQuery) {
             return 0;

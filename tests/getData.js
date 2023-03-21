@@ -1,4 +1,4 @@
-const { DiscordUserSchema, NationsSchema } = require('../utils/schemas');
+const { DiscordUserSchema, NationsSchema, NBMonSchema } = require('../utils/schemas');
 const mongoose = require('mongoose');
 
 require('dotenv').config();
@@ -96,9 +96,16 @@ const rewardDoubleEligibleStakers = async () => {
 };
 
 
-const testQueryNoAsync = () => {
-    const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
-    const userQuery = User.findOne({ doubleTagEligibility: true });
+const testCreatedDate = async () => {
+    try {
+        const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
+        const nbmonQuery = await NBMon.findOne().sort({ _created_at: - 1 });
 
-    console.log(userQuery.schema.tree._wperm);
+        console.log(nbmonQuery);
+    } catch (err) {
+        console.log({
+            errorFrom: 'testCreatedDate',
+            errorMessage: err,
+        });
+    }
 }
