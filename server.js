@@ -191,12 +191,11 @@ client.on('messageCreate', async (message) => {
             // if error, send the message in the channel where the command was sent
             if (status === 'error') {
                 return await message.channel.send(rewardMessage);
-            // otherwise, send it to #general-chat.
             } else {
-                if (message.content.toLowerCase().includes('togeneralchat')) {
-                    return await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send(rewardMessage);
-                } else if (message.content.toLowerCase().includes('nottogeneralchat')) {
+                if (message.content.toLowerCase().includes('nottogeneralchat')) {
                     return await message.channel.send(rewardMessage);
+                } else if (message.content.toLowerCase().includes('nottogeneralchat')) {
+                    return await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send(rewardMessage);
                 }
             }
         } else {
