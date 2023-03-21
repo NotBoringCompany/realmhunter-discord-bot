@@ -193,9 +193,9 @@ client.on('messageCreate', async (message) => {
                 return await message.channel.send(rewardMessage);
             // otherwise, send it to #general-chat.
             } else {
-                if (message.content.contains('toGeneralChat')) {
+                if (message.content.toLowerCase().contains('togeneralchat')) {
                     return await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send(rewardMessage);
-                } else if (message.content.contains('notToGeneralChat')) {
+                } else if (message.content.toLowerCase().contains('nottogeneralchat')) {
                     return await message.channel.send(rewardMessage);
                 }
             }
