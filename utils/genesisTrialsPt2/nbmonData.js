@@ -6,6 +6,14 @@ const { NBMonSchema, DiscordUserSchema } = require('../schemas');
  */
 const getNBMonData = async (userId, nbmonId) => {
     try {
+        if (isNaN(nbmonId)) {
+            return {
+                status: 'error',
+                message: 'Invalid NBMon ID.',
+                data: undefined,
+            };
+        }
+
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
         const nbmonQuery = await NBMon.findOne({ nbmonId: nbmonId });
 
