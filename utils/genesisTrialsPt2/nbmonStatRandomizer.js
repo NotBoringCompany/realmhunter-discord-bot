@@ -98,7 +98,7 @@ const genusData = () => {
 };
 
 const bossHp = async () => {
-    // boss hp is calculated so that it can be attacked 1000 - 4000 times.
+    // boss hp is calculated so that it can be attacked 500 - 2000 times.
     // for this, we will need to get the average damage of ALL NBMons and therefore will need to query the NBMon database.
     const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
 
@@ -106,8 +106,8 @@ const bossHp = async () => {
     const nbmonQuery = await NBMon.find({});
     const bossHp = nbmonQuery.reduce((acc, nbmon) => acc + nbmon.atk, 0) / nbmonQuery.length;
 
-    // rand between 1000 - 4000
-    const rand = Math.floor(Math.random() * 3001) + 1000;
+    // rand between 500 - 2000
+    const rand = Math.floor(Math.random() * 1501) + 500;
 
     return Math.floor(bossHp * rand);
 };
