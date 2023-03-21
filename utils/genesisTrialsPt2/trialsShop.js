@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const { TrialsShopSchema, DiscordUserSchema, NBMonSchema } = require('../schemas');
 const { addPurchasedNBMon } = require('./nbmonAppearance');
+const { checkXPAndUpgrade } = require('./nbmonStatCalc');
 
 /**
  * Purchases a simple healing potion and restores the NBMon's HP to FULL.
@@ -170,10 +171,15 @@ const purchaseXPBooster = async (userId, nbmonId) => {
         await trialsShopQuery.save();
 
         // 3. update the NBMon's XP by 30.
+        // we check if the nbmon has levelled up by giving the 30 xp. if yes, upgrade the atk and hp stat.
+        const { attackUpgrade, hpUpgrade } = checkXPAndUpgrade(nbmonQuery.rarity, nbmonQuery.xp, 30);
+
         nbmonQuery.xp += 30;
         nbmonQuery._updated_at = Date.now();
 
         await nbmonQuery.save();
+
+        await NBMon.updateOne({ nbmonId: nbmonId }, { $set: { atk: nbmonQuery.atk + attackUpgrade, maxHp: nbmonQuery.maxHp + hpUpgrade } });
 
         return {
             status: 'success',
