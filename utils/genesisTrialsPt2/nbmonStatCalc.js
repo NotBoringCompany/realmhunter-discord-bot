@@ -85,11 +85,11 @@ const xpToGive = (currentXp, damageDealt) => {
     } else if (currentXp > 3500 && currentXp <= 7500) {
         xpToGive = Math.floor(damageDealt * 0.125);
     } else if (currentXp > 7500 && currentXp <= 15000) {
-        xpToGive = Math.floor(damageDealt * 0.075);
+        xpToGive = Math.floor(damageDealt * 0.08);
     } else if (currentXp > 15000 && currentXp <= 30000) {
-        xpToGive = Math.floor(damageDealt * 0.05);
+        xpToGive = Math.floor(damageDealt * 0.065);
     } else {
-        xpToGive = Math.floor(damageDealt * 0.025);
+        xpToGive = Math.floor(damageDealt * 0.035);
     }
 
     return xpToGive;

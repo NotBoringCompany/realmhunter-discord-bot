@@ -129,10 +129,10 @@ client.on('messageCreate', async (message) => {
     //     await showCheckRealmPointsCollectedEmbed(message);
     // }
 
-    // if (message.content.toLowerCase() === '!showtrialsshopembed') {
-    //     if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-    //     await showTrialsShopEmbed(message);
-    // }
+    if (message.content.toLowerCase() === '!showtrialsshopembed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        await showTrialsShopEmbed(message);
+    }
 
     if (message.content.toLowerCase() === '!shownbmondataembed') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
@@ -185,19 +185,22 @@ client.on('messageCreate', async (message) => {
         return await showFirstQuestWinnerButtons(message);
     }
     if (message.content.toLowerCase().startsWith('!hunt manuallyrewardtags')) {
-        if (!message.member._roles.includes(process.env.CREATORS_ROLEID) || !message.member._roles.includes(process.env.GATEKEEPER_INTERN_ROLEID)) return;
-        const { status, message: rewardMessage } = await manuallyRewardTags(message).catch((err) => console.log(err));
+        if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.GATEKEEPER_INTERN_ROLEID)) {
+            const { status, message: rewardMessage } = await manuallyRewardTags(message).catch((err) => console.log(err));
 
-        // if error, send the message in the channel where the command was sent
-        if (status === 'error') {
-            return await message.channel.send(rewardMessage);
-        // otherwise, send it to #general-chat.
-        } else {
-            if (message.content.contains('toGeneralChat')) {
-                return await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send(rewardMessage);
-            } else if (message.content.contains('notToGeneralChat')) {
+            // if error, send the message in the channel where the command was sent
+            if (status === 'error') {
                 return await message.channel.send(rewardMessage);
+            // otherwise, send it to #general-chat.
+            } else {
+                if (message.content.contains('toGeneralChat')) {
+                    return await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send(rewardMessage);
+                } else if (message.content.contains('notToGeneralChat')) {
+                    return await message.channel.send(rewardMessage);
+                }
             }
+        } else {
+            return;
         }
     }
 
@@ -386,10 +389,10 @@ client.on('messageCreate', async (message) => {
 client.on('interactionCreate', async (interaction) => {
     if (interaction.isButton()) {
         /// UNLOCK WHEN TIME COMES.
-        // await attackBossInteraction(interaction);
+        await attackBossInteraction(interaction);
         // await hunterGamesInteraction(interaction);
         // await realmPointsButtonInteraction(interaction);
-        // await trialsShopInteraction(interaction);
+        await trialsShopInteraction(interaction);
         await nbmonDataButtonInteraction(interaction);
 
         await nationPendingTagsDistribution(interaction);
@@ -435,17 +438,17 @@ client.on('interactionCreate', async (interaction) => {
 
     // modal submit interactions
     if (interaction.type === InteractionType.ModalSubmit) {
-        // if (interaction.customId === 'attackBossModal') {
-        //     const attackerNBMonId = interaction.fields.getTextInputValue('attackerNBMonId');
-        //     const { status: attackStatus, message: attackMessage } = await attackBoss(interaction.user.id, attackerNBMonId);
+        if (interaction.customId === 'attackBossModal') {
+            const attackerNBMonId = interaction.fields.getTextInputValue('attackerNBMonId');
+            const { status: attackStatus, message: attackMessage } = await attackBoss(interaction.user.id, attackerNBMonId);
 
-        //     await interaction.reply({ content: attackMessage, ephemeral: true });
+            await interaction.reply({ content: attackMessage, ephemeral: true });
 
-        //     if (attackStatus === 'success') {
-        //         // add the damage log to dungeon log channel. FOR NOW, IT IS THE TEST LEADERBOARD CHANNEL.
-        //         return await client.channels.cache.get(process.env.TEST_LEADERBOARD_CHANNELID).send(attackMessage);
-        //     }
-        // }
+            if (attackStatus === 'success') {
+                // add the damage log to dungeon log channel.
+                return await client.channels.cache.get(process.env.DUNGEON_LOG_CHANNELID).send(attackMessage);
+            }
+        }
 
         if (interaction.customId === 'checkNBMonStatsModal') {
             const nbmonId = interaction.fields.getTextInputValue('checkNBMonStatsNBMonId');
@@ -473,7 +476,7 @@ client.on('interactionCreate', async (interaction) => {
             return await interaction.reply({ content: disownMessage, ephemeral: true });
         }
 
-        // await trialsShopModalInteraction(interaction);
+        await trialsShopModalInteraction(interaction);
 
         if (interaction.customId === 'distributeNationPendingTagsModal') {
             const userId = interaction.fields.getTextInputValue('cookiesToDistributeUserId');
@@ -550,8 +553,8 @@ client.on('ready', async c => {
 
     /// UNLOCK WHEN TIME COMES (AS EVENTS GET RELEASED)
     await nbmonAppearanceScheduler(client);
-    // await bossAppearanceScheduler(client);
-    // await updateBossStatEmbedScheduler(client);
+    await bossAppearanceScheduler(client);
+    await updateBossStatEmbedScheduler(client);
 
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,

@@ -187,20 +187,20 @@ const attackBoss = async (userId, attackerId) => {
             // we now give the XP and level up the attack stat of the attacker NBMon. (we will do so anyway since if no upgrade, `upgradeAttack` will return 0.)
             await NBMon.updateOne({ nbmonId: attackerId }, { $set: { xp: attackerQuery.xp + getXp, atk: attackerQuery.atk + attackUpgrade, maxHp: attackerQuery.maxHp + hpUpgrade } });
 
-            // now, we give the realm points to the user based on the damage dealt.
-            await rewardRealmPoints(userId, damageDealt);
+            // now, we give the realm points to the user based on the XP earned
+            await rewardRealmPoints(userId, getXp);
 
             /// RETALIATION LOGIC:
-            // 45% chance to damage 1 - 10% of the attacker's MAX HP.
-            // 40% chance to damage 11 - 60% of the attacker's MAX HP.
+            // 40% chance to damage 1 - 20% of the attacker's MAX HP.
+            // 45% chance to damage 21 - 60% of the attacker's MAX HP.
             // 15% chance to damage 61 - 100% of the attacker's MAX HP.
             const retaliationChance = Math.floor(Math.random() * 100) + 1;
             let retaliationDamage;
-            if (retaliationChance <= 45) {
-                const retaliationDmgMultiplier = Math.random() * 0.1 + 0.01;
+            if (retaliationChance <= 40) {
+                const retaliationDmgMultiplier = Math.random() * 0.2 + 0.01;
                 retaliationDamage = Math.floor(attackerQuery.maxHp * retaliationDmgMultiplier);
             } else if (retaliationChance <= 85) {
-                const retaliationDmgMultiplier = Math.random() * 0.5 + 0.11;
+                const retaliationDmgMultiplier = Math.random() * 0.4 + 0.21;
                 retaliationDamage = Math.floor(attackerQuery.maxHp * retaliationDmgMultiplier);
             } else if (retaliationChance <= 100) {
                 const retaliationDmgMultiplier = Math.random() * 0.4 + 0.61;
@@ -219,7 +219,7 @@ const attackBoss = async (userId, attackerId) => {
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to deliver the **FINAL BLOW** to Boss #${bossQuery.nbmonId}. However, the boss retaliated and __**knocked out**__ their NBMon, **${attackerName}**, with ${retaliationDamage} damage!`,
+                    message: `<@${userId}>'s NBMon, **${attackerName}**, dealt the **FINAL BLOW** with __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ and earned ${getXp} XP. However, the boss retaliated and **knocked out** their NBMon with **${retaliationDamage}** damage!`,
                 };
             // if the damage dealt by the boss is less than the attacker's HP, we will just update the attacker's HP.
             } else {
@@ -233,7 +233,7 @@ const attackBoss = async (userId, attackerId) => {
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to deliver the **FINAL BLOW** to Boss #${bossQuery.nbmonId}. The boss retaliated and dealt ${retaliationDamage} damage to to their NBMon, **${attackerName}**!`,
+                    message: `<@${userId}>'s NBMon, **${attackerName}**, dealt the **FINAL BLOW** with __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ and earned ${getXp} XP. However, the boss retaliated and dealt **${retaliationDamage}** damage to their NBMon!`,
                 };
             }
         // if the boss still has hp left, we will update a few things.
@@ -273,20 +273,20 @@ const attackBoss = async (userId, attackerId) => {
             // we now give the XP and level up the attack stat of the attacker NBMon. (we will do so anyway since if no upgrade, `upgradeAttack` will return 0.)
             await NBMon.updateOne({ nbmonId: attackerId }, { $set: { xp: attackerQuery.xp + getXp, atk: attackerQuery.atk + attackUpgrade, maxHp: attackerQuery.maxHp + hpUpgrade } });
 
-            // now, we give the realm points to the user based on the damage dealt.
-            await rewardRealmPoints(userId, damageDealt);
+            // now, we give the realm points to the user based on the XP earned
+            await rewardRealmPoints(userId, getXp);
 
             /// RETALIATION LOGIC:
-            // 45% chance to damage 1 - 10% of the attacker's MAX HP.
-            // 40% chance to damage 11 - 60% of the attacker's MAX HP.
+            // 40% chance to damage 1 - 20% of the attacker's MAX HP.
+            // 45% chance to damage 21 - 60% of the attacker's MAX HP.
             // 15% chance to damage 61 - 100% of the attacker's MAX HP.
             const retaliationChance = Math.floor(Math.random() * 100) + 1;
             let retaliationDamage;
-            if (retaliationChance <= 45) {
-                const retaliationDmgMultiplier = Math.random() * 0.1 + 0.01;
+            if (retaliationChance <= 40) {
+                const retaliationDmgMultiplier = Math.random() * 0.2 + 0.01;
                 retaliationDamage = Math.floor(attackerQuery.maxHp * retaliationDmgMultiplier);
             } else if (retaliationChance <= 85) {
-                const retaliationDmgMultiplier = Math.random() * 0.5 + 0.11;
+                const retaliationDmgMultiplier = Math.random() * 0.4 + 0.21;
                 retaliationDamage = Math.floor(attackerQuery.maxHp * retaliationDmgMultiplier);
             } else if (retaliationChance <= 100) {
                 const retaliationDmgMultiplier = Math.random() * 0.4 + 0.61;
@@ -305,7 +305,7 @@ const attackBoss = async (userId, attackerId) => {
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to Boss #${bossQuery.nbmonId}. However, the boss retaliated and __**knocked out**__ their NBMon, **${attackerName}**, with ${retaliationDamage} damage!`,
+                    message: `<@${userId}>'s NBMon, **${attackerName}**, dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ and earned ${getXp} XP. However, the boss retaliated and __**knocked out**__ their NBMon with **${retaliationDamage}** damage!`,
                 };
             // if the damage dealt by the boss is less than the attacker's HP, we will just update the attacker's HP.
             } else {
@@ -319,7 +319,7 @@ const attackBoss = async (userId, attackerId) => {
 
                 return {
                     status: 'success',
-                    message: `<@${userId}> has dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ to Boss #${bossQuery.nbmonId}. The boss retaliated and dealt ${retaliationDamage} damage to their NBMon, **${attackerName}**!`,
+                    message: `<@${userId}>'s NBMon, **${attackerName}**, dealt __**${criticalHit ? 'a CRITICAL HIT with ' : ''}${damageDealt} damage**__ and earned ${getXp} XP. However, the boss retaliated and dealt **${retaliationDamage}** damage to their NBMon!`,
                 };
             }
         }
@@ -501,7 +501,7 @@ const allowNextBossAppearance = async () => {
         if (!bossDefeated) {
             return {
                 status: 'error',
-                message: `A new boss wants to be challenged but the previous boss has not yet been defeated. Defeat it in <#${process.env.FOUNDERS_BOT_COMMANDS_CHANNELID}> to allow the next boss to appear soon.`,
+                message: `A new boss wants to be challenged but the previous boss has not yet been defeated. Defeat it in <#${process.env.REALM_DUNGEON_PVE_CHANNELID}> to allow the next boss to appear soon.`,
                 canAppear: false,
             };
         };
@@ -575,8 +575,7 @@ const bossAppears = async (client) => {
         const { bossHp } = await addBoss(newBossId);
 
         // 2. add the boss embed to the dungeon channel
-        // for TESTING, IT WILL BE IN FOUNDERS BOT COMMANDS!
-        const statsMsg = await client.channels.cache.get(process.env.FOUNDERS_BOT_COMMANDS_CHANNELID).send({
+        const statsMsg = await client.channels.cache.get(process.env.REALM_DUNGEON_PVE_CHANNELID).send({
             embeds: [bossNBMonEmbed(newBossId, imageUrl('scorpio'), bossHp, bossHp, 0)],
             components: [
                 {
@@ -587,8 +586,7 @@ const bossAppears = async (client) => {
         });
 
         // 3. add the boss appearance embed to the general chat.
-        // for TESTING, IT WILL BE IN TEST GENERAL CHAT!
-        const appearanceMsg = await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send({
+        const appearanceMsg = await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send({
             embeds: [bossNBMonAppearanceEmbed(newBossId, imageUrl('scorpio'))],
         });
 
@@ -676,7 +674,7 @@ const damageDealt = async (userId) => {
         const bossQuery = await BossNBMon.findOne().sort({ nbmonId: -1 });
 
         if (!bossQuery) {
-            return `You have dealt 0 damage.`;
+            return `You have dealt 0 damage to Boss #${bossQuery.nbmonId}.`;
         }
 
         const damagedBy = bossQuery.damagedBy;
@@ -745,7 +743,7 @@ const updateBossStatEmbed = async (client) => {
         const attackedBy = bossQuery.damagedBy.length;
         const statMsgId = bossQuery.bossStatsMsgId;
 
-        const dungeonChannel = await client.channels.fetch(process.env.FOUNDERS_BOT_COMMANDS_CHANNELID);
+        const dungeonChannel = await client.channels.fetch(process.env.REALM_DUNGEON_PVE_CHANNELID);
         const statEmbed = await dungeonChannel.messages.fetch(statMsgId);
 
         if (!statEmbed) {
@@ -840,59 +838,59 @@ const reviveUserKnockedOutNBMons = async (userId) => {
  * If the chance hits but the previous boss is not yet defeated, throw a message saying to defeat the boss.
  * If the chance doesn't hit and the boss is defeated and the time between the current and previous boss is more than 5 hours, we let the boss appear.
  */
-// const bossAppearanceScheduler = async (client) => {
-//     try {
-//         // run every 10 minutes
-//         cron.schedule('*/10 * * * *', async () => {
-//             // 1% chance of boss appearing each 10 minutes.
-//             const rand = Math.floor(Math.random() * 100) + 1;
+const bossAppearanceScheduler = async (client) => {
+    try {
+        // run every 10 minutes
+        cron.schedule('*/10 * * * *', async () => {
+            // 1% chance of boss appearing each 10 minutes.
+            const rand = Math.floor(Math.random() * 100) + 1;
 
-//             console.log('boss appearance rand: ', rand);
+            console.log('boss appearance rand: ', rand);
 
-//             const now = Math.floor(new Date().getTime() / 1000);
-//             const prevAppearance = await prevBossAppearance();
+            const now = Math.floor(new Date().getTime() / 1000);
+            const prevAppearance = await prevBossAppearance();
 
-//             const isOver5Hours = now - prevAppearance >= 18000;
+            const isOver6Hours = now - prevAppearance >= 21600;
 
-//             // if rand = 1 or its already 5 hours since the previous boss appearance, run the bossAppears function.
-//             // if the prev boss hasn't been defeated, `bossAppears` will return an error status.
-//             if (rand === 1 || isOver5Hours) {
-//                 const { status, message } = await bossAppears(client);
+            // if rand = 1 or its already 6 hours since the previous boss appearance, run the bossAppears function.
+            // if the prev boss hasn't been defeated, `bossAppears` will return an error status.
+            if (rand === 1 || isOver6Hours) {
+                const { status, message } = await bossAppears(client);
 
-//                 if (status === 'error') {
-//                     // we don't need to show this message in general chat.
-//                     if (message !== 'Boss cannot appear yet.' || message !== 'Error while retrieving boss data.') {
-//                         await client.channels.cache.get(process.env.TEST_GENERAL_CHAT_CHANNELID).send(message);
-//                     } else {
-//                         console.log(message);
-//                     }
-//                 }
-//             }
-//         });
-//     } catch (err) {
-//         console.log({
-//             errorFrom: 'bossAppearanceScheduler',
-//             errorMessage: err,
-//         });
-//     }
-// };
+                if (status === 'error') {
+                    // we don't need to show this message in general chat.
+                    if (message !== 'Boss cannot appear yet.' || message !== 'Error while retrieving boss data.') {
+                        await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send(message);
+                    } else {
+                        console.log(message);
+                    }
+                }
+            }
+        });
+    } catch (err) {
+        console.log({
+            errorFrom: 'bossAppearanceScheduler',
+            errorMessage: err,
+        });
+    }
+};
 
 /**
  * Updates the boss stat embed every 30 seconds.
  */
-// const updateBossStatEmbedScheduler = async (client) => {
-//     try {
-//         cron.schedule('*/30 * * * * *', async () => {
-//             const { message } = await updateBossStatEmbed(client);
-//             console.log(message);
-//         });
-//     } catch (err) {
-//         console.log({
-//             errorFrom: 'updateBossStatEmbedScheduler',
-//             errorMessage: err,
-//         });
-//     }
-// };
+const updateBossStatEmbedScheduler = async (client) => {
+    try {
+        cron.schedule('*/30 * * * * *', async () => {
+            const { message } = await updateBossStatEmbed(client);
+            console.log(message);
+        });
+    } catch (err) {
+        console.log({
+            errorFrom: 'updateBossStatEmbedScheduler',
+            errorMessage: err,
+        });
+    }
+};
 
 module.exports = {
     addBoss,
@@ -903,9 +901,9 @@ module.exports = {
     userLastHit,
     bossAppears,
     updateBossStatEmbed,
-    // bossAppearanceScheduler,
+    bossAppearanceScheduler,
     checkIfOwned,
     reviveUserKnockedOutNBMons,
-    // updateBossStatEmbedScheduler,
+    updateBossStatEmbedScheduler,
     damageDealt,
 };
