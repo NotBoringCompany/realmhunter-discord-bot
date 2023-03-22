@@ -98,11 +98,12 @@ const updateManyMongo = async () => {
     mongoose.connect(process.env.MONGODB_URI);
     const Benchmark = mongoose.model('Benchmark', BenchmarkSchema, 'Benchmarking');
 
-    await Benchmark.updateMany({}, { $set: { name: 'Yes' } });
+    await Benchmark.updateMany({ name: 'Yes' }, { $inc: { age: -3 } });
 
     console.log('done');
 }
 
+updateManyMongo();
 
 const benchmark = async () => {
     await mongooseCollectionFind();

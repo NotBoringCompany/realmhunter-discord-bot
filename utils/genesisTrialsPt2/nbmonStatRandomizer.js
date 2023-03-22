@@ -106,8 +106,8 @@ const bossHp = async () => {
     const nbmonQuery = await NBMon.find({});
     const bossHp = nbmonQuery.reduce((acc, nbmon) => acc + nbmon.atk, 0) / nbmonQuery.length;
 
-    // rand between 250 - 1000 times.
-    const rand = Math.floor(Math.random() * 750) + 250;
+    // rand between 750 - 2500 times.
+    const rand = Math.floor(Math.random() * 1750) + 750;
 
     return Math.floor(bossHp * rand);
 };

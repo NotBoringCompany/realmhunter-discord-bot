@@ -852,6 +852,8 @@ const bossAppearanceScheduler = async (client) => {
 
             const isOver6Hours = now - prevAppearance >= 21600;
 
+            console.log('isOver6Hours: ', isOver6Hours);
+
             // if rand = 1 or its already 6 hours since the previous boss appearance, run the bossAppears function.
             // if the prev boss hasn't been defeated, `bossAppears` will return an error status.
             if (rand === 1 || isOver6Hours) {

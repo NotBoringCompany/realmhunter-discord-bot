@@ -13,6 +13,7 @@ const BenchmarkSchema = new mongoose.Schema(
         _acl: Object,
         name: String,
         age: Number,
+        user: String,
     }, {
         versionKey: false,
     },
