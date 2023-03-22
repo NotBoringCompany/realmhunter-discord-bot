@@ -397,7 +397,7 @@ client.on('interactionCreate', async (interaction) => {
         /// UNLOCK WHEN TIME COMES.
         await attackBossInteraction(interaction);
         // await hunterGamesInteraction(interaction);
-        // await realmPointsButtonInteraction(interaction);
+        await realmPointsButtonInteraction(interaction);
         await trialsShopInteraction(interaction);
         await nbmonDataButtonInteraction(interaction);
 
