@@ -27,8 +27,12 @@ const realmPointsLeaderboardLogic = async (client) => {
 
                 const userId = user.userId;
 
+                // get the user's username
+                const userData = await client.users.fetch(userId);
+                const userTag = userData.username + '#' + userData.discriminator;
+
                 leaderboard.push({
-                    name: `${i + 1}. <@${userId}>`,
+                    name: `${i + 1}. ${userTag}`,
                     value: `${user.realmPoints} Favor Points`,
                 });
             }
@@ -47,9 +51,9 @@ const realmPointsLeaderboardLogic = async (client) => {
     }
 };
 
-const showRealmPointsLeaderboard = async () => {
+const showRealmPointsLeaderboard = async (client) => {
     try {
-        return await realmPointsLeaderboardLogic();
+        return await realmPointsLeaderboardLogic(client);
     } catch (err) {
         throw err;
     }
@@ -67,7 +71,7 @@ const realmPointsLeaderboardScheduler = async (msgId, client) => {
             const leaderboardChannel = await client.channels.fetch(process.env.FAVOR_POINTS_LEADERBOARD_CHANNELID);
             const leaderboardMessage = await leaderboardChannel.messages.fetch(msgId);
 
-            const { embed } = await showRealmPointsLeaderboard();
+            const { embed } = await showRealmPointsLeaderboard(client);
             await leaderboardMessage.edit({ embeds: [embed] });
         });
     } catch (err) {

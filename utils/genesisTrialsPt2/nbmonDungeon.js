@@ -101,6 +101,16 @@ const attackBoss = async (userId, attackerId) => {
             };
         }
 
+        // check if user has already attacked the past 2 minutes.
+        const { status: lastHitStatus, message: lastHitTimestamp } = await userLastHit(userId);
+
+        if (lastHitStatus === 'error') {
+            return {
+                status: 'error',
+                message: lastHitTimestamp,
+            };
+        }
+
         const BossNBMon = mongoose.model('NBMonBossData', BossNBMonSchema, 'RHDiscordBossNBMonData');
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
 

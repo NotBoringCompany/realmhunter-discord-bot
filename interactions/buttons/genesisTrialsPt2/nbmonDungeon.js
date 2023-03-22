@@ -12,12 +12,12 @@ const attackBossInteraction = async (interaction) => {
                     return await interaction.reply({ content: ownsAtLeastOne, ephemeral: true });
                 }
 
-                // check if user has already attacked the past 5 minutes.
-                const { status: lastHitStatus, message: lastHitTimestamp } = await userLastHit(interaction.user.id);
+                // // check if user has already attacked the past 5 minutes.
+                // const { status: lastHitStatus, message: lastHitTimestamp } = await userLastHit(interaction.user.id);
 
-                if (lastHitStatus === 'error') {
-                    return await interaction.reply({ content: lastHitTimestamp, ephemeral: true });
-                }
+                // if (lastHitStatus === 'error') {
+                //     return await interaction.reply({ content: lastHitTimestamp, ephemeral: true });
+                // }
 
                 return await interaction.showModal(attackBossModal);
             case 'checkNBMonsOwnedButton':
