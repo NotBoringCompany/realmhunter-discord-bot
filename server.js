@@ -64,7 +64,7 @@ const { nbmonDataButtonInteraction } = require('./interactions/buttons/genesisTr
 const { getNBMonData, changeNBMonName, disownNBMon } = require('./utils/genesisTrialsPt2/nbmonData');
 const { nbmonDataEmbed } = require('./embeds/genesisTrialsPt2/nbmonData');
 const { updateNBMonNameModal } = require('./modals/genesisTrialsPt2/nbmonData');
-const { showRealmPointsLeaderboard } = require('./utils/genesisTrialsPt2/realmPoints');
+const { showRealmPointsLeaderboard, realmPointsLeaderboardScheduler } = require('./utils/genesisTrialsPt2/realmPoints');
 
 const client = new Client({
     intents: [
@@ -556,6 +556,7 @@ client.on('ready', async c => {
     await restartDailyContributionTagsClaimedScheduler();
     await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
     await cumulativeNationTagsStakedScheduler(process.env.CUMULATIVE_COOKIES_STAKED_EMBED_MESSAGEID, client);
+    await realmPointsLeaderboardScheduler(process.env.FAVOR_POINTS_LEADERBOARD_MESSAGEID, client);
 
     /// UNLOCK WHEN TIME COMES (AS EVENTS GET RELEASED)
     await nbmonAppearanceScheduler(client);
