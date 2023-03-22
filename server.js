@@ -64,6 +64,7 @@ const { nbmonDataButtonInteraction } = require('./interactions/buttons/genesisTr
 const { getNBMonData, changeNBMonName, disownNBMon } = require('./utils/genesisTrialsPt2/nbmonData');
 const { nbmonDataEmbed } = require('./embeds/genesisTrialsPt2/nbmonData');
 const { updateNBMonNameModal } = require('./modals/genesisTrialsPt2/nbmonData');
+const { showRealmPointsLeaderboard } = require('./utils/genesisTrialsPt2/realmPoints');
 
 const client = new Client({
     intents: [
@@ -102,6 +103,12 @@ client.on('messageCreate', async (message) => {
         await message.reply(captureNBMonMessage);
         // delay 5 seconds to prevent spamming.
         return await delay(5000);
+    }
+
+    if (message.content.toLowerCase === '!showfavorpointsleaderboard') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        const { embed } = await showRealmPointsLeaderboard();
+        return await message.channel.send({ embeds: [embed] });
     }
 
     /// UNLOCK WHEN TIME COMES.
