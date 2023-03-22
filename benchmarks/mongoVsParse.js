@@ -103,8 +103,6 @@ const updateManyMongo = async () => {
     console.log('done');
 }
 
-updateManyMongo();
-
 const benchmark = async () => {
     await mongooseCollectionFind();
     // await parseCollectionQuery();
