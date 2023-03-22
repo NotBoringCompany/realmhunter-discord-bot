@@ -105,7 +105,7 @@ client.on('messageCreate', async (message) => {
         return await delay(5000);
     }
 
-    if (message.content.toLowerCase === '!showfavorpointsleaderboard') {
+    if (message.content.toLowerCase() === '!showfavorpointsleaderboard') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         const { embed } = await showRealmPointsLeaderboard();
         return await message.channel.send({ embeds: [embed] });
