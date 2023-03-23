@@ -374,5 +374,5 @@ module.exports = {
     nbmonCaptured,
     captureNBMonLogic,
     allowNextNBMonAppearance,
-    nbmonAppearanceScheduler,
+    // nbmonAppearanceScheduler,
 };
