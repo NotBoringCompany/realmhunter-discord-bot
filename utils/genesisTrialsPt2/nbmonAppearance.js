@@ -333,39 +333,39 @@ const captureNBMonLogic = async (nbmonId, userId) => {
  * Rolls a random number between 1 to 100 every 3 minutes.
  * 15% chance an nbmon appears, then an NBMon will appear, given that it passes the checks already.
  */
-const nbmonAppearanceScheduler = async (client) => {
-    try {
-        // gets run every 3 minutes.
-        cron.schedule('*/3 * * * *', async () => {
-            const rand = Math.floor(Math.random() * 100) + 1;
+// const nbmonAppearanceScheduler = async (client) => {
+//     try {
+//         // gets run every 3 minutes.
+//         cron.schedule('*/3 * * * *', async () => {
+//             const rand = Math.floor(Math.random() * 100) + 1;
 
-            console.log('nbmon appearance rand: ', rand);
+//             console.log('nbmon appearance rand: ', rand);
 
-            const now = Math.floor(new Date().getTime() / 1000);
-            const prevAppearance = await prevNBMonAppearance();
+//             const now = Math.floor(new Date().getTime() / 1000);
+//             const prevAppearance = await prevNBMonAppearance();
 
-            const isOver15Minutes = now - prevAppearance >= 900;
+//             const isOver15Minutes = now - prevAppearance >= 900;
 
-            // if rand is either 1-5 or the time passed between now and the previous NBMon is over an hour, we will show the nbmon.
-            if (rand <= 15 || isOver15Minutes) {
-                const { status, message } = await nbmonAppears(client);
-                if (status === 'error') {
-                    // we don't need to show this message in the general chat.
-                    if (message !== 'Next NBMon can\'t appear yet.') {
-                        await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send(message);
-                    } else {
-                        console.log(message);
-                    }
-                }
-            }
-        });
-    } catch (err) {
-        console.log({
-            errorFrom: 'nbmonAppearanceScheduler',
-            errorMessage: err,
-        });
-    }
-};
+//             // if rand is either 1-5 or the time passed between now and the previous NBMon is over an hour, we will show the nbmon.
+//             if (rand <= 15 || isOver15Minutes) {
+//                 const { status, message } = await nbmonAppears(client);
+//                 if (status === 'error') {
+//                     // we don't need to show this message in the general chat.
+//                     if (message !== 'Next NBMon can\'t appear yet.') {
+//                         await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send(message);
+//                     } else {
+//                         console.log(message);
+//                     }
+//                 }
+//             }
+//         });
+//     } catch (err) {
+//         console.log({
+//             errorFrom: 'nbmonAppearanceScheduler',
+//             errorMessage: err,
+//         });
+//     }
+// };
 
 module.exports = {
     addNBMon,

@@ -97,13 +97,13 @@ for (const file of commandFiles) {
 
 // MESSAGE CREATE EVENT LISTENER
 client.on('messageCreate', async (message) => {
-    if (message.content.startsWith('!hunt captureNBMon')) {
-        if (message.channelId !== process.env.GENERAL_CHAT_CHANNELID) return;
-        const { message: captureNBMonMessage } = await captureNBMon(message);
-        await message.reply(captureNBMonMessage);
-        // delay 5 seconds to prevent spamming.
-        return await delay(5000);
-    }
+    // if (message.content.startsWith('!hunt captureNBMon')) {
+    //     if (message.channelId !== process.env.GENERAL_CHAT_CHANNELID) return;
+    //     const { message: captureNBMonMessage } = await captureNBMon(message);
+    //     await message.reply(captureNBMonMessage);
+    //     // delay 5 seconds to prevent spamming.
+    //     return await delay(5000);
+    // }
 
     if (message.content.toLowerCase() === '!showfavorpointsleaderboard') {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
@@ -559,7 +559,7 @@ client.on('ready', async c => {
     await realmPointsLeaderboardScheduler(process.env.FAVOR_POINTS_LEADERBOARD_MESSAGEID, client);
 
     /// UNLOCK WHEN TIME COMES (AS EVENTS GET RELEASED)
-    await nbmonAppearanceScheduler(client);
+    // await nbmonAppearanceScheduler(client);
     await bossAppearanceScheduler(client);
     await updateBossStatEmbedScheduler(client);
 
