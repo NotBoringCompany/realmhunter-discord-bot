@@ -217,10 +217,13 @@ client.on('messageCreate', async (message) => {
     }
 
     if (message.content.toLowerCase() === '!hunt unrewardedcontributions') {
-        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        const { status, message: contributionsMessage } = await retrieveUnrewardedContributions(message).catch((err) => console.log(err));
+        if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.GATEKEEPER_INTERN_ROLEID)) {
+            const { status, message: contributionsMessage } = await retrieveUnrewardedContributions(message).catch((err) => console.log(err));
 
-        return await message.channel.send(contributionsMessage);
+            return await message.channel.send(contributionsMessage);
+        } else {
+            return;
+        }
     }
 
     if (message.content.toLowerCase() === '!hunt manuallyresetdailycontributiontagsclaimed') {
@@ -231,22 +234,28 @@ client.on('messageCreate', async (message) => {
     }
 
     if (message.content.toLowerCase().startsWith('!hunt invalidatecontribution')) {
-        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-
-        const { message: invalidateMessage } = await invalidateContribution(message).catch((err) => console.log(err));
-        return await message.channel.send(invalidateMessage);
+        if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.GATEKEEPER_INTERN_ROLEID)) {
+            const { message: invalidateMessage } = await invalidateContribution(message).catch((err) => console.log(err));
+            return await message.channel.send(invalidateMessage);
+        } else {
+            return;
+        }
     }
 
     if (message.content.toLowerCase().startsWith('!hunt rewardcontribution')) {
-        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
-        const { status, message: contributionsMessage } = await rewardContribution(message).catch((err) => console.log(err));
+        if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.GATEKEEPER_INTERN_ROLEID)) {
+            if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+            const { status, message: contributionsMessage } = await rewardContribution(message).catch((err) => console.log(err));
 
-        // if there's an error status, send the message in the channel where the command was sent
-        if (status === 'error') {
-            return await message.channel.send(contributionsMessage);
-        // otherwise, send it to the #rewarded-contributions channel
+            // if there's an error status, send the message in the channel where the command was sent
+            if (status === 'error') {
+                return await message.channel.send(contributionsMessage);
+            // otherwise, send it to the #rewarded-contributions channel
+            } else {
+                return await client.channels.cache.get(process.env.REWARDED_CONTRIBUTIONS_CHANNELID).send(contributionsMessage);
+            }
         } else {
-            return await client.channels.cache.get(process.env.REWARDED_CONTRIBUTIONS_CHANNELID).send(contributionsMessage);
+            return;
         }
     }
 
