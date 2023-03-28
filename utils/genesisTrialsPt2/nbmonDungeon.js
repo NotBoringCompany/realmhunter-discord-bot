@@ -272,7 +272,7 @@ const attackBoss = async (userId, attackerId) => {
             }
 
             //  we give the attacker the following xp.
-            const getXp = xpToGive(attackerQuery.xp, damageDealt);
+            const getXp = xpToGive(attackerQuery.xp, damageDealt * 2);
 
             // now, we check if the attacker NBMon can level up its attack and hp stat
             const { attackUpgrade, hpUpgrade } = checkXPAndUpgrade(attackerQuery.rarity, attackerQuery.xp, getXp);
