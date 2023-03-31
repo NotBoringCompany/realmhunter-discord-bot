@@ -7,6 +7,13 @@ mongoose.connect(process.env.MONGODB_URI);
 // trades an NBMon for realm points.
 const tradeNBMon = async (userId, nbmonId) => {
     try {
+        if (isNaN(nbmonId)) {
+            return {
+                status: 'error',
+                message: 'Please provide a valid NBMon ID.',
+            };
+        }
+
         const NBMon = mongoose.model('NBMonData', NBMonSchema, 'RHDiscordNBMonData');
         const nbmonQuery = await NBMon.findOne({ nbmonId: nbmonId });
 
@@ -27,7 +34,7 @@ const tradeNBMon = async (userId, nbmonId) => {
         if (nbmonQuery.disowned) {
             return {
                 status: 'error',
-                message: 'This NBMon has already been disowned.',
+                message: 'This NBMon has already been traded (or disowned if you disowned it).',
             };
         }
 
