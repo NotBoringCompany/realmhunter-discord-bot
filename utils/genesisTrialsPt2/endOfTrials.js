@@ -86,7 +86,7 @@ const tradeNBMonButtons = () => {
 
 // calculates how many realm points the user can get by trading the nbmon.
 const realmPointsEarned = (xp, rarity, genus) => {
-    const xpAdd = (xp) ^ (8/9);
+    const xpAdd = Math.floor(Math.pow(xp, 8/9));
     let rarityAdd;
 
     if (rarity.toLowerCase() === 'common') {
