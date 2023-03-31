@@ -585,8 +585,8 @@ client.on('ready', async c => {
 
     /// UNLOCK WHEN TIME COMES (AS EVENTS GET RELEASED)
     // await nbmonAppearanceScheduler(client);
-    await bossAppearanceScheduler(client);
-    await updateBossStatEmbedScheduler(client);
+    // await bossAppearanceScheduler(client);
+    // await updateBossStatEmbedScheduler(client);
 
     await Moralis.start({
         serverUrl: process.env.MORALIS_SERVERURL,
