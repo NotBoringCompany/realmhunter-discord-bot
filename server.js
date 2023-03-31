@@ -67,6 +67,7 @@ const { updateNBMonNameModal } = require('./modals/genesisTrialsPt2/nbmonData');
 const { showRealmPointsLeaderboard, realmPointsLeaderboardScheduler } = require('./utils/genesisTrialsPt2/realmPoints');
 const { showTradeNBMonsEmbed } = require('./commands/genesisTrialsPt2/endOfTrials');
 const { tradeNBMon } = require('./utils/genesisTrialsPt2/endOfTrials');
+const { endOfTrialsInteraction } = require('./interactions/buttons/genesisTrialsPt2/endOfTrials');
 
 const client = new Client({
     intents: [
@@ -420,6 +421,8 @@ client.on('interactionCreate', async (interaction) => {
         await nationPendingTagsDistribution(interaction);
         await nationTagStakingInteraction(interaction);
         await nationLeadVotesInteraction(interaction);
+
+        await endOfTrialsInteraction(interaction);
 
         // if nation button is clicked. will run the `nationButtonInteraction` function to check if the user can get a nation.
         await nationButtonInteraction(interaction);
