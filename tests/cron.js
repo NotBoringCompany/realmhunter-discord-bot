@@ -22,7 +22,7 @@ const { AllianceSchema } = require('../utils/schemas');
 
 // check();
 
-mongoose.connect(process.env.MONGODB_URI);
+// mongoose.connect(process.env.MONGODB_URI);
 
 // const test = async () => {
 //     try {
@@ -44,7 +44,7 @@ mongoose.connect(process.env.MONGODB_URI);
 //     }
 // };
 
-const validate = () => {
-    const valid = cron.validate('59 * * * *');
-    console.log(valid);
-}
+// const validate = () => {
+//     const valid = cron.validate('59 * * * *');
+//     console.log(valid);
+// }

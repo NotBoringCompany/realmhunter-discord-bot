@@ -2,7 +2,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 
-const { Client, GatewayIntentBits, Collection, InteractionType } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, InteractionType, InteractionCollector } = require('discord.js');
 const Moralis = require('moralis-v1/node');
 const { showSubmitContributionEmbed } = require('./commands/genesisTrials/submitContribution');
 const { submitContributionModal } = require('./modals/submitContribution');
@@ -65,6 +65,8 @@ const { getNBMonData, changeNBMonName, disownNBMon } = require('./utils/genesisT
 const { nbmonDataEmbed } = require('./embeds/genesisTrialsPt2/nbmonData');
 const { updateNBMonNameModal } = require('./modals/genesisTrialsPt2/nbmonData');
 const { showRealmPointsLeaderboard, realmPointsLeaderboardScheduler } = require('./utils/genesisTrialsPt2/realmPoints');
+const { showTradeNBMonsEmbed } = require('./commands/genesisTrialsPt2/endOfTrials');
+const { tradeNBMon } = require('./utils/genesisTrialsPt2/endOfTrials');
 
 const client = new Client({
     intents: [
@@ -109,6 +111,11 @@ client.on('messageCreate', async (message) => {
         if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
         const { embed } = await showRealmPointsLeaderboard(client);
         return await message.channel.send({ embeds: [embed] });
+    }
+
+    if (message.content.toLowerCase() === '!showtradenbmonembed') {
+        if (!message.member._roles.includes(process.env.CREATORS_ROLEID)) return;
+        return await showTradeNBMonsEmbed(message);
     }
 
     /// UNLOCK WHEN TIME COMES.
@@ -453,6 +460,12 @@ client.on('interactionCreate', async (interaction) => {
 
     // modal submit interactions
     if (interaction.type === InteractionType.ModalSubmit) {
+        if (interaction.customId === 'tradeNBMonModal') {
+            const nbmonId = interaction.fields.getTextInputValue('tradeNBMonNBMonId');
+            const { status: tradeStatus, message: tradeMessage } = await tradeNBMon(interaction.user.id, nbmonId);
+
+            await interaction.reply({ content: tradeMessage, ephemeral: true });
+        }
         if (interaction.customId === 'attackBossModal') {
             const attackerNBMonId = interaction.fields.getTextInputValue('attackerNBMonId');
             const { status: attackStatus, message: attackMessage } = await attackBoss(interaction.user.id, attackerNBMonId);
@@ -563,8 +576,8 @@ client.on('ready', async c => {
     await restartDailyTagsAllowance();
     await removeExpiredInvitesScheduler();
     await restartDailyContributionTagsClaimedScheduler();
-    await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
-    await cumulativeNationTagsStakedScheduler(process.env.CUMULATIVE_COOKIES_STAKED_EMBED_MESSAGEID, client);
+    // await tagsLeaderboardScheduler(process.env.COOKIES_LEADERBOARD_MESSAGEID, client);
+    // await cumulativeNationTagsStakedScheduler(process.env.CUMULATIVE_COOKIES_STAKED_EMBED_MESSAGEID, client);
     await realmPointsLeaderboardScheduler(process.env.FAVOR_POINTS_LEADERBOARD_MESSAGEID, client);
 
     /// UNLOCK WHEN TIME COMES (AS EVENTS GET RELEASED)
