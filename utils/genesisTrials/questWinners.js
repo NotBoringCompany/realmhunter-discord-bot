@@ -5,9 +5,6 @@ const { QuestEntriesSchema, DiscordUserSchema } = require('../schemas');
 const mongoose = require('mongoose');
 const permissions = require('../dbPermissions');
 const { generateObjectId } = require('../cryptoUtils');
-
-mongoose.connect(process.env.MONGODB_URI);
-
 // /**
 //  * All winners for the first quest.
 //  */
@@ -26,154 +23,154 @@ mongoose.connect(process.env.MONGODB_URI);
 //     ),
 // );
 
-/**
- * Gets the Discord ID from the entry. Only works with our quest entries.
- */
-const getDiscordId = (data) => {
-    const split = data.Discord.split('@me/')[1];
-    const getSub = split.substring(0, split.indexOf('#'));
-    return getSub;
-};
+// /**
+//  * Gets the Discord ID from the entry. Only works with our quest entries.
+//  */
+// const getDiscordId = (data) => {
+//     const split = data.Discord.split('@me/')[1];
+//     const getSub = split.substring(0, split.indexOf('#'));
+//     return getSub;
+// };
 
-const genesisTrialWinners = JSON.parse(
-    fs.readFileSync(
-        path.join(__dirname, '../../files/genesisTrials/winners.json'),
-    ),
-);
+// const genesisTrialWinners = JSON.parse(
+//     fs.readFileSync(
+//         path.join(__dirname, '../../files/genesisTrials/winners.json'),
+//     ),
+// );
 
-const genesisTrialEntries = JSON.parse(
-    fs.readFileSync(
-        path.join(__dirname, '../../files/genesisTrials/participants.json'),
-    ),
-);
+// const genesisTrialEntries = JSON.parse(
+//     fs.readFileSync(
+//         path.join(__dirname, '../../files/genesisTrials/participants.json'),
+//     ),
+// );
 
-const getGenesisTrialWinners = () => {
-    const winnerDiscordIds = [];
+// const getGenesisTrialWinners = () => {
+//     const winnerDiscordIds = [];
 
-    genesisTrialWinners.forEach((winner) => {
-        if (winner.Discord) {
-            const getId = getDiscordId(winner);
-            winnerDiscordIds.push(getId);
-        } else {
-            const userEmail = winner.Email;
-            const dataWithDiscordId = genesisTrialEntries.find((entry) => entry.Email === userEmail && entry.Discord);
-            const getId = getDiscordId(dataWithDiscordId);
-            winnerDiscordIds.push(getId);
-        }
-    });
-    return winnerDiscordIds;
-};
+//     genesisTrialWinners.forEach((winner) => {
+//         if (winner.Discord) {
+//             const getId = getDiscordId(winner);
+//             winnerDiscordIds.push(getId);
+//         } else {
+//             const userEmail = winner.Email;
+//             const dataWithDiscordId = genesisTrialEntries.find((entry) => entry.Email === userEmail && entry.Discord);
+//             const getId = getDiscordId(dataWithDiscordId);
+//             winnerDiscordIds.push(getId);
+//         }
+//     });
+//     return winnerDiscordIds;
+// };
 
-const getGenesisTrialEntries = () => {
-    const entriesData = [];
+// const getGenesisTrialEntries = () => {
+//     const entriesData = [];
 
-    const winners = getGenesisTrialWinners();
+//     const winners = getGenesisTrialWinners();
 
-    genesisTrialEntries.forEach((entry) => {
-        // check if discord URL exists, if `entriesData` array doesn't already contain the ID and is not already part of the winners.
-        if (entry.Discord && !entriesData.includes(getDiscordId(entry)) && !winners.includes(getDiscordId(entry))) {
-            entriesData.push(getDiscordId(entry));
-        }
-    });
+//     genesisTrialEntries.forEach((entry) => {
+//         // check if discord URL exists, if `entriesData` array doesn't already contain the ID and is not already part of the winners.
+//         if (entry.Discord && !entriesData.includes(getDiscordId(entry)) && !winners.includes(getDiscordId(entry))) {
+//             entriesData.push(getDiscordId(entry));
+//         }
+//     });
 
-    console.log(entriesData);
-    return entriesData;
-};
+//     console.log(entriesData);
+//     return entriesData;
+// };
 
-const rewardGenesisTrialWinners = async () => {
-    try {
-        const winners = getGenesisTrialWinners();
+// const rewardGenesisTrialWinners = async () => {
+//     try {
+//         const winners = getGenesisTrialWinners();
 
-        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+//         const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
 
-        for (let i = 0; i < winners.length; i++) {
-            const userQuery = await User.findOne({ userId: winners[i] });
+//         for (let i = 0; i < winners.length; i++) {
+//             const userQuery = await User.findOne({ userId: winners[i] });
 
-            if (userQuery) {
-                const tags = userQuery.hunterTags;
-                if (!tags) {
-                    // rewards 50 tags
-                    userQuery.hunterTags = 50;
-                } else {
-                    userQuery.hunterTags += 50;
-                }
+//             if (userQuery) {
+//                 const tags = userQuery.hunterTags;
+//                 if (!tags) {
+//                     // rewards 50 tags
+//                     userQuery.hunterTags = 50;
+//                 } else {
+//                     userQuery.hunterTags += 50;
+//                 }
 
-                await userQuery.save();
+//                 await userQuery.save();
 
-                console.log(`Rewarded #${i}. ${winners[i]} with 50 tags.`);
-            } else {
-                const { _wperm, _rperm, _acl } = permissions(true, false);
-                const newUser = new User({
-                    _id: generateObjectId(),
-                    _created_at: Date.now(),
-                    _updated_at: Date.now(),
-                    _wperm,
-                    _rperm,
-                    _acl,
-                    userId: winners[i],
-                    hunterTags: 50,
-                });
+//                 console.log(`Rewarded #${i}. ${winners[i]} with 50 tags.`);
+//             } else {
+//                 const { _wperm, _rperm, _acl } = permissions(true, false);
+//                 const newUser = new User({
+//                     _id: generateObjectId(),
+//                     _created_at: Date.now(),
+//                     _updated_at: Date.now(),
+//                     _wperm,
+//                     _rperm,
+//                     _acl,
+//                     userId: winners[i],
+//                     hunterTags: 50,
+//                 });
 
-                await newUser.save();
-                console.log(`Created new user #${i}. ${winners[i]} and rewarded them with 50 tags.`);
-            }
-        }
-    } catch (err) {
-        console.log(err);
-    }
-};
+//                 await newUser.save();
+//                 console.log(`Created new user #${i}. ${winners[i]} and rewarded them with 50 tags.`);
+//             }
+//         }
+//     } catch (err) {
+//         console.log(err);
+//     }
+// };
 
-// rewardGenesisTrialWinners();
+// // rewardGenesisTrialWinners();
 
-const rewardGenesisTrialEntries = async () => {
-    try {
-        const start = performance.now();
-        const entries = getGenesisTrialEntries();
+// const rewardGenesisTrialEntries = async () => {
+//     try {
+//         const start = performance.now();
+//         const entries = getGenesisTrialEntries();
 
-        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+//         const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
 
-        for (let i = 0; i < entries.length; i++) {
-            const userQuery = await User.findOne({ userId: entries[i] });
+//         for (let i = 0; i < entries.length; i++) {
+//             const userQuery = await User.findOne({ userId: entries[i] });
 
-            if (userQuery) {
-                const tags = userQuery.hunterTags;
-                if (!tags) {
-                    // rewards 5 cookies
-                    userQuery.hunterTags = 5;
-                } else {
-                    userQuery.hunterTags += 5;
-                }
+//             if (userQuery) {
+//                 const tags = userQuery.hunterTags;
+//                 if (!tags) {
+//                     // rewards 5 cookies
+//                     userQuery.hunterTags = 5;
+//                 } else {
+//                     userQuery.hunterTags += 5;
+//                 }
 
-                userQuery._updated_at = Date.now();
-                await userQuery.save();
-                console.log(`Rewarded #${i}. ${entries[i]} with 5 tags.`);
-            } else {
-                const { _wperm, _rperm, _acl } = permissions(true, false);
-                const newUser = new User({
-                    _id: generateObjectId(),
-                    _created_at: Date.now(),
-                    _updated_at: Date.now(),
-                    _wperm,
-                    _rperm,
-                    _acl,
-                    userId: entries[i],
-                    hunterTags: 5,
-                });
+//                 userQuery._updated_at = Date.now();
+//                 await userQuery.save();
+//                 console.log(`Rewarded #${i}. ${entries[i]} with 5 tags.`);
+//             } else {
+//                 const { _wperm, _rperm, _acl } = permissions(true, false);
+//                 const newUser = new User({
+//                     _id: generateObjectId(),
+//                     _created_at: Date.now(),
+//                     _updated_at: Date.now(),
+//                     _wperm,
+//                     _rperm,
+//                     _acl,
+//                     userId: entries[i],
+//                     hunterTags: 5,
+//                 });
 
-                await newUser.save();
+//                 await newUser.save();
 
-                console.log(`Created new user #${i}. ${entries[i]} and rewarded them with 5 tags.`);
-            }
-        }
+//                 console.log(`Created new user #${i}. ${entries[i]} and rewarded them with 5 tags.`);
+//             }
+//         }
 
-        const end = performance.now();
+//         const end = performance.now();
 
-        // get time taken to do this for loop in seconds
-        console.log(`Time taken: ${(end - start) / 1000} seconds.`);
-    } catch (err) {
-        console.log(err);
-    }
-};
+//         // get time taken to do this for loop in seconds
+//         console.log(`Time taken: ${(end - start) / 1000} seconds.`);
+//     } catch (err) {
+//         console.log(err);
+//     }
+// };
 
 // const rugRadioWinners = JSON.parse(
 //     fs.readFileSync(
