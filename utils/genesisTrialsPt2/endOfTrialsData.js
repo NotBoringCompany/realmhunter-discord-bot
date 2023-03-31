@@ -119,6 +119,33 @@ const favorPointsData = async () => {
     }
 };
 
+const top50RealmPoints = async () => {
+    try {
+        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.find().sort({ realmPoints: -1 }).limit(50);
+
+        const top50 = [];
+        for (let i = 0; i < userQuery.length; i++) {
+            const user = userQuery[i];
+
+            top50.push({
+                username: user.userId,
+                realmPoints: user.realmPoints,
+            });
+        }
+
+        console.log(top50);
+        return top50;
+    } catch (err) {
+        console.log({
+            errorFrom: 'top50RealmPoints',
+            errorMessage: err,
+        });
+    }
+};
+
+top50RealmPoints();
+
 module.exports = {
     getNBMonXPData,
     getNBMonGenusData,

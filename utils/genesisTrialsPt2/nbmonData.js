@@ -33,6 +33,14 @@ const getNBMonData = async (userId, nbmonId) => {
             };
         }
 
+        if (nbmonQuery.disowned) {
+            return {
+                status: 'error',
+                message: 'This NBMon has already been traded (or disowned if you disowned it).',
+                data: undefined,
+            };
+        }
+
         const data = {
             nbmonId: nbmonQuery.nbmonId,
             genus: nbmonQuery.genus,

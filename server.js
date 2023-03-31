@@ -412,7 +412,7 @@ client.on('messageCreate', async (message) => {
 client.on('interactionCreate', async (interaction) => {
     if (interaction.isButton()) {
         /// UNLOCK WHEN TIME COMES.
-        await attackBossInteraction(interaction);
+        // await attackBossInteraction(interaction);
         // await hunterGamesInteraction(interaction);
         await realmPointsButtonInteraction(interaction);
         await trialsShopInteraction(interaction);
@@ -469,17 +469,17 @@ client.on('interactionCreate', async (interaction) => {
 
             await interaction.reply({ content: tradeMessage, ephemeral: true });
         }
-        if (interaction.customId === 'attackBossModal') {
-            const attackerNBMonId = interaction.fields.getTextInputValue('attackerNBMonId');
-            const { status: attackStatus, message: attackMessage } = await attackBoss(interaction.user.id, attackerNBMonId);
+        // if (interaction.customId === 'attackBossModal') {
+        //     const attackerNBMonId = interaction.fields.getTextInputValue('attackerNBMonId');
+        //     const { status: attackStatus, message: attackMessage } = await attackBoss(interaction.user.id, attackerNBMonId);
 
-            await interaction.reply({ content: attackMessage, ephemeral: true });
+        //     await interaction.reply({ content: attackMessage, ephemeral: true });
 
-            if (attackStatus === 'success') {
-                // add the damage log to dungeon log channel.
-                return await client.channels.cache.get(process.env.DUNGEON_LOG_CHANNELID).send(attackMessage);
-            }
-        }
+        //     if (attackStatus === 'success') {
+        //         // add the damage log to dungeon log channel.
+        //         return await client.channels.cache.get(process.env.DUNGEON_LOG_CHANNELID).send(attackMessage);
+        //     }
+        // }
 
         if (interaction.customId === 'checkNBMonStatsModal') {
             const nbmonId = interaction.fields.getTextInputValue('checkNBMonStatsNBMonId');
