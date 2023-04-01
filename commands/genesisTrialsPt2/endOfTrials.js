@@ -1,5 +1,5 @@
 const { tradeNBMonEmbed } = require('../../embeds/genesisTrialsPt2/endOfTrials');
-const { tradeNBMonButtons } = require('../../utils/genesisTrialsPt2/endOfTrials');
+const { tradeNBMonButtons, deductRealmPoints } = require('../../utils/genesisTrialsPt2/endOfTrials');
 
 const showTradeNBMonsEmbed = async (message) => {
     try {
@@ -22,7 +22,7 @@ const showTradeNBMonsEmbed = async (message) => {
 
 const deductRealmPointsCommand = async (message) => {
     try {
-        const [hunt, deductRealmPoints, userId, realmPoints] = message.content.split(' ');
+        const [hunt, deductMessage, userId, realmPoints] = message.content.split(' ');
 
         console.log(userId, realmPoints);
 
