@@ -66,7 +66,7 @@ const { nbmonDataEmbed } = require('./embeds/genesisTrialsPt2/nbmonData');
 const { updateNBMonNameModal } = require('./modals/genesisTrialsPt2/nbmonData');
 const { showRealmPointsLeaderboard, realmPointsLeaderboardScheduler } = require('./utils/genesisTrialsPt2/realmPoints');
 const { showTradeNBMonsEmbed } = require('./commands/genesisTrialsPt2/endOfTrials');
-const { tradeNBMon } = require('./utils/genesisTrialsPt2/endOfTrials');
+const { tradeNBMon, deductRealmPoints } = require('./utils/genesisTrialsPt2/endOfTrials');
 const { endOfTrialsInteraction } = require('./interactions/buttons/genesisTrialsPt2/endOfTrials');
 
 const client = new Client({
@@ -213,6 +213,15 @@ client.on('messageCreate', async (message) => {
                     return await client.channels.cache.get(process.env.GENERAL_CHAT_CHANNELID).send(rewardMessage);
                 }
             }
+        } else {
+            return;
+        }
+    }
+
+    if (message.content.toLowerCase().startsWith('!hunt deductRealmPoints')) {
+        if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.GATEKEEPER_INTERN_ROLEID)) {
+            const { status, message: deductMessage } = await deductRealmPoints(message).catch((err) => console.log(err));
+            return await message.channel.send(deductMessage);
         } else {
             return;
         }

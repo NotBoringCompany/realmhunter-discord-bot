@@ -80,6 +80,50 @@ const tradeNBMon = async (userId, nbmonId) => {
     }
 };
 
+// deducts a user's realm points. only callable by higher level admins.
+const deductRealmPoints = async (userId, points) => {
+    try {
+        const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
+        const userQuery = await User.findOne({ userId: userId });
+
+        if (!userQuery) {
+            return {
+                status: 'error',
+                message: 'User not found. Please contact the team.',
+            };
+        }
+
+        if (!userQuery.realmPoints) {
+            return {
+                status: 'error',
+                message: 'User does not have any Favor Points.',
+            };
+        }
+
+        if (userQuery.realmPoints < points) {
+            return {
+                status: 'error',
+                message: 'User does not have enough Favor Points.',
+            };
+        }
+
+        userQuery.realmPoints -= points;
+        userQuery._updated_at = Date.now();
+
+        await userQuery.save();
+
+        return {
+            status: 'success',
+            message: `Successfully deducted ${points} Favor Points from ${userQuery.userId}.`,
+        };
+    } catch (err) {
+        console.log({
+            errorFrom: 'deductRealmPoints',
+            errorMessage: err,
+        });
+    }
+};
+
 const tradeNBMonButtons = () => {
     return [
         {
@@ -139,4 +183,5 @@ const realmPointsEarned = (xp, rarity, genus) => {
 module.exports = {
     tradeNBMon,
     tradeNBMonButtons,
+    deductRealmPoints,
 };
