@@ -431,7 +431,7 @@ client.on('interactionCreate', async (interaction) => {
         await nationTagStakingInteraction(interaction);
         await nationLeadVotesInteraction(interaction);
 
-        await endOfTrialsInteraction(interaction);
+        // await endOfTrialsInteraction(interaction);
 
         // if nation button is clicked. will run the `nationButtonInteraction` function to check if the user can get a nation.
         await nationButtonInteraction(interaction);
@@ -472,12 +472,12 @@ client.on('interactionCreate', async (interaction) => {
 
     // modal submit interactions
     if (interaction.type === InteractionType.ModalSubmit) {
-        if (interaction.customId === 'tradeNBMonModal') {
-            const nbmonId = interaction.fields.getTextInputValue('tradeNBMonNBMonId');
-            const { status: tradeStatus, message: tradeMessage } = await tradeNBMon(interaction.user.id, nbmonId);
+        // if (interaction.customId === 'tradeNBMonModal') {
+        //     const nbmonId = interaction.fields.getTextInputValue('tradeNBMonNBMonId');
+        //     const { status: tradeStatus, message: tradeMessage } = await tradeNBMon(interaction.user.id, nbmonId);
 
-            await interaction.reply({ content: tradeMessage, ephemeral: true });
-        }
+        //     await interaction.reply({ content: tradeMessage, ephemeral: true });
+        // }
         // if (interaction.customId === 'attackBossModal') {
         //     const attackerNBMonId = interaction.fields.getTextInputValue('attackerNBMonId');
         //     const { status: attackStatus, message: attackMessage } = await attackBoss(interaction.user.id, attackerNBMonId);

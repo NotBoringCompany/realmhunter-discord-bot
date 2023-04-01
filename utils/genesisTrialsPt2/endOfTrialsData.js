@@ -124,18 +124,20 @@ const top50RealmPoints = async () => {
         const User = mongoose.model('UserData', DiscordUserSchema, 'RHDiscordUserData');
         const userQuery = await User.find().sort({ realmPoints: -1 }).limit(50);
 
-        const top50 = [];
+        let top50Str = '';
         for (let i = 0; i < userQuery.length; i++) {
             const user = userQuery[i];
 
-            top50.push({
-                username: user.userId,
-                realmPoints: user.realmPoints,
-            });
+            top50Str += `${i}. <@${user.userId}> - ${user.realmPoints} favor points \n`;
+
+            // top50.push({
+            //     username: user.userId,
+            //     realmPoints: user.realmPoints,
+            // });
         }
 
-        console.log(top50);
-        return top50;
+        console.log(top50Str);
+        return top50Str;
     } catch (err) {
         console.log({
             errorFrom: 'top50RealmPoints',
@@ -144,7 +146,7 @@ const top50RealmPoints = async () => {
     }
 };
 
-top50RealmPoints();
+// top50RealmPoints();
 
 module.exports = {
     getNBMonXPData,
