@@ -218,7 +218,7 @@ client.on('messageCreate', async (message) => {
         }
     }
 
-    if (message.content.toLowerCase().startsWith('!hunt deductRealmPoints')) {
+    if (message.content.toLowerCase().startsWith('!hunt deductrealmpoints')) {
         if (message.member._roles.includes(process.env.CREATORS_ROLEID) || message.member._roles.includes(process.env.GATEKEEPER_INTERN_ROLEID)) {
             const { status, message: deductMessage } = await deductRealmPoints(message).catch((err) => console.log(err));
             return await message.channel.send(deductMessage);
