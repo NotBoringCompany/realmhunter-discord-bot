@@ -24,6 +24,8 @@ const deductRealmPointsCommand = async (message) => {
     try {
         const [hunt, deductRealmPoints, userId, realmPoints] = message.content.split(' ');
 
+        console.log(userId, realmPoints);
+
         if (!userId) {
             return {
                 status: 'error',
